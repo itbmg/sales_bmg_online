@@ -1,0 +1,1041 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using MySql.Data.MySqlClient;
+using System.Data;
+
+public partial class DeliveryChallanReport : System.Web.UI.Page
+{
+    MySqlCommand cmd;
+    string UserName = "";
+    VehicleDBMgr vdm;
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (Session["salestype"] == null)
+        {
+            Response.Redirect("Login.aspx");
+        }
+        if (!this.IsPostBack)
+        {
+            if (!Page.IsCallback)
+            {
+                vdm = new VehicleDBMgr();
+
+
+                DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdm.conn);
+
+                txtdate.Text = ServerDateCurrentdate.ToString("dd-MM-yyyy HH:mm");
+                txttodate.Text = ServerDateCurrentdate.ToString("dd-MM-yyyy HH:mm");
+                lblTitle.Text = Session["TitleName"].ToString();
+                lblAddress.Text = Session["Address"].ToString();
+                lbltinNo.Text = Session["TinNo"].ToString();
+                getdet();
+            }
+        }
+    }
+    private DateTime GetLowDate(DateTime dt)
+    {
+        double Hour, Min, Sec;
+        DateTime DT = DateTime.Now;
+        DT = dt;
+        Hour = -dt.Hour;
+        Min = -dt.Minute;
+        Sec = -dt.Second;
+        DT = DT.AddHours(Hour);
+        DT = DT.AddMinutes(Min);
+        DT = DT.AddSeconds(Sec);
+        return DT;
+    }
+    private DateTime GetHighDate(DateTime dt)
+    {
+        double Hour, Min, Sec;
+        DateTime DT = DateTime.Now;
+        Hour = 23 - dt.Hour;
+        Min = 59 - dt.Minute;
+        Sec = 59 - dt.Second;
+        DT = dt;
+        DT = DT.AddHours(Hour);
+        DT = DT.AddMinutes(Min);
+        DT = DT.AddSeconds(Sec);
+        return DT;
+    }
+    string TripId = "";
+    string assigndate = "";
+    string vehicleno = "";
+    string DispatchName = "";
+    string Dispatchsno = "";
+    string Employee = "";
+    string branchsno = "";
+    string Refdcno = "";
+    string PlanTime = "";
+    string DispMode = "";
+    string DcNo = "";
+    string BranchId = "";
+    void getdet()
+    {
+        try
+        {
+            vdm = new VehicleDBMgr();
+
+            if (txt_tripid.Text == "")
+            {
+                if (Session["TripIDSno"] == null)
+                {
+                    TripId = txt_tripid.Text;
+                }
+                else
+                {
+                    TripId = Session["TripIDSno"].ToString();
+                }
+                //assigndt = Session["AssignDate"].ToString();
+            }
+            else
+            {
+                TripId = txt_tripid.Text;
+            }
+            //cmd = new MySqlCommand("SELECT tripdata.BranchID, tripdata.AssignDate, tripdata.Sno, tripdata.DCNo, tripdata.DispTime, tripdata.VehicleNo, dispatch.DispMode, dispatch.DispName AS DispatchName, dispatch.sno AS dispsno, empmanage.EmpName AS Employee FROM tripdata INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno LEFT OUTER JOIN empmanage ON tripdata.EmpId = empmanage.Sno WHERE (tripdata.Sno = @tripsno)");
+            cmd = new MySqlCommand("SELECT tripdata.BranchID, tripdata.AssignDate, tripdata.Sno, tripdata.DCNo, tripdata.DispTime, tripdata.VehicleNo, dispatch.DispMode, dispatch.DispName AS DispatchName, dispatch.sno AS dispsno, empmanage_1.EmpName AS Employee, empmanage.EmpName AS dispather FROM tripdata INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno LEFT OUTER JOIN empmanage ON tripdata.DEmpId = empmanage.Sno LEFT OUTER JOIN empmanage empmanage_1 ON tripdata.EmpId = empmanage_1.Sno WHERE (tripdata.Sno = @tripsno)"); 
+            cmd.Parameters.AddWithValue("@tripsno", TripId);
+            DataTable dtdetails = vdm.SelectQuery(cmd).Tables[0];
+            if (dtdetails.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtdetails.Rows)
+                {
+                    assigndate = dr["AssignDate"].ToString();
+                    vehicleno = dr["VehicleNo"].ToString();
+                    DispatchName = dr["DispatchName"].ToString();
+                    Refdcno = dr["Sno"].ToString();
+                    Dispatchsno = dr["dispsno"].ToString();
+                    Employee = dr["Employee"].ToString();
+                    PlanTime = dr["DispTime"].ToString();
+                    DispMode = dr["DispMode"].ToString();
+                    DcNo = dr["DCno"].ToString();
+                    BranchId = dr["BranchID"].ToString();
+                    if (dr["dispather"].ToString() == "")
+                    {
+                        lbldispat.Text = "DISPATCHER";
+                    }
+                    else
+                    {
+                        lbldispat.Text = dr["dispather"].ToString();
+                    }
+                }
+                lblvehicleno.Text = vehicleno;
+                lblRefdcno.Text = Refdcno;
+                DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdm.conn);
+                DateTime dtapril = new DateTime();
+                DateTime dtmarch = new DateTime();
+                int currentyear = ServerDateCurrentdate.Year;
+                int nextyear = ServerDateCurrentdate.Year + 1;
+                int currntyearnum = 0;
+                int nextyearnum = 0;
+                if (ServerDateCurrentdate.Month > 3)
+                {
+                    string apr = "4/1/" + currentyear;
+                    dtapril = DateTime.Parse(apr);
+                    string march = "3/31/" + nextyear;
+                    dtmarch = DateTime.Parse(march);
+                    currntyearnum = currentyear;
+                    nextyearnum = nextyear;
+                }
+                if (ServerDateCurrentdate.Month <= 3)
+                {
+                    string apr = "4/1/" + (currentyear - 1);
+                    dtapril = DateTime.Parse(apr);
+                    string march = "3/31/" + (nextyear - 1);
+                    dtmarch = DateTime.Parse(march);
+                    currntyearnum = currentyear - 1;
+                    nextyearnum = nextyear - 1;
+                }
+               
+                if (BranchId == "172")
+                {
+                    DcNo = "SVDS/PBK/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                if (BranchId == "1801")
+                {
+                    DcNo = "SVDS/KPM/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "158")
+                {
+                    DcNo = "SVF/WYRA/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "174")
+                {
+                    DcNo = "SVDS/CHN/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "285")
+                {
+                    DcNo = "SVDS/TPT/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "282")
+                {
+                    DcNo = "SVDS/SKHT/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "271")
+                {
+                    DcNo = "SVDS/NLR/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "306")
+                {
+                    DcNo = "SVDS/KANCHI/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "570")
+                {
+                    DcNo = "SVF/VJD/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "458")
+                {
+                    DcNo = "SVF/KHM/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "159")
+                {
+                    DcNo = "SVF/HYD/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "457")
+                {
+                    DcNo = "SVF/WGL/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "538")
+                {
+                    DcNo = "SVDS/BNG/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "527")
+                {
+                    DcNo = "SVDS/PNR/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "3559")
+                {
+                    DcNo = "SVDS/CTR/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "2749")
+                {
+                    DcNo = "SVDS/MDPL/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                else if (BranchId == "2909")
+                {
+                    DcNo = "SVDS/VLR/DC/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "/" + DcNo;
+                }
+                lbldcno.Text = DcNo;
+                DateTime dtassigndate = Convert.ToDateTime(assigndate);
+                string date = dtassigndate.ToString("dd/MMM/yyyy");
+                string strassigndate = dtassigndate.ToString();
+                if (PlanTime == "")
+                {
+                }
+                else
+                {
+                    DateTime dtPlantime = Convert.ToDateTime(PlanTime);
+                    string time = dtPlantime.ToString("dd/MMM/yyyy");
+                    string strPlantime = dtPlantime.ToString();
+                    string[] DateTime = strPlantime.Split(' ');
+                    string[] PlanDateTime = strPlantime.Split(' ');
+                    lblassigndate.Text = date;
+                    lbldisptime.Text = PlanDateTime[1];
+                }
+                if (DispMode == "LOCAL" || DispMode == "Staff" || DispMode == "AGENT")
+                {
+                    lblpartyname.Text = DispatchName;
+                    lblroutename.Text = "";
+                }
+                else
+                {
+                    lblpartyname.Text = Employee;
+                    lblroutename.Text = DispatchName;
+                }
+            }
+            if (TripId != "")
+            {
+                GetDC();
+            }
+        }
+        catch
+        {
+        }
+    }
+    protected void btnGenerate_Click(object sender, EventArgs e)
+    {
+        getdet();
+    }
+
+    DataTable Report = new DataTable();
+    DataTable dtTotQty = new DataTable();
+    DataTable dtbrnchprdts = new DataTable();
+    void GetDC()
+    {
+        try
+        {
+            vdm = new VehicleDBMgr();
+            DateTime fromdate = DateTime.Now;
+            Report = new DataTable();
+            dtTotQty = new DataTable();
+            pnlHide.Visible = true;
+            string DispMode = "";
+            lblmsg.Text = "";
+            cmd = new MySqlCommand(" SELECT sno, DispName, BranchID, Dispdate, DispMode,DispType FROM dispatch WHERE (sno = @DispSno)");
+            cmd.Parameters.AddWithValue("@DispSno", Dispatchsno);
+            DataTable dtbrnch = vdm.SelectQuery(cmd).Tables[0];
+            if (dtbrnch.Rows.Count > 0)
+            {
+                branchsno = dtbrnch.Rows[0]["BranchID"].ToString();
+                DispMode = dtbrnch.Rows[0]["DispMode"].ToString();
+            }
+            else 
+            {
+                branchsno = Context.Session["branch"].ToString();
+            }
+            if (DispMode == "Staff")
+            {
+                cmd = new MySqlCommand("SELECT  productsdata.sno, productsdata.ProductName, productsdata.Units, branchproducts.unitprice, invmaster.Qty, products_category.Categoryname FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno INNER JOIN branchdata ON branchproducts.branch_sno = branchdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (branchdata.sno = @SOID) and (branchproducts.flag=@flag)  group by  productsdata.ProductName ORDER BY branchproducts.Rank");
+                cmd.Parameters.AddWithValue("@SOID", branchsno);
+                cmd.Parameters.AddWithValue("@flag", "1");
+                cmd.Parameters.AddWithValue("@SalesType", "20");
+               dtbrnchprdts = vdm.SelectQuery(cmd).Tables[0];
+            }
+            else if (DispMode == "AGENT")
+            {
+                cmd = new MySqlCommand("SELECT productsdata.sno, productsdata.ProductName, productsdata.Units, branchproducts.unitprice, invmaster.Qty, products_category.Categoryname, branchproducts_1.unitprice AS BUnitPrice FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno INNER JOIN branchdata ON branchproducts.branch_sno = branchdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchproducts branchproducts_1 ON branchmappingtable.SuperBranch = branchproducts_1.branch_sno AND productsdata.sno = branchproducts_1.product_sno WHERE (branchdata.sno = @SOID) and (branchproducts.flag=@flag) GROUP BY productsdata.ProductName ORDER BY branchproducts_1.Rank");
+                cmd.Parameters.AddWithValue("@SOID", branchsno);
+                cmd.Parameters.AddWithValue("@flag", "1");
+                dtbrnchprdts = vdm.SelectQuery(cmd).Tables[0];
+            }
+            else
+            {
+                string salestype = Session["salestype"].ToString();
+                if (salestype == "SALES OFFICE")
+                {
+                    branchsno = Session["branch"].ToString();
+                }
+                else
+                {
+                }
+                cmd = new MySqlCommand("SELECT productsdata.sno, productsdata.ProductName, productsdata.Units, branchproducts.unitprice, invmaster.Qty, products_category.Categoryname FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (branchproducts.branch_sno = @branchhsno) and (branchproducts.flag=@flag) group by  productsdata.ProductName ORDER BY branchproducts.Rank");
+                cmd.Parameters.AddWithValue("@flag", "1");
+                cmd.Parameters.AddWithValue("@branchhsno", branchsno);
+                dtbrnchprdts = vdm.SelectQuery(cmd).Tables[0];
+            }
+            string DispType = "";
+            if (dtbrnch.Rows.Count > 0)
+            {
+                DispType = dtbrnch.Rows[0]["DispType"].ToString();
+            }
+            if (branchsno == "458")
+            {
+                lblType.Text = "DELIVERY CHALLAN / INVOICE";
+            }
+            else
+            {
+                if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                {
+                    lblType.Text = "STOCK TRANSFER";
+                }
+                else
+                {
+                    lblType.Text = "DELIVERY CHALLAN / INVOICE";
+                }
+            }
+            string TaxType = ddlTaxType.SelectedValue;
+
+           
+            //cmd = new MySqlCommand("SELECT tripsubdata.ProductId, productsdata.ProductName,productsdata.VatPercent,branchproducts.VatPercent AS vp,tripsubdata.Price, ROUND(tripsubdata.Qty, 2) AS Qty, tripdata.AssignDate FROM tripdata INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (tripdata.Sno = @tripdataId) AND (branchproducts.branch_sno = @BranchID)GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT tripsubdata.ProductId, productsdata.ProductName, productsdata.VatPercent, branchproducts.VatPercent AS vp, tripsubdata.Price, ROUND(tripsubdata.Qty, 2) AS Qty,tripdata.AssignDate, tripdata.BranchID, branchproducts_1.VatPercent AS plantvp FROM tripdata INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno INNER JOIN branchproducts branchproducts_1 ON tripdata.BranchID = branchproducts_1.branch_sno AND branchproducts.product_sno = branchproducts_1.product_sno WHERE (tripdata.Sno = @tripdataId) AND (branchproducts.branch_sno = @BranchID) GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
+            cmd.Parameters.AddWithValue("@BranchID", branchsno);
+            cmd.Parameters.AddWithValue("@tripdataId", TripId);
+            DataTable dtIndent = vdm.SelectQuery(cmd).Tables[0];
+            cmd = new MySqlCommand("SELECT invmaster.InvName, tripinvdata.Qty FROM tripinvdata INNER JOIN invmaster ON tripinvdata.invid = invmaster.sno WHERE (tripinvdata.Tripdata_sno = @tripdataId)");
+            cmd.Parameters.AddWithValue("@tripdataId", TripId);
+            DataTable dtInventory = vdm.SelectQuery(cmd).Tables[0];
+            dtTotQty.Columns.Add("Sl No");
+            dtTotQty.Columns.Add("Product Name");
+            dtTotQty.Columns.Add("Qty in ltrs/kgs").DataType = typeof(Double);
+            dtTotQty.Columns.Add("Crates/Bags").DataType = typeof(Double);
+            dtTotQty.Columns.Add("Cans").DataType = typeof(Double);
+            if (branchsno == "570")
+            {
+                if (TaxType == "With Tax")
+                {
+                    dtTotQty.Columns.Add("Rate");
+                    dtTotQty.Columns.Add("Amount").DataType = typeof(Double);
+                }
+            }
+            if (branchsno == "458")
+            {
+                dtTotQty.Columns.Add("Rate");
+                dtTotQty.Columns.Add("Amount").DataType = typeof(Double);
+            }
+            else
+            {
+                if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                {
+                }
+                else
+                {
+                    dtTotQty.Columns.Add("Rate");
+                    dtTotQty.Columns.Add("Amount").DataType = typeof(Double);
+                }
+            }
+            int i = 1;
+            double TotalMilk = 0;
+            double Vat2 = 0;
+            double Vat5 = 0;
+            double Vat14 = 0;
+            if (dtIndent.Rows.Count > 0)
+            {
+                foreach (DataRow drprdt in dtbrnchprdts.Rows)
+                {
+                    foreach (DataRow dr in dtIndent.Rows)
+                    {
+                        if (dr["ProductId"].ToString() == drprdt["sno"].ToString())
+                        {
+                            DataRow newrow = dtTotQty.NewRow();
+                            string Percent = "";
+                            string Percent1 = dr["vp"].ToString();
+                            string Percent2 = dr["VatPercent"].ToString();
+                            string percent3 = dr["plantvp"].ToString();
+                            if (Percent1 == "" || Percent1 == "0")
+                            {
+                                if (percent3 == "" || percent3 == "0")
+                                {
+                                    if (Percent2 == "" || Percent2 == "0")
+                                    {
+                                        
+                                    }
+                                    else
+                                    {
+                                        Percent = percent3;
+                                    }
+                                }
+                                else
+                                {
+                                    Percent = percent3;
+                                }
+                                
+                            }
+                            else if (Percent1 != "" || Percent1 != "0")
+                            {
+                                Percent = Percent1;
+                            }
+                            if (Percent == "" || Percent == "0")
+                            {
+                                if (TaxType == "With Tax")
+                                {
+                                }
+                                else
+                                {
+                                    newrow["Sl No"] = i++.ToString();
+                                    newrow["Product Name"] = dr["ProductName"].ToString();
+                                    float qty = 0;
+                                    float invqty = 0;
+                                    float.TryParse(dr["Qty"].ToString(), out qty);
+
+                                    float VatPercent = 0;
+                                    float Price = 0;
+                                    float.TryParse(dr["Price"].ToString(), out Price);
+                                    double PAmount = qty * Price;
+                                    newrow["Qty in ltrs/kgs"] = Math.Round(qty, 2);
+                                    string Categoryname = drprdt["Categoryname"].ToString();
+                                    if (Categoryname == "MILK")
+                                    {
+                                        TotalMilk += qty;
+                                    }
+                                    if (drprdt["Units"].ToString() == "ltr")
+                                    {
+                                        float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                        newrow["Cans"] = Math.Round(qty / invqty);
+                                    }
+                                    if (drprdt["Units"].ToString() == "kgs")
+                                    {
+                                        float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                        newrow["Cans"] = Math.Round(qty / invqty);
+                                    }
+                                    if (drprdt["Units"].ToString() == "ml")
+                                    {
+                                        string branchid = Session["branch"].ToString();
+                                        if (branchid == "158")
+                                        {
+                                            if (dr["ProductName"].ToString() == "CURD200")
+                                            {
+                                                newrow["Crates/Bags"] = Math.Round(qty / 12);
+                                            }
+                                            else
+                                            {
+                                                float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                                newrow["Crates/Bags"] = Math.Round(qty / invqty);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (dr["ProductName"].ToString() == "CURD175")
+                                            {
+                                                newrow["Crates/Bags"] = Math.Round(qty / 10.5);
+                                            }
+                                            else
+                                            {
+                                                float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                                newrow["Crates/Bags"] = Math.Round(qty / invqty);
+                                            }
+                                        }
+                                        
+                                    }
+                                    if (drprdt["Units"].ToString() == "gms")
+                                    {
+                                        string branchid = Session["branch"].ToString();
+                                        if (branchid == "158")
+                                        {
+                                            if (dr["ProductName"].ToString() == "C-CURD100")
+                                            {
+                                                //float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                                newrow["Crates/Bags"] = Math.Round(qty / 3.2);
+                                            }
+                                            if (dr["ProductName"].ToString() == "C-CURD200")
+                                            {
+                                                newrow["Crates/Bags"] = Math.Round(qty / 4.8);
+                                            }
+                                        }
+                                    }
+                                    string UnitCost = dr["Price"].ToString();
+                                    float rate = 0;
+                                    if (DispMode == "Free")
+                                    {
+                                        rate = 0;
+                                    }
+                                    else
+                                    {
+                                        float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                    }
+                                    if (DispMode == "AGENT")
+                                    {
+                                        String unitprice = drprdt["unitprice"].ToString();
+                                        if (unitprice == "0")
+                                        {
+                                            unitprice = drprdt["BUnitPrice"].ToString();
+                                        }
+                                        float.TryParse(unitprice, out rate);
+                                    }
+                                    if (UnitCost == "")
+                                    {
+                                    }
+                                    else
+                                    {
+                                        rate = Price;
+                                    }
+                                    if (branchsno == "458")
+                                    {
+                                        newrow["Rate"] = rate;
+                                        float Amount = rate * qty;
+                                        newrow["Amount"] = Math.Round(Amount, 2);
+                                    }
+                                    else
+                                    {
+                                        if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                                        {
+                                        }
+                                        else
+                                        {
+                                            newrow["Rate"] = rate;
+                                            float Amount = rate * qty;
+                                            newrow["Amount"] = Math.Round(Amount, 2);
+                                        }
+                                    }
+                                    dtTotQty.Rows.Add(newrow);
+                                }
+                            }
+                            else
+                            {
+                                if (TaxType == "With Tax")
+                                {
+                                   
+                                    newrow["Sl No"] = i++.ToString();
+                                    newrow["Product Name"] = dr["ProductName"].ToString();
+                                    float qty = 0;
+                                    float invqty = 0;
+                                    float.TryParse(dr["Qty"].ToString(), out qty);
+
+                                    float VatPercent = 0;
+                                    float Price = 0;
+                                    float.TryParse(dr["Price"].ToString(), out Price);
+
+                                    float.TryParse(Percent, out VatPercent);
+
+
+                                    newrow["Qty in ltrs/kgs"] = Math.Round(qty, 2);
+                                    string Categoryname = drprdt["Categoryname"].ToString();
+                                    if (Categoryname == "MILK")
+                                    {
+                                        TotalMilk += qty;
+                                    }
+                                    if (drprdt["Units"].ToString() == "ltr")
+                                    {
+                                        float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                        newrow["Cans"] = Math.Round(qty / invqty);
+                                    }
+                                    if (drprdt["Units"].ToString() == "kgs")
+                                    {
+                                        float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                        newrow["Cans"] = Math.Round(qty / invqty);
+                                    }
+                                    if (drprdt["Units"].ToString() == "ml")
+                                    {
+                                        string branchid = Session["branch"].ToString();
+                                        if (branchid == "158")
+                                        {
+                                            if (dr["ProductName"].ToString() == "CURD200")
+                                            {
+                                                newrow["Crates/Bags"] = Math.Round(qty / 10);
+                                            }
+                                            else
+                                            {
+                                                float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                                newrow["Crates/Bags"] = Math.Round(qty / invqty);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                            newrow["Crates/Bags"] = Math.Round(qty / invqty);
+                                        }
+                                    }
+                                    if (drprdt["Units"].ToString() == "gms")
+                                    {
+                                        string branchid = Session["branch"].ToString();
+                                        if (branchid == "158")
+                                        {
+                                            if (dr["ProductName"].ToString() == "C-CURD100")
+                                            {
+                                                //float.TryParse(drprdt["Qty"].ToString(), out invqty);
+                                                newrow["Crates/Bags"] = Math.Round(qty / 3.2);
+                                            }
+                                            if (dr["ProductName"].ToString() == "C-CURD200")
+                                            {
+                                                newrow["Crates/Bags"] = Math.Round(qty / 4.8);
+                                            }
+                                        }
+                                    }
+                                    string UnitCost = dr["Price"].ToString();
+                                    float rate = 0;
+                                    if (DispMode == "Free")
+                                    {
+                                        rate = 0;
+                                    }
+                                    else
+                                    {
+                                        float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                    }
+                                    if (DispMode == "AGENT")
+                                    {
+                                        String unitprice = drprdt["unitprice"].ToString();
+                                        if (unitprice == "0")
+                                        {
+                                            unitprice = drprdt["BUnitPrice"].ToString();
+                                        }
+                                        float.TryParse(unitprice, out rate);
+                                    }
+                                    if (UnitCost == "")
+                                    {
+                                    }
+                                    else
+                                    {
+                                        rate = Price;
+                                    }
+                                    if (branchsno == "570" )
+                                    {
+                                        
+                                        double PAmount = qty * rate;
+                                        if (Percent == "2")
+                                        {
+                                            double TVat = (VatPercent / 102) * PAmount;
+                                            TVat = Math.Round(TVat, 2);
+                                            Vat2 += TVat;
+                                        }
+                                        if (Percent == "5")
+                                        {
+                                            double TVat = (VatPercent / 105) * PAmount;
+                                            TVat = Math.Round(TVat, 2);
+                                            Vat5 += TVat;
+                                        }
+                                        if (Percent == "14.5")
+                                        {
+                                            double TVat = (VatPercent / 114.5) * PAmount;
+                                            TVat = Math.Round(TVat, 2);
+                                            Vat14 += TVat;
+                                        }
+
+                                        float vat2 = 0;
+                                        float vat5 = 0;
+                                        float vat14 = 0;
+                                        if (Percent == "2")
+                                        {
+                                            vat5 = (rate / 102) * VatPercent;
+                                            //vat2 = (VatPercent / 100) * rate;
+                                        }
+                                        if (Percent == "5")
+                                        {
+                                            vat5 = (rate / 105) * VatPercent;
+                                        }
+                                        if (Percent == "14.5")
+                                        {
+                                            double dbvat = 0;
+                                            dbvat = (rate / 114.5) * VatPercent;
+                                            float.TryParse(dbvat.ToString(), out vat14);
+                                            //vat14 = (VatPercent / 100) * rate;
+                                        }
+                                        float totRate = vat2 + vat5 + vat14;
+                                        float Vatrate = rate - totRate;
+                                        double DVatrate = 0;
+                                        double.TryParse(Vatrate.ToString(), out DVatrate);
+                                        DVatrate = Math.Round(DVatrate, 2);
+                                        newrow["Rate"] = DVatrate;
+                                        float Amount = Vatrate * qty;
+                                        newrow["Amount"] = Math.Round(Amount, 2);
+                                    }
+                                    else
+                                    {
+                                        if (branchsno == "458")
+                                        {
+                                            double PAmount = qty * rate;
+                                            if (Percent == "2")
+                                            {
+                                                double TVat = (VatPercent / 102) * PAmount;
+                                                TVat = Math.Round(TVat, 2);
+                                                Vat2 += TVat;
+                                            }
+                                            if (Percent == "5")
+                                            {
+                                                double TVat = (VatPercent / 105) * PAmount;
+                                                TVat = Math.Round(TVat, 2);
+                                                Vat5 += TVat;
+                                            }
+                                            if (Percent == "14.5")
+                                            {
+                                                double TVat = (VatPercent / 114.5) * PAmount;
+                                                TVat = Math.Round(TVat, 2);
+                                                Vat14 += TVat;
+                                            }
+
+                                            float vat2 = 0;
+                                            float vat5 = 0;
+                                            float vat14 = 0;
+                                            if (Percent == "2")
+                                            {
+                                                vat5 = (rate / 102) * VatPercent;
+                                                //vat2 = (VatPercent / 100) * rate;
+                                            }
+                                            if (Percent == "5")
+                                            {
+                                                vat5 = (rate / 105) * VatPercent;
+                                            }
+                                            if (Percent == "14.5")
+                                            {
+                                                double dbvat = 0;
+                                                dbvat = (rate / 114.5) * VatPercent;
+                                                float.TryParse(dbvat.ToString(), out vat14);
+                                                //vat14 = (VatPercent / 100) * rate;
+                                            }
+                                            float totRate = vat2 + vat5 + vat14;
+                                            float Vatrate = rate - totRate;
+                                            double DVatrate = 0;
+                                            double.TryParse(Vatrate.ToString(), out DVatrate);
+                                            DVatrate = Math.Round(DVatrate, 2);
+                                            newrow["Rate"] = DVatrate;
+                                            float Amount = Vatrate * qty;
+                                            newrow["Amount"] = Math.Round(Amount, 2);
+                                        }
+                                        else
+                                        {
+                                            if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                                            {
+                                            }
+                                            else
+                                            {
+                                                double PAmount = qty * rate;
+                                                if (Percent == "2")
+                                                {
+                                                    double TVat = (VatPercent / 102) * PAmount;
+                                                    TVat = Math.Round(TVat, 2);
+                                                    Vat2 += TVat;
+                                                }
+                                                if (Percent == "5")
+                                                {
+                                                    double TVat = (VatPercent / 105) * PAmount;
+                                                    TVat = Math.Round(TVat, 2);
+                                                    Vat5 += TVat;
+                                                }
+                                                if (Percent == "14.5")
+                                                {
+                                                    double TVat = (VatPercent / 114.5) * PAmount;
+                                                    TVat = Math.Round(TVat, 2);
+                                                    Vat14 += TVat;
+                                                }
+
+                                                float vat2 = 0;
+                                                float vat5 = 0;
+                                                float vat14 = 0;
+                                                if (Percent == "2")
+                                                {
+                                                    vat5 = (rate / 102) * VatPercent;
+                                                    //vat2 = (VatPercent / 100) * rate;
+                                                }
+                                                if (Percent == "5")
+                                                {
+                                                    vat5 = (rate / 105) * VatPercent;
+                                                }
+                                                if (Percent == "14.5")
+                                                {
+                                                    double dbvat = 0;
+                                                    dbvat = (rate / 114.5) * VatPercent;
+                                                    float.TryParse(dbvat.ToString(), out vat14);
+                                                    //vat14 = (VatPercent / 100) * rate;
+                                                }
+                                                float totRate = vat2 + vat5 + vat14;
+                                                float Vatrate = rate - totRate;
+                                                double DVatrate = 0;
+                                                double.TryParse(Vatrate.ToString(), out DVatrate);
+                                                DVatrate = Math.Round(DVatrate, 2);
+                                                newrow["Rate"] = DVatrate;
+                                                float Amount = Vatrate * qty;
+                                                newrow["Amount"] = Math.Round(Amount, 2);
+                                            }
+                                        }
+                                    }
+                                    dtTotQty.Rows.Add(newrow);
+                                }
+                            }
+                        }
+                    }
+                }
+                DataRow newvartical = dtTotQty.NewRow();
+                newvartical["Product Name"] = "Total";
+                double val = 0.0;
+                if (branchsno == "458")
+                {
+                    double.TryParse(dtTotQty.Compute("sum([Amount])", "[Amount]<>'0'").ToString(), out val);
+                    newvartical["Amount"] = val;
+                }
+                else
+                {
+                    if (branchsno == "570")
+                    {
+                        if (TaxType == "With Tax")
+                        {
+                            double.TryParse(dtTotQty.Compute("sum([Amount])", "[Amount]<>'0'").ToString(), out val);
+                            newvartical["Amount"] = val;
+                        }
+                    }
+                    else
+                    {
+                        if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                        {
+                        }
+                        else
+                        {
+                            double.TryParse(dtTotQty.Compute("sum([Amount])", "[Amount]<>'0'").ToString(), out val);
+                            newvartical["Amount"] = val;
+                        }
+                    }
+                }
+                double totqty = 0.0;
+                double.TryParse(dtTotQty.Compute("sum([Qty in ltrs/kgs])", "[Qty in ltrs/kgs]<>'0'").ToString(), out totqty);
+                newvartical["Qty in ltrs/kgs"] = totqty;
+                double totcratesqty = 0.0;
+                double.TryParse(dtTotQty.Compute("sum([Crates/Bags])", "[Crates/Bags]<>'0'").ToString(), out totcratesqty);
+                newvartical["Crates/Bags"] = totcratesqty;
+                double totcansqty = 0.0;
+                double.TryParse(dtTotQty.Compute("sum([Cans])", "[Cans]<>'0'").ToString(), out totcansqty);
+                newvartical["Cans"] = totcansqty;
+                dtTotQty.Rows.Add(newvartical);
+
+                DataRow newvartical1 = dtTotQty.NewRow();
+                newvartical1["Sl No"] = "Total Milk";
+                newvartical1["Product Name"] = TotalMilk;
+                dtTotQty.Rows.Add(newvartical1);
+                if (branchsno == "458")
+                {
+                    if (TaxType == "With Tax")
+                    {
+                        DataRow New2 = dtTotQty.NewRow();
+                        New2["Sl No"] = "Vat 2%";
+                        New2["Product Name"] = Vat2;
+                        dtTotQty.Rows.Add(New2);
+                        DataRow New5 = dtTotQty.NewRow();
+                        New5["Sl No"] = "Vat 5%";
+                        New5["Product Name"] = Vat5;
+                        dtTotQty.Rows.Add(New5);
+                        DataRow New = dtTotQty.NewRow();
+                        New["Sl No"] = "Vat 14.5%";
+                        New["Product Name"] = Vat14;
+                        dtTotQty.Rows.Add(New);
+                        DataRow NewAmount = dtTotQty.NewRow();
+                        NewAmount["Product Name"] = "Total Amount";
+                        NewAmount["Amount"] = Vat14 + Vat5 + Vat2 + val;
+                        dtTotQty.Rows.Add(NewAmount);
+                    }
+                    else
+                    {
+                        DataRow NewAmount = dtTotQty.NewRow();
+                        NewAmount["Product Name"] = "Total Amount";
+                        NewAmount["Amount"] = val;
+                        dtTotQty.Rows.Add(NewAmount);
+                    }
+                }
+                else
+                {
+                    if (branchsno == "570")
+                    {
+                        if (TaxType == "With Tax")
+                        {
+                            DataRow New2 = dtTotQty.NewRow();
+                            New2["Sl No"] = "Vat 2%";
+                            New2["Product Name"] = Vat2;
+                            dtTotQty.Rows.Add(New2);
+                            DataRow New5 = dtTotQty.NewRow();
+                            New5["Sl No"] = "Vat 5%";
+                            New5["Product Name"] = Vat5;
+                            dtTotQty.Rows.Add(New5);
+                            DataRow New = dtTotQty.NewRow();
+                            New["Sl No"] = "Vat 14.5%";
+                            New["Product Name"] = Vat14;
+                            dtTotQty.Rows.Add(New);
+                            DataRow NewAmount = dtTotQty.NewRow();
+                            NewAmount["Product Name"] = "Total Amount";
+                            NewAmount["Amount"] = Vat14 + Vat5 + Vat2 + val;
+                            dtTotQty.Rows.Add(NewAmount);
+                        }
+                    }
+                    else
+                    {
+
+                        if ((DispType == "SO" && DispMode != "AGENT") || (DispType == "SO" && DispMode == "SPL"))
+                        {
+                        }
+                        else
+                        {
+                            if (TaxType == "With Tax")
+                            {
+                                DataRow New2 = dtTotQty.NewRow();
+                                New2["Sl No"] = "Vat 2%";
+                                New2["Product Name"] = Vat2;
+                                dtTotQty.Rows.Add(New2);
+                                DataRow New5 = dtTotQty.NewRow();
+                                New5["Sl No"] = "Vat 5%";
+                                New5["Product Name"] = Vat5;
+                                dtTotQty.Rows.Add(New5);
+                                DataRow New = dtTotQty.NewRow();
+                                New["Sl No"] = "Vat 14.5%";
+                                New["Product Name"] = Vat14;
+                                dtTotQty.Rows.Add(New);
+                                DataRow NewAmount = dtTotQty.NewRow();
+                                NewAmount["Product Name"] = "Total Amount";
+                                NewAmount["Amount"] = Vat14 + Vat5 + Vat2 + val;
+                                dtTotQty.Rows.Add(NewAmount);
+                            }
+                            else
+                            {
+                                DataRow NewAmount = dtTotQty.NewRow();
+                                NewAmount["Product Name"] = "Total Amount";
+                                NewAmount["Amount"] = val;
+                                dtTotQty.Rows.Add(NewAmount);
+                            }
+                        }
+                    }
+                }
+                if (TaxType == "With Tax")
+                {
+                }
+                else
+                {
+                    DataRow newempty = dtTotQty.NewRow();
+                    newempty["Product Name"] = "";
+                    dtTotQty.Rows.Add(newempty);
+                    DataRow newInventory = dtTotQty.NewRow();
+                    newInventory["Sl No"] = "Inventory";
+                    newInventory["Product Name"] = "Qty";
+                    dtTotQty.Rows.Add(newInventory);
+                    foreach (DataRow dr in dtInventory.Rows)
+                    {
+                        DataRow drnew = dtTotQty.NewRow();
+                        drnew["Sl No"] = dr["InvName"].ToString();
+                        drnew["Product Name"] = dr["Qty"].ToString();
+                        dtTotQty.Rows.Add(drnew);
+                    }
+                }
+                grdReports.DataSource = dtTotQty;
+                grdReports.DataBind();
+                Session["xportdata"] = dtTotQty;
+            }
+        }
+        catch (Exception ex)
+        {
+            lblmsg.Text = ex.Message;
+            grdReports.DataSource = dtTotQty;
+            grdReports.DataBind();
+        }
+    }
+
+
+    protected void btn_getdetails_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            vdm = new VehicleDBMgr();
+            DateTime fromdate = DateTime.Now;
+            DateTime todate = DateTime.Now;
+            string[] datestrig = txtdate.Text.Split(' ');
+            if (datestrig.Length > 1)
+            {
+                if (datestrig[0].Split('-').Length > 0)
+                {
+                    string[] dates = datestrig[0].Split('-');
+                    string[] times = datestrig[1].Split(':');
+                    fromdate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
+                }
+            }
+            string[] todatestrig = txttodate.Text.Split(' ');
+            if (todatestrig.Length > 1)
+            {
+                if (todatestrig[0].Split('-').Length > 0)
+                {
+                    string[] dates = todatestrig[0].Split('-');
+                    string[] times = todatestrig[1].Split(':');
+                    todate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
+                }
+            }
+            if (Session["salestype"].ToString() == "Plant")
+            {
+                cmd = new MySqlCommand(" SELECT tripdata.Sno AS TripId, DATE_FORMAT(tripdata.AssignDate, '%d %b %y') AS AssignDate, tripdata.Permissions, tripdata.VehicleNo, dispatch.DispName AS DispatchName, empmanage.EmpName AS Employee FROM tripdata INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno WHERE (tripdata.Status <> 'c') and (tripdata.DespatchStatus=@DespatchStatus) AND (tripdata.AssignDate BETWEEN @Adt AND @Adt1) AND (tripdata.Permissions LIKE '%D%') AND (dispatch.Branch_Id = @brnch)");
+                //cmd = new MySqlCommand("SELECT tripdata.Sno AS TripId, DATE_FORMAT(tripdata.AssignDate, '%d %b %y') AS AssignDate,tripdata.Permissions,tripdata.VehicleNo,dispatch.DispName AS DispatchName, empmanage.EmpName AS Employee FROM tripdata INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno WHERE (tripdata.Status<>'c') AND (tripdata.AssignDate BETWEEN @Adt AND @Adt1) AND (tripdata.Permissions LIKE '%D%') AND (empmanage.Branch = @brnch)");
+                cmd.Parameters.AddWithValue("@UserName", UserName);
+                cmd.Parameters.AddWithValue("@DespatchStatus", "Yes");
+                cmd.Parameters.AddWithValue("@brnch", Session["branch"]);
+            }
+            else
+            {
+                cmd = new MySqlCommand("SELECT tripdata.Sno AS TripId, DATE_FORMAT(tripdata.AssignDate, '%d %b %y') AS AssignDate, tripdata.Permissions, tripdata.VehicleNo,dispatch.DispName AS DispatchName, empmanage.EmpName AS Employee FROM tripdata INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno INNER JOIN branchdata ON empmanage.Branch = branchdata.sno WHERE (tripdata.Status <> 'c') AND (tripdata.AssignDate BETWEEN @Adt AND @Adt1) AND (tripdata.Permissions LIKE '%D%') AND (empmanage.Branch = @brnch) OR (tripdata.Status <> 'c') AND (tripdata.AssignDate BETWEEN @Adt AND @Adt1) AND (tripdata.Permissions LIKE '%D%') AND (branchdata.SalesOfficeID = @SOID)");
+                //      cmd = new MySqlCommand("SELECT tripdata.Sno AS TripId, DATE_FORMAT(tripdata.AssignDate, '%d %b %y') AS AssignDate,tripdata.Permissions,tripdata.VehicleNo,dispatch.DispName AS DispatchName, empmanage.EmpName AS Employee FROM tripdata INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN triproutes ON tripdata.Sno = triproutes.Tripdata_sno INNER JOIN dispatch ON triproutes.RouteID = dispatch.sno WHERE (tripdata.Status<>'c') AND (tripdata.AssignDate BETWEEN @Adt AND @Adt1) AND (tripdata.Permissions LIKE '%D%') AND (empmanage.Branch = @brnch)");
+                cmd.Parameters.AddWithValue("@brnch", Session["branch"]);
+                cmd.Parameters.AddWithValue("@SOID", Session["branch"]);
+            }
+
+            cmd.Parameters.AddWithValue("@Adt", GetLowDate(fromdate));
+            cmd.Parameters.AddWithValue("@Adt1", GetHighDate(todate));
+            DataTable dttripdata = vdm.SelectQuery(cmd).Tables[0];
+            if (dttripdata.Rows.Count == 0)
+            {
+                lbldateValidation.Text = "No DC Found Between These Dates ";
+            }
+            else
+            {
+                Gridtripdata.DataSource = dttripdata;
+                Gridtripdata.DataBind();
+            }
+        }
+        catch (Exception ex)
+        {
+            lblmsg.Text = ex.Message;
+        }
+
+
+    }
+}
