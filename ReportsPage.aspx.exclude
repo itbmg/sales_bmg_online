@@ -308,7 +308,7 @@ display: block;
 
                             <td>
                             <ul>--%>
-                             <li id="litimingreport"><a href="TimingReport.aspx"><i class="fa fa-share"></i>&nbsp Timing Report</a></li>
+                            <%-- <li id="litimingreport"><a href="TimingReport.aspx"><i class="fa fa-share"></i>&nbsp Timing Report</a></li>--%>
                             </ul>
                             </td>
                            

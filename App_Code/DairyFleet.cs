@@ -1090,10 +1090,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 case "get_smstransmsgtype_details":
                     get_smstransmsgtype_details(context);
                     break;
-                    // procurement
-                case "Getchillingcenters":
-                    Getchillingcenters(context);
-                    break;
                 case "btnEditCashbookSaveClick":
                     btnEditCashbookSaveClick(context);
                     break;
@@ -50204,10 +50200,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         }
         return p.Substring(0, i) + " " + p.Substring(i, p.Length - i);
     }
-    // procurement
-    private void Getchillingcenters(HttpContext context)
-    {
+    //// procurement
+    //private void Getchillingcenters(HttpContext context)
+    //{
 
-    }
+    //}
 }
 //}

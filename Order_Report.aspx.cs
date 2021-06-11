@@ -162,7 +162,7 @@ public partial class Order_Report : System.Web.UI.Page
             Session["RouteName"] = ddlRouteName.SelectedItem.Text;
             lblRouteName.Text = ddlRouteName.SelectedItem.Text;
             Session["IDate"] = DateTime.Now.AddDays(1).ToString("dd/MM/yyyy");
-             Report = new DataTable();
+            Report = new DataTable();
             string[] datestrig = txtdate.Text.Split(' ');
             if (datestrig.Length > 1)
             {
@@ -174,7 +174,7 @@ public partial class Order_Report : System.Web.UI.Page
                 }
             }
             lblDate.Text = fromdate.AddDays(1).ToString("dd/MMM/yyyy");
-            Session["filename"] = ddlRouteName.SelectedItem.Text +fromdate.AddDays(1).ToString("dd/MM/yyyy");
+            Session["filename"] = ddlRouteName.SelectedItem.Text + fromdate.AddDays(1).ToString("dd/MM/yyyy");
             cmd = new MySqlCommand("select Route_id,IndentType from dispatch_sub where dispatch_sno=@dispsno");
             cmd.Parameters.AddWithValue("@dispsno", ddlRouteName.SelectedValue);
             DataTable dtrouteindenttype = vdm.SelectQuery(cmd).Tables[0];
@@ -185,7 +185,7 @@ public partial class Order_Report : System.Web.UI.Page
             }
             string Branch = "";
             //cmd = new MySqlCommand("SELECT branchroutes.RouteName,branchproducts.Rank,branchroutesubtable.Rank as RouteRank,  indents_subtable.unitQty, indents.IndentType, productsdata.ProductName, branchdata.BranchName,productsdata.Units, productsdata.sno,products_category.Categoryname, invmaster.Qty FROM branchroutes INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN indents ON branchdata.sno = indents.Branch_id INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (branchroutes.Sno = @TripID) AND (indents.I_date BETWEEN @starttime AND @endtime) AND (indents.Status <> 'D') AND (indents.IndentType = @itype) and (branchproducts.branch_sno=@BranchID) GROUP BY productsdata.ProductName, branchdata.BranchName, productsdata.sno, products_category.Categoryname ORDER BY branchproducts.Rank,RouteRank");
-            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, brnchprdt.Rank, modifiedroutesubtable.Rank AS RouteRank, indents_subtable.unitQty, indent.IndentType, productsdata.ProductName,branchdata.BranchName,branchdata.SalesType, productsdata.Units, productsdata.sno, products_category.Categoryname, invmaster.Qty, modifiedroutesubtable.BranchID FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, I_date, IndentType, Status FROM indents WHERE (I_date BETWEEN @starttime AND @endtime)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN (SELECT        branch_sno, product_sno, Rank FROM  branchproducts WHERE (branch_sno = @BranchID)) brnchprdt ON productsdata.sno = brnchprdt.product_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (modifiedroutes.Sno = @TripID) AND (indent.Status <> 'D') AND (indent.IndentType = @itype) AND (brnchprdt.branch_sno = @BranchID) AND  (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) OR (modifiedroutes.Sno = @TripID) AND (indent.Status <> 'D') AND (indent.IndentType = @itype) AND (brnchprdt.branch_sno = @BranchID) AND  (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) GROUP BY productsdata.ProductName, branchdata.BranchName, productsdata.sno, products_category.Categoryname ORDER BY brnchprdt.Rank, RouteRank");
+            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, brnchprdt.Rank, modifiedroutesubtable.Rank AS RouteRank, indents_subtable.unitQty, indent.IndentType, productsdata.ProductName,branchdata.BranchName,branchdata.SalesType, productsdata.Units, productsdata.qty as uomqty, productsdata.sno, products_category.Categoryname, invmaster.Qty, modifiedroutesubtable.BranchID FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, I_date, IndentType, Status FROM indents WHERE (I_date BETWEEN @starttime AND @endtime)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN (SELECT        branch_sno, product_sno, Rank FROM  branchproducts WHERE (branch_sno = @BranchID)) brnchprdt ON productsdata.sno = brnchprdt.product_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (modifiedroutes.Sno = @TripID) AND (indent.Status <> 'D') AND (indent.IndentType = @itype) AND (brnchprdt.branch_sno = @BranchID) AND  (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) OR (modifiedroutes.Sno = @TripID) AND (indent.Status <> 'D') AND (indent.IndentType = @itype) AND (brnchprdt.branch_sno = @BranchID) AND  (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) GROUP BY productsdata.ProductName, branchdata.BranchName, productsdata.sno, products_category.Categoryname ORDER BY brnchprdt.Rank, RouteRank");
             cmd.Parameters.AddWithValue("@TripID", routeid);
             if (Session["salestype"].ToString() == "Plant")
             {
@@ -204,9 +204,9 @@ public partial class Order_Report : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
                 Branch = Session["branch"].ToString();
             }
-            cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate));  
-            cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate)); 
-            cmd.Parameters.AddWithValue("@itype", routeitype);  
+            cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate));
+            cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate));
+            cmd.Parameters.AddWithValue("@itype", routeitype);
             DataTable dtble = vdm.SelectQuery(cmd).Tables[0];
 
             cmd = new MySqlCommand("SELECT modifiedroutesubtable.BranchID, branchaccounts.Amount, inventory_monitor.Qty,  inventory_monitor.Inv_Sno FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN inventory_monitor ON branchdata.sno = inventory_monitor.BranchId LEFT OUTER JOIN branchaccounts ON branchdata.sno = branchaccounts.BranchId WHERE (modifiedroutes.Sno = @RouteID) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) OR (modifiedroutes.Sno = @RouteID) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) GROUP BY branchdata.BranchName, branchaccounts.Amount, inventory_monitor.Qty, inventory_monitor.Inv_Sno ");
@@ -233,7 +233,7 @@ public partial class Order_Report : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@itype", routeitype);
             DataTable dtAgentBal = vdm.SelectQuery(cmd).Tables[0];
 
-            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, brnchprdt.Rank, modifiedroutesubtable.Rank AS RouteRank, offer_indents_sub.offer_indent_qty AS unitQty, offerindent.IndentType, productsdata.ProductName, branchdata.BranchName, productsdata.Units, productsdata.sno, products_category.Categoryname, invmaster.Qty, modifiedroutesubtable.BranchID FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT idoffer_indents, agent_id, indent_date, indents_id, IndentType, I_modified_by FROM offer_indents WHERE (indent_date BETWEEN @starttime AND @endtime)) offerindent ON branchdata.sno = offerindent.agent_id INNER JOIN offer_indents_sub ON offerindent.idoffer_indents = offer_indents_sub.idoffer_indents INNER JOIN productsdata ON offer_indents_sub.product_id = productsdata.sno INNER JOIN (SELECT branch_sno, product_sno, Rank FROM branchproducts WHERE (branch_sno = @BranchID)) brnchprdt ON productsdata.sno = brnchprdt.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (modifiedroutes.Sno = @TripID) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (offerindent.IndentType = @itype) OR (modifiedroutes.Sno = @TripID) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND (offerindent.IndentType = @itype) GROUP BY branchdata.BranchName, modifiedroutesubtable.Rank, productsdata.sno, productsdata.ProductName, products_category.Categoryname ORDER BY RouteRank, brnchprdt.Rank"); 
+            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, brnchprdt.Rank, modifiedroutesubtable.Rank AS RouteRank, offer_indents_sub.offer_indent_qty AS unitQty, offerindent.IndentType, productsdata.ProductName, branchdata.BranchName, productsdata.Units,productsdata.Qty as uomqty, productsdata.sno, products_category.Categoryname, invmaster.Qty, modifiedroutesubtable.BranchID FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT idoffer_indents, agent_id, indent_date, indents_id, IndentType, I_modified_by FROM offer_indents WHERE (indent_date BETWEEN @starttime AND @endtime)) offerindent ON branchdata.sno = offerindent.agent_id INNER JOIN offer_indents_sub ON offerindent.idoffer_indents = offer_indents_sub.idoffer_indents INNER JOIN productsdata ON offer_indents_sub.product_id = productsdata.sno INNER JOIN (SELECT branch_sno, product_sno, Rank FROM branchproducts WHERE (branch_sno = @BranchID)) brnchprdt ON productsdata.sno = brnchprdt.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (modifiedroutes.Sno = @TripID) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (offerindent.IndentType = @itype) OR (modifiedroutes.Sno = @TripID) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND (offerindent.IndentType = @itype) GROUP BY branchdata.BranchName, modifiedroutesubtable.Rank, productsdata.sno, productsdata.ProductName, products_category.Categoryname ORDER BY RouteRank, brnchprdt.Rank");
             cmd.Parameters.AddWithValue("@TripID", routeid);
             if (Session["salestype"].ToString() == "Plant")
             {
@@ -243,15 +243,15 @@ public partial class Order_Report : System.Web.UI.Page
             {
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
             }
-            cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate));  
-            cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate)); 
-            cmd.Parameters.AddWithValue("@itype", routeitype);  
+            cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate));
+            cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate));
+            cmd.Parameters.AddWithValue("@itype", routeitype);
             DataTable dtoffer = vdm.SelectQuery(cmd).Tables[0];
 
             DataView viewprdts = new DataView(dtble);
             DataView view_offer_prdts = new DataView(dtoffer);
-            DataTable Finalprodutstbl = viewprdts.ToTable(true, "ProductName", "Categoryname", "Units", "Qty", "Rank");
-            DataTable offerprodutstbl = view_offer_prdts.ToTable(true, "ProductName", "Categoryname", "Units", "Qty", "Rank");
+            DataTable Finalprodutstbl = viewprdts.ToTable(true, "ProductName", "Categoryname", "Units", "Qty", "Rank", "uomqty");
+            DataTable offerprodutstbl = view_offer_prdts.ToTable(true, "ProductName", "Categoryname", "Units", "Qty", "Rank", "uomqty");
             productsReport.Columns.Add("ProductName");
             productsReport.Columns.Add("Categoryname");
             productsReport.Columns.Add("Units");
@@ -286,8 +286,8 @@ public partial class Order_Report : System.Web.UI.Page
                 }
 
             }
-           // dtble.Merge(dtoffer);
-           // DataTable dt3 = dtble.Copy();
+            // dtble.Merge(dtoffer);
+            // DataTable dt3 = dtble.Copy();
             //dt3.Merge(dtoffer);
             //cmd = new MySqlCommand(" SELECT products_category.Categoryname, products_subcategory.SubCatName, productsdata.ProductName FROM productsdata INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno ORDER BY productsdata.Rank");
             //cmd = new MySqlCommand("SELECT products_category.Categoryname, products_subcategory.SubCatName, productsdata.ProductName, productsdata.Units, invmaster.Qty FROM branchproducts INNER JOIN dispatch ON branchproducts.branch_sno = dispatch.Branch_Id INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (dispatch.sno = @dispatchSno) GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
@@ -296,7 +296,7 @@ public partial class Order_Report : System.Web.UI.Page
             if (dtble.Rows.Count > 0)
             {
                 DataView view = new DataView(dtble);
-                DataTable produtstbl = view.ToTable(true, "ProductName", "Categoryname","Units","Qty");
+                DataTable produtstbl = view.ToTable(true, "ProductName", "Categoryname", "Units", "Qty");
                 Report = new DataTable();
                 Report.Columns.Add("SNo");
                 Report.Columns.Add("Agent Name");
@@ -319,7 +319,7 @@ public partial class Order_Report : System.Web.UI.Page
                     }
                 }
                 Report.Columns.Add("Total Indent", typeof(Double)).SetOrdinal(count + 5);
-                DataTable distincttable = view.ToTable(true, "BranchID", "BranchName", "RouteRank","SalesType");
+                DataTable distincttable = view.ToTable(true, "BranchID", "BranchName", "RouteRank", "SalesType");
                 distincttable.DefaultView.Sort = "RouteRank ASC";
                 distincttable = distincttable.DefaultView.ToTable(true);
                 int i = 1;
@@ -328,71 +328,92 @@ public partial class Order_Report : System.Web.UI.Page
                     DataRow newrow = Report.NewRow();
                     newrow["SNo"] = i;
                     newrow["Agent Name"] = branch["BranchName"].ToString();
-                  
-                    string SalesType = branch["SalesType"].ToString();
-                     DataRow[] dragentamount = dtAgentBal.Select("BranchID=" + branch["BranchID"].ToString());
-                     int ivvbal = 0;
 
-                     foreach (DataRow drc in dragentamount)
-                     {
-                         double amount = 0;
-                         double.TryParse(drc.ItemArray[1].ToString(), out amount);
-                         if (SalesType == "20")
-                         {
-                             newrow["Bal Amount"] = amount.ToString();
-                         }
-                         string invsno = drc.ItemArray[3].ToString();
-                         if (invsno == "1")
-                         {
-                             newrow["Crates Bal"] = drc.ItemArray[2].ToString();
-                         }
-                         if (invsno == "2" || invsno == "3" || invsno == "4")
-                         {
-                             int invqty = 0;
-                             int.TryParse(drc.ItemArray[2].ToString(), out invqty);
-                             ivvbal += invqty;
-                             newrow["Cans Bal"] = ivvbal.ToString();
-                         }
-                     }
+                    string SalesType = branch["SalesType"].ToString();
+                    DataRow[] dragentamount = dtAgentBal.Select("BranchID=" + branch["BranchID"].ToString());
+                    int ivvbal = 0;
+
+                    foreach (DataRow drc in dragentamount)
+                    {
+                        double amount = 0;
+                        double.TryParse(drc.ItemArray[1].ToString(), out amount);
+                        if (SalesType == "20")
+                        {
+                            newrow["Bal Amount"] = amount.ToString();
+                        }
+                        string invsno = drc.ItemArray[3].ToString();
+                        if (invsno == "1")
+                        {
+                            newrow["Crates Bal"] = drc.ItemArray[2].ToString();
+                        }
+                        if (invsno == "2" || invsno == "3" || invsno == "4")
+                        {
+                            int invqty = 0;
+                            int.TryParse(drc.ItemArray[2].ToString(), out invqty);
+                            ivvbal += invqty;
+                            newrow["Cans Bal"] = ivvbal.ToString();
+                        }
+                    }
                     double total = 0;
                     foreach (DataRow dr in productsReport.Rows)
                     {
                         //if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
                         //{
-                            double qtyvalue = 0;
-                            double offerqty = 0;
-                            double indqty = 0;
-                            double totindqty = 0;
+                        double qtyvalue = 0;
+                        double offerqty = 0;
+                        double indqty = 0;
+                        double totindqty = 0;
 
-                            foreach (DataRow drindent in dtble.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
+                        foreach (DataRow drindent in dtble.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
+                        {
+                            if (drindent["Units"].ToString() == "Pkts")
                             {
-                                double.TryParse(drindent["unitQty"].ToString(), out indqty);
-                            }
-                            foreach (DataRow droffer in dtoffer.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
-                            {
-                                double.TryParse(droffer["unitQty"].ToString(), out offerqty);
-
-                            }
-                            //Report.Rows[Report.Rows.Count-1][dr["ProductName"].ToString()].ToString()
-
-                                //double dispqty = 0;
-                                //double.TryParse(Report.Rows[Report.Rows.Count][dr["ProductName"].ToString()].ToString(), out offerqty);
-                            totindqty = indqty + offerqty;
-                            if (totindqty == 0)
-                            {
-                                //newrow[dr["ProductName"].ToString()] = ;
-
+                                double unitQty = 0;
+                                double uomqty = 0;
+                                double.TryParse(drindent["uomqty"].ToString(), out uomqty);
+                                double.TryParse(drindent["unitQty"].ToString(), out unitQty);
+                                indqty = unitQty * uomqty / 1000;
                             }
                             else
                             {
-                                newrow[dr["ProductName"].ToString()] = totindqty;
-
+                                double.TryParse(drindent["unitQty"].ToString(), out indqty);
                             }
-                            if (dr["Categoryname"].ToString() == "MILK")
+                        }
+                        foreach (DataRow droffer in dtoffer.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
+                        {
+                            if (droffer["Units"].ToString() == "Pkts")
                             {
-                                //double.TryParse(dr["unitQty"].ToString(), out qtyvalue);
-                                total += totindqty;
+                                double unitQty = 0;
+                                double uomqty = 0;
+                                double.TryParse(droffer["uomqty"].ToString(), out uomqty);
+                                double.TryParse(droffer["unitQty"].ToString(), out unitQty);
+                                offerqty = unitQty * uomqty / 1000;
                             }
+                            else
+                            {
+                                double.TryParse(droffer["unitQty"].ToString(), out offerqty);
+                            }
+                        }
+                        //Report.Rows[Report.Rows.Count-1][dr["ProductName"].ToString()].ToString()
+
+                        //double dispqty = 0;
+                        //double.TryParse(Report.Rows[Report.Rows.Count][dr["ProductName"].ToString()].ToString(), out offerqty);
+                        totindqty = indqty + offerqty;
+                        if (totindqty == 0)
+                        {
+                            //newrow[dr["ProductName"].ToString()] = ;
+
+                        }
+                        else
+                        {
+                            newrow[dr["ProductName"].ToString()] = totindqty;
+
+                        }
+                        if (dr["Categoryname"].ToString() == "MILK")
+                        {
+                            //double.TryParse(dr["unitQty"].ToString(), out qtyvalue);
+                            total += totindqty;
+                        }
                         //}
                     }
                     newrow["Total Indent"] = total;
