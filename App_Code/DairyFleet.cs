@@ -1465,14 +1465,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 obj1.voucherid = voucherid;
                 string DOE = dtCash.Rows[0]["DOE"].ToString();
                 DateTime dtDOE = Convert.ToDateTime(DOE);
-                if (BrachSOID == "174")
-                {
+                
                     obj1.approveemp = dtCash.Rows[0]["EmpName"].ToString();
-                }
-                else
-                {
-                    obj1.approveemp = "G.M/P.M";
-                }
+               
                 string ChangedTime = dtDOE.ToString("dd/MMM/yyyy");
                 obj1.date = ChangedTime;
                 obj1.nameof = dtCash.Rows[0]["onNameof"].ToString();
@@ -12722,19 +12717,11 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             #region
             if (DayType == "DayWise")
             {
-                if (BranchId == "174")
-                {
-                    cmd = new MySqlCommand("SELECT    branchmappingtable.SuperBranch, branchdata.BranchName, ROUND(SUM(indents_subtable.DeliveryQty) / 2, 2) AS DeliveryQty, ROUND(AVG(indents_subtable.DeliveryQty), 2) AS AvgQty,ROUND(SUM(indents_subtable.UnitCost * indents_subtable.DeliveryQty) / 2, 2) AS SaleValue, branchdata.sno,indents.I_date FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN branchmappingtable branchmappingtable_1 ON branchdata.sno = branchmappingtable_1.SuperBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable_1.SubBranch = branchdata_1.sno INNER JOIN indents ON branchdata_1.sno = indents.Branch_id INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE  (indents.I_date BETWEEN @d1 AND @d2) AND (branchmappingtable.SubBranch IN ('174', '527', '4607')) GROUP BY branchmappingtable.SubBranch,DATE_FORMAT(indents.I_date, '%Y%m%d')");
-                    cmd.Parameters.AddWithValue("@d1", GetLowDate(frmdate.AddDays(-1)));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
-                }
-                else
-                {
+               
                     cmd = new MySqlCommand("SELECT    branchmappingtable.SuperBranch, branchdata.BranchName, ROUND(SUM(indents_subtable.DeliveryQty) / 2, 2) AS DeliveryQty, ROUND(AVG(indents_subtable.DeliveryQty), 2) AS AvgQty,ROUND(SUM(indents_subtable.UnitCost * indents_subtable.DeliveryQty) / 2, 2) AS SaleValue, branchdata.sno,indents.I_date FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN branchmappingtable branchmappingtable_1 ON branchdata.sno = branchmappingtable_1.SuperBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable_1.SubBranch = branchdata_1.sno INNER JOIN indents ON branchdata_1.sno = indents.Branch_id INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE  (indents.I_date BETWEEN @d1 AND @d2) AND (branchmappingtable.SubBranch = @BranchId) GROUP BY branchmappingtable.SubBranch,DATE_FORMAT(indents.I_date, '%Y%m%d')");
                     cmd.Parameters.AddWithValue("@BranchId", BranchId);
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(frmdate.AddDays(-1)));
                     cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
-                }
                 DataTable dtyesterdayroutesale = vdbmngr.SelectQuery(cmd).Tables[0];
                 List<LineChartValuesclass> LineChartValuelist = new List<LineChartValuesclass>();
                 List<TotalProductclass> Categeorylist = new List<TotalProductclass>();
@@ -14988,7 +14975,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     if (state == "33")  ////Hardcore this are the Tamlnadu State wise same Address For Three Branches Kanch,Ambur,Chennai.so for GST CompasInvoice purpose we need to If Conditions  below processs
                     {
                         cmd = new MySqlCommand("SELECT branchdata.companycode, branchdata.phonenumber,branchdata.email, branchdata.sno,branchdata.stateid, branchdata.Address, branchdata.TinNumber, branchdata.panno, branchdata.BranchCode,statemastar.statecode, statemastar.statename, statemastar.gststatecode, branchdata.phonenumber, branchdata.emailid,  branchdata.street, branchdata.city, branchdata.mandal, branchdata.district, branchdata.pincode, branchdata.gstno, branchdata.doorno, branchdata.area FROM branchdata INNER JOIN statemastar ON branchdata.stateid = statemastar.sno WHERE (branchdata.sno = @branchsno)");
-                        cmd.Parameters.AddWithValue("@branchsno", "174");
+                        cmd.Parameters.AddWithValue("@branchsno", SOID);
                         dtbrnchaddress = vdbmngr.SelectQuery(cmd).Tables[0];
                         branchname = "Chennai";
 
@@ -22665,14 +22652,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     dtpaiddt = DateTime.Parse(paiddate);
                     if (prevamt != presentamt)
                     {
-                        if (soid == "527")
-                        {
-                            soid = "174";
-                        }
-                        if (soid == "572")
-                        {
-                            soid = "158";
-                        }
                         cmd = new MySqlCommand("Select IFNULL(MAX(Receipt),0)+1 as Sno  from cashreceipts where BranchID=@BranchID AND (DOE BETWEEN @d1 AND @d2)");
                         cmd.Parameters.AddWithValue("@BranchID", soid);
                         cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril));
@@ -24162,22 +24141,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     }
                     if (Branch != "158")
                     {
-                        if (soid == "527")
-                        {
-                            Branch = "174";
-                        }
-                        if (soid == "2194")
-                        {
-                            Branch = "1801";
-                        }
-                        if (soid == "2948")
-                        {
-                            Branch = "285";
-                        }
-                        if (soid == "282")
-                        {
-                            Branch = "172";
-                        }
                         if (Transactiontype == "Credit")
                         {
                             cmd = new MySqlCommand("SELECT Branchid, UserData_sno, AmountPaid, Denominations, Remarks, Sno, PaidDate FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2)");
@@ -24606,11 +24569,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 else
                                 {
                                     ///////................Instruction By Raghu Kumar.............................../////////////
-                                    if (soid == "174" || soid == "527")
-                                    {
-                                    }
-                                    else
-                                    {
                                         try
                                         {
                                             string Date = PaidDate;
@@ -24651,7 +24609,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         catch
                                         {
                                         }
-                                    }
                                 }
                             }
                         }
@@ -30306,14 +30263,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
             else
             {
-                if (soid == "527")
-                {
-                    soid = "174";
-                }
-                if (soid == "2194")
-                {
-                    soid = "1801";
-                }
+              
                 if (Transactiontype == "Credit")
                 {
                     cmd = new MySqlCommand("Select Amount from branchaccounts where BranchId=@BranchId");
@@ -30970,14 +30920,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
             if (Branch != "158")
             {
-                if (soid == "527")
-                {
-                    Branch = "174";
-                }
-                if (soid == "2194")
-                {
-                    Branch = "1801";
-                }
+               
                 if (Transactiontype == "Credit")
                 {
                     cmd = new MySqlCommand("SELECT Branchid, UserData_sno, AmountPaid, Denominations, Remarks, Sno, PaidDate FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2)");
@@ -31289,11 +31232,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         else
                         {
                             ///////................Instruction By Raghu Kumar.............................../////////////
-                            if (soid == "174" || soid == "527")
-                            {
-                            }
-                            else
-                            {
+                           
                                 try
                                 {
                                    // string Date = PaidDate;
@@ -31310,7 +31249,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 catch
                                 {
                                 }
-                            }
                         }
                     }
 
@@ -40548,14 +40486,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 companycode = dtEmpID.Rows[0]["companycode"].ToString();
                 statecode = dtEmpID.Rows[0]["gststatecode"].ToString();
             }
-            if (BranchID == "527")
-            {
-                BranchID = "174";
-            }
-            if (BranchID == "2948")
-            {
-                BranchID = "285";
-            }
+           
             //if (fromstate == tostate)
             //{
             //    cmd = new MySqlCommand("SELECT IFNULL(MAX(agentstno), 0) + 1 AS Sno FROM agentst WHERE (soid = @soid) AND (IndDate BETWEEN @d1 AND @d2)");

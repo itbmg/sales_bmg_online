@@ -246,15 +246,9 @@ public partial class DayEndReport : System.Web.UI.Page
                             totamtreceived = Math.Round(totcollection, 2);
                         }
                     }
-                    if (dr["sno"].ToString() == "174" || dr["sno"].ToString() == "527")
-                    {
-                        cmd = new MySqlCommand("SELECT SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS due FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, I_date FROM  indents WHERE        (I_date BETWEEN @starttime AND @endtime)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (modifiedroutes.BranchID = @BranchID) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (branchdata.Due_Limit_Days > 0) OR (modifiedroutes.BranchID = @BranchID) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND  (branchdata.Due_Limit_Days > 0) GROUP BY modifiedroutes.BranchID");
-                    }
-                    else
-                    {
+                   
                         cmd = new MySqlCommand("SELECT SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS due FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, I_date FROM  indents WHERE        (I_date BETWEEN @starttime AND @endtime)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (modifiedroutes.BranchID = @BranchID) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (branchdata.CollectionType = 'DUE') OR (modifiedroutes.BranchID = @BranchID) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND  (branchdata.CollectionType = 'DUE') GROUP BY modifiedroutes.BranchID");
 
-                    }
                     cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate).AddDays(-1));
                     cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate).AddDays(-1));
                     cmd.Parameters.AddWithValue("@BranchID", dr["sno"].ToString());
@@ -368,17 +362,9 @@ public partial class DayEndReport : System.Web.UI.Page
                             }
                         }
                     }
-                    if (dr["sno"].ToString() == "174" || dr["sno"].ToString() == "527")
-                    {
-                        cashsaledue = cashsaledue - creditdue;
+                    
                         cashsaledue = Math.Round(cashsaledue, 2);
                         newrow["Cash Sale Due"] = cashsaledue;
-                    }
-                    else
-                    {
-                        cashsaledue = Math.Round(cashsaledue, 2);
-                        newrow["Cash Sale Due"] = cashsaledue;
-                    }
 
                     // cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno, dispatch.DispName, SUM(collectin.AmountPaid) AS collectionamount, collectin.PaymentType, collectin.Branchid, collectin.CheckStatus FROM branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN dispatch_sub ON dispatch.sno = dispatch_sub.dispatch_sno INNER JOIN branchroutesubtable ON dispatch_sub.Route_id = branchroutesubtable.RefNo INNER JOIN (SELECT Branchid, AmountPaid, PaidDate, PaymentType, CheckStatus FROM collections WHERE (PaidDate BETWEEN @d1 AND @d2)) collectin ON branchroutesubtable.BranchID = collectin.Branchid WHERE (branchdata_1.SalesOfficeID = @SOID) AND (dispatch.DispMode IS NULL) AND (collectin.CheckStatus IS NULL) OR (branchdata.sno = @BranchID) AND (dispatch.DispMode IS NULL) AND (collectin.CheckStatus IS NULL) ORDER BY branchdata.sno");
                     //cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno, SUM(collectin.AmountPaid) AS collectionamount, collectin.PaymentType, collectin.Branchid, collectin.CheckStatus FROM branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SuperBranch INNER JOIN (SELECT Branchid, AmountPaid, PaidDate, PaymentType, CheckStatus FROM collections WHERE (PaidDate BETWEEN @d1 AND @d2)) collectin ON branchmappingtable.SubBranch = collectin.Branchid WHERE (branchdata_1.SalesOfficeID = @SOID) AND (collectin.CheckStatus IS NULL) AND (collectin.PaymentType <> @pt) OR (collectin.CheckStatus IS NULL) AND (branchdata.sno = @BranchID) AND (collectin.PaymentType <> @pt) ORDER BY branchdata.sno");

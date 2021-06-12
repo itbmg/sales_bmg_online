@@ -589,13 +589,11 @@ public partial class IncentiveReport : System.Web.UI.Page
                                 }
                                 else
                                 {
-                                    if (BranchID == "174" || BranchID == "527")
-                                    {
+                                    
                                         lblmsg.Text = "Crates Balance   :" + totcratesbal + "  Cans Balance    :" + totcansbal;
                                         btnicentivesave.Visible = false;
                                         btnPrint.Visible = false;
                                         Button3.Visible = false;
-                                    }
                                 }
                             }
                             #endregion
@@ -1827,15 +1825,6 @@ public partial class IncentiveReport : System.Web.UI.Page
                 string Remarks = txtremarks.Text;
                 string UserSno = Session["UserSno"].ToString();
                 string BranchID = Session["branch"].ToString();
-                if (BranchID == "174" || BranchID == "538" || BranchID == "527")
-                {
-                }
-                else
-                {
-                    //if (BranchID == "282")
-                    //{
-                    //    BranchID = "172";
-                    //}
                     cmd = new MySqlCommand("SELECT Sno, BranchId, HeadName, LimitAmount, AccountType, AgentID, EmpID, accountcode, flag FROM accountheads WHERE (BranchId = @BranchID) AND (HeadName LIKE '%Sales Discount%')");
                     cmd.Parameters.AddWithValue("@BranchID", BranchID);
                     DataTable dtincentive = vdm.SelectQuery(cmd).Tables[0];
@@ -1861,7 +1850,6 @@ public partial class IncentiveReport : System.Web.UI.Page
                     //cmd.Parameters.AddWithValue("@Denominations", DenominationString);
                     //cmd.Parameters.AddWithValue("@ReturnDenomin", ReturnDenominationString);
                     //vdm.insert(cmd);
-                }
                 lblmsg.Text = "Record Inserted Successfully";
                 ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Record Inserted Successfully')", true);
                 // ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "alertMessage", "alert('Please select Correct FromDate')", true);

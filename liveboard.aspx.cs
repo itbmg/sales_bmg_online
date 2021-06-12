@@ -3700,14 +3700,8 @@ public partial class liveboard : System.Web.UI.Page
                             {
                                 newrow["branchname"] = dr["BranchName"].ToString();
                             }
-                            if (dr["sno"].ToString() == "527")
-                            {
-                                newrow["sno"] = "174";
-                            }
-                            else
-                            {
+                         
                                 newrow["sno"] = dr["sno"].ToString();
-                            }
                             double dqty = 0; double dsalevalue = 0;
                             double.TryParse(dr["DeliveryQty"].ToString(), out dqty);
                             double.TryParse(dr["SaleValue"].ToString(), out dsalevalue);
@@ -3892,47 +3886,16 @@ public partial class liveboard : System.Web.UI.Page
                     dtMainDataTable.Columns.Add("Sale Value");
                     double Total_Qty = 0; double Total_Value = 0;
                     double ComTotal_Qty = 0; double ComTotal_Value = 0;
-                    string A1 = "174";
-                    string A2="527";
                     foreach (DataRow drreport in approval.Rows)
                     {
                         DataRow newrow = dtMainDataTable.NewRow();
-                        if (drreport["BranchId"].ToString() == "174")
-                        {
-                            if (Total_Qty == 0.0)
-                            {
-                                Total_Qty = Convert.ToDouble(Report.Compute("SUM(deliveryqty)", "sno=" + "174" + ""));
-                                Total_Value = Convert.ToDouble(Report.Compute("SUM(salevalue)", "sno=" + "174" + ""));
-
-                                ComTotal_Qty = Convert.ToDouble(Report.Compute("SUM(deliveryqty)", "cmpid=" + "8012" + ""));
-                                ComTotal_Value = Convert.ToDouble(Report.Compute("SUM(salevalue)", "cmpid=" + "8012" + ""));
-
-                                
-                                double AvgRate = Total_Value / Total_Qty;
-                                newrow["BranchID"] = "174";
-                                newrow["Branch Name"] = "Chennai SalesOffice";
-                                newrow["AvgRate"] = Math.Round(AvgRate, 0);
-                                //newrow["Sale Quantity"] = Math.Round(Total_Qty, 0);
-                                //newrow["Sale Value"] = Math.Round(Total_Value, 0);
-                                double salevalue_per = (Total_Value / ComTotal_Value) * 100;
-                                double saleqty_per = (Total_Qty / ComTotal_Qty) * 100;
-                                newrow["Sale Quantity"] = Total_Qty + "(" + Math.Round(saleqty_per, 0) + "%)"; ;
-                                grandtotsalesumqty += totsaleqty;
-                                newrow["Sale Value"] = Total_Value + "(" + Math.Round(salevalue_per, 0) + "%)"; ;
-
-                                dtMainDataTable.Rows.Add(newrow);
-                                //}
-                            }
-                        }
-                        else
-                        {
+                        
                             newrow["BranchID"] = drreport["BranchID"].ToString();
                             newrow["Branch Name"] = drreport["Branch Name"].ToString();
                             newrow["AvgRate"] = drreport["AvgRate"].ToString();
                             newrow["Sale Quantity"] = drreport["Sale Quantity"].ToString();
                             newrow["Sale Value"] = drreport["Sale Value"].ToString();
                             dtMainDataTable.Rows.Add(newrow);
-                        }
                     }
                     grdBranchReport.DataSource = dtMainDataTable;
                     grdBranchReport.DataBind();

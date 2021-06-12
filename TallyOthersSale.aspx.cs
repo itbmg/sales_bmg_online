@@ -233,30 +233,6 @@ public partial class TallyOthersSale : System.Web.UI.Page
 
                         if (Dtfreemilk.Rows.Count > 0)
                         {
-                            //Hardcore this are the subbranches of sales offices.so for GST invoice purpose we need to maintain below processs
-                            if (ddlSalesOffice.SelectedValue == "527" || ddlSalesOffice.SelectedValue == "2948" || ddlSalesOffice.SelectedValue == "282")
-                            {
-                                if (ddlSalesOffice.SelectedValue == "2948")
-                                {
-                                    soid = "285";
-                                }
-                                if (ddlSalesOffice.SelectedValue == "527")
-                                {
-                                    soid = "174";
-                                }
-                                if (ddlSalesOffice.SelectedValue == "282")
-                                {
-                                    soid = "172";
-                                }
-                            }
-                            else
-                            {
-                                if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "458")
-                                {
-                                    soid = "158";
-                                }
-                                soid = ddlSalesOffice.SelectedValue;
-                            }
                             double freeqty = 0; double taxfreeqty = 0;
                             foreach (DataRow branch in newdt.Rows)
                             {
@@ -541,30 +517,7 @@ public partial class TallyOthersSale : System.Web.UI.Page
                     {
                         if (newdt.Rows.Count > 0)
                         {
-                            //Hardcore this are the subbranches of sales offices.so for GST invoice purpose we need to maintain below processs
-                            if (ddlSalesOffice.SelectedValue == "527" || ddlSalesOffice.SelectedValue == "2948" || ddlSalesOffice.SelectedValue == "282")
-                            {
-                                if (ddlSalesOffice.SelectedValue == "2948")
-                                {
-                                    soid = "285";
-                                }
-                                if (ddlSalesOffice.SelectedValue == "527")
-                                {
-                                    soid = "174";
-                                }
-                                if (ddlSalesOffice.SelectedValue == "282")
-                                {
-                                    soid = "172";
-                                }
-                            }
-                            else
-                            {
-                                if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "458")
-                                {
-                                    soid = "158";
-                                }
-                                soid = ddlSalesOffice.SelectedValue;
-                            }
+                            
                             double freeqty = 0; double taxfreeqty = 0;
                             foreach (DataRow branch in newdt.Rows)
                             {

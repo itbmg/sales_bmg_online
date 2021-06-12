@@ -412,10 +412,10 @@
                         var rndmnum = Math.floor((Math.random() * 10) + 1);
                         var img_url = BranchdataArr[i].ftplocation + BranchdataArr[i].Emp_PIC + '?v=' + rndmnum;
                         if (BranchdataArr[i].Emp_PIC != "") {
-                            results += '<td><img data-imagezoom="true" class="img-circle img-responsive" id="main_img_item" alt="Item Image" src="' + img_url + '" style="width: 35px; height: 35px;border: 2px solid gray;" /></td>';
+                            results += '<td><img class="img-circle img-responsive" id="main_img_item" alt="Item Image" src="Images/dummy_image.jpg" style="width: 35px; height: 35px;border: 2px solid gray;" /></td>';
                         }
                         else {
-                            results += '<td><img data-imagezoom="true" class="img-circle img-responsive" id="main_img_item" alt="Item Image" src="Images/dummy_image.jpg" style="width: 35px; height: 35px;border: 2px solid gray;" /></td>';
+                            results += '<td><img class="img-circle img-responsive" id="main_img_item" alt="Item Image" src="Images/dummy_image.jpg" style="width: 35px; height: 35px;border: 2px solid gray;" /></td>';
                         }
                         results += '<td data-title="Capacity"  class="16">' + status + '</td>';
                         results += '<td><button type="button" title="Click Here To Edit!" class="btn btn-info btn-outline btn-circle btn-lg m-r-5 editcls"   onclick="getme(this)"><span class="glyphicon glyphicon-edit" style="top: 0px !important;"></span></button></td></tr>';

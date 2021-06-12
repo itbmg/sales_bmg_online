@@ -286,13 +286,6 @@ public partial class Order_Report : System.Web.UI.Page
                 }
 
             }
-            // dtble.Merge(dtoffer);
-            // DataTable dt3 = dtble.Copy();
-            //dt3.Merge(dtoffer);
-            //cmd = new MySqlCommand(" SELECT products_category.Categoryname, products_subcategory.SubCatName, productsdata.ProductName FROM productsdata INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno ORDER BY productsdata.Rank");
-            //cmd = new MySqlCommand("SELECT products_category.Categoryname, products_subcategory.SubCatName, productsdata.ProductName, productsdata.Units, invmaster.Qty FROM branchproducts INNER JOIN dispatch ON branchproducts.branch_sno = dispatch.Branch_Id INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (dispatch.sno = @dispatchSno) GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
-            //cmd.Parameters.AddWithValue("@dispatchSno", ddlRouteName.SelectedValue);
-            //DataTable produtstbl = vdm.SelectQuery(cmd).Tables[0];
             if (dtble.Rows.Count > 0)
             {
                 DataView view = new DataView(dtble);
@@ -357,52 +350,43 @@ public partial class Order_Report : System.Web.UI.Page
                     double total = 0;
                     foreach (DataRow dr in productsReport.Rows)
                     {
-                        //if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
-                        //{
-                        double qtyvalue = 0;
                         double offerqty = 0;
                         double indqty = 0;
                         double totindqty = 0;
 
                         foreach (DataRow drindent in dtble.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
                         {
-                            if (drindent["Units"].ToString() == "Pkts")
-                            {
-                                double unitQty = 0;
-                                double uomqty = 0;
-                                double.TryParse(drindent["uomqty"].ToString(), out uomqty);
-                                double.TryParse(drindent["unitQty"].ToString(), out unitQty);
-                                indqty = unitQty * uomqty / 1000;
-                            }
-                            else
-                            {
+                            ////if (drindent["Units"].ToString() == "Pkts")
+                            ////{
+                            ////    double unitQty = 0;
+                            ////    double uomqty = 0;
+                            ////    double.TryParse(drindent["uomqty"].ToString(), out uomqty);
+                            ////    double.TryParse(drindent["unitQty"].ToString(), out unitQty);
+                            ////    indqty = unitQty * uomqty / 1000;
+                            ////}
+                            ////else
+                            ////{
                                 double.TryParse(drindent["unitQty"].ToString(), out indqty);
-                            }
+                            ////}
                         }
                         foreach (DataRow droffer in dtoffer.Select("ProductName='" + dr["ProductName"].ToString() + "' AND BranchID='" + branch["BranchID"].ToString() + "'"))
                         {
-                            if (droffer["Units"].ToString() == "Pkts")
-                            {
-                                double unitQty = 0;
-                                double uomqty = 0;
-                                double.TryParse(droffer["uomqty"].ToString(), out uomqty);
-                                double.TryParse(droffer["unitQty"].ToString(), out unitQty);
-                                offerqty = unitQty * uomqty / 1000;
-                            }
-                            else
-                            {
+                            ////if (droffer["Units"].ToString() == "Pkts")
+                            ////{
+                            ////    double unitQty = 0;
+                            ////    double uomqty = 0;
+                            ////    double.TryParse(droffer["uomqty"].ToString(), out uomqty);
+                            ////    double.TryParse(droffer["unitQty"].ToString(), out unitQty);
+                            ////    offerqty = unitQty * uomqty / 1000;
+                            ////}
+                            ////else
+                            ////{
                                 double.TryParse(droffer["unitQty"].ToString(), out offerqty);
-                            }
+                            ////}
                         }
-                        //Report.Rows[Report.Rows.Count-1][dr["ProductName"].ToString()].ToString()
-
-                        //double dispqty = 0;
-                        //double.TryParse(Report.Rows[Report.Rows.Count][dr["ProductName"].ToString()].ToString(), out offerqty);
                         totindqty = indqty + offerqty;
                         if (totindqty == 0)
                         {
-                            //newrow[dr["ProductName"].ToString()] = ;
-
                         }
                         else
                         {
@@ -411,10 +395,8 @@ public partial class Order_Report : System.Web.UI.Page
                         }
                         if (dr["Categoryname"].ToString() == "MILK")
                         {
-                            //double.TryParse(dr["unitQty"].ToString(), out qtyvalue);
                             total += totindqty;
                         }
-                        //}
                     }
                     newrow["Total Indent"] = total;
                     Report.Rows.Add(newrow);
@@ -639,6 +621,7 @@ public partial class Order_Report : System.Web.UI.Page
             grdReports.DataBind();
         }
     }
+
     private string GetSpace(string p)
     {
         int i = 0;

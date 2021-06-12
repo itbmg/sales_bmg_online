@@ -115,21 +115,8 @@ public partial class PrintVoucher : System.Web.UI.Page
                 lblVoucherno.Text = voucherid;
                 string DOE = dtCash.Rows[0]["DOE"].ToString();
                 DateTime dtDOE = Convert.ToDateTime(DOE);
-                if (BrachSOID == "174")
-                {
                     lblApprove.Text = "Authorised By";
-                }
-                else
-                {
-                    if (BrachSOID == "172" || BrachSOID == "158")
-                    {
-                        lblApprove.Text = "G.M/P.M";
-                    }
-                    else
-                    {
-                        lblApprove.Text = "Manager";
-                    }
-                }
+               
                 string ChangedTime = dtDOE.ToString("dd/MMM/yyyy");
                 lblDate.Text = ChangedTime;
                 lblPayCash.Text = dtCash.Rows[0]["onNameof"].ToString();

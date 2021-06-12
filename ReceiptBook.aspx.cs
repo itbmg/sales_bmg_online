@@ -141,14 +141,8 @@ public partial class ReceiptBook : System.Web.UI.Page
                         lblreceiptno.Text = Receiptid;
                         lblDate.Text = dtReceiptBook.Rows[0]["DOE"].ToString();
                         string Branch=Session["branch"].ToString();
-                        if (Branch == "174")
-                        {
-                            lblPayCash.Text = dtReceiptBook.Rows[0]["BranchName"].ToString() + "(" + dtReceiptBook.Rows[0]["RouteName"].ToString() + ")";
-                        }
-                        else
-                        {
+                       
                             lblPayCash.Text = dtReceiptBook.Rows[0]["BranchName"].ToString();
-                        }
                         string PaymentStatus = dtReceiptBook.Rows[0]["PaymentStatus"].ToString();
                         if (PaymentStatus == "Cheque")
                         {
