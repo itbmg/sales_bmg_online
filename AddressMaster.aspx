@@ -1384,7 +1384,7 @@
                                     <tr>
                                         <td>
                                             <label>
-                                                DC Number:</label>
+                                                DC Number ::</label>
                                             <input type="text" id="txtQuotationNo" placeholder="Enter QuotationNo" class="form-control" />
                                         </td>
                                         <td style="width:2px;">
