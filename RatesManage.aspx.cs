@@ -165,6 +165,7 @@ public partial class RatesManage : System.Web.UI.Page
                     dt.Rows[dt.Rows.Count - 1][i] = row.Cells[i].Text;
                 }
             }
+            Session["dtImport"] = dt;
             using (XLWorkbook wb = new XLWorkbook())
             {
                 wb.Worksheets.Add(dt);

@@ -6148,37 +6148,15 @@ public partial class liveboard : System.Web.UI.Page
                             dtLastMonthpaidamount = vdbmngr.SelectQuery(cmd).Tables[0];
                         }
                         DataTable dtLastYearroutesale = new DataTable();
-                        if (BranchID == "174")
-                        {
-                            cmd = new MySqlCommand("SELECT   modifiedroutes.Branchid As SuperBranch,modifiedroutes.RouteName, ROUND(SUM(indents_subtable.DeliveryQty),2) AS saleQty, ROUND(AVG(indents_subtable.DeliveryQty) ) AS AvgQty,SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS salevalue, modifiedroutes.Sno AS routeid, modifidroutssubtab.BranchID AS bid, branchdata_2.BranchName, branchdata_2.flag, branchdata_1.sno AS BranchID, branchdata_2.SalesType AS SalesTypeId FROM branchdata branchdata_2 RIGHT OUTER JOIN branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN modifiedroutes ON branchdata.sno = modifiedroutes.BranchID INNER JOIN (SELECT  RefNo, Rank, LevelType, BranchID, CDate, EDate FROM  modifiedroutesubtable WHERE (EDate IS NULL) AND (CDate <= @starttime) OR (EDate > @starttime) AND (CDate <= @starttime)) modifidroutssubtab ON modifiedroutes.Sno = modifidroutssubtab.RefNo ON  branchdata_2.sno = modifidroutssubtab.BranchID LEFT OUTER JOIN indents_subtable INNER JOIN (SELECT  IndentNo, I_date, Branch_id FROM   indents WHERE  (I_date BETWEEN @starttime AND @endtime)) indt ON indents_subtable.IndentNo = indt.IndentNo ON  modifidroutssubtab.BranchID = indt.Branch_id WHERE   (branchdata.SalesType IS NOT NULL) AND (indents_subtable.DeliveryQty <> 0) AND (branchdata.sno IN ('174','527','4607')) GROUP BY SalesTypeId ORDER BY SalesTypeId");
-                            cmd.Parameters.AddWithValue("@SOID", BranchID);
-                            cmd.Parameters.AddWithValue("@BranchID", BranchID);
-                            cmd.Parameters.AddWithValue("@starttime", GetLowDate(LastYearFromDate));
-                            cmd.Parameters.AddWithValue("@endtime", GetHighDate(LastYearToDate));
-                            dtLastYearroutesale = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
-                        else
-                        {
+                       
                             cmd = new MySqlCommand("SELECT   modifiedroutes.Branchid As SuperBranch,modifiedroutes.RouteName, ROUND(SUM(indents_subtable.DeliveryQty),2) AS saleQty, ROUND(AVG(indents_subtable.DeliveryQty) ) AS AvgQty,SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS salevalue, modifiedroutes.Sno AS routeid, modifidroutssubtab.BranchID AS bid, branchdata_2.BranchName, branchdata_2.flag, branchdata_1.sno AS BranchID, branchdata_2.SalesType AS SalesTypeId FROM branchdata branchdata_2 RIGHT OUTER JOIN branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN modifiedroutes ON branchdata.sno = modifiedroutes.BranchID INNER JOIN (SELECT  RefNo, Rank, LevelType, BranchID, CDate, EDate FROM  modifiedroutesubtable WHERE (EDate IS NULL) AND (CDate <= @starttime) OR (EDate > @starttime) AND (CDate <= @starttime)) modifidroutssubtab ON modifiedroutes.Sno = modifidroutssubtab.RefNo ON  branchdata_2.sno = modifidroutssubtab.BranchID LEFT OUTER JOIN indents_subtable INNER JOIN (SELECT  IndentNo, I_date, Branch_id FROM   indents WHERE  (I_date BETWEEN @starttime AND @endtime)) indt ON indents_subtable.IndentNo = indt.IndentNo ON  modifidroutssubtab.BranchID = indt.Branch_id WHERE   (branchdata.SalesType IS NOT NULL) AND (indents_subtable.DeliveryQty <> 0) AND (branchdata.sno = @BranchID) GROUP BY SalesTypeId ORDER BY SalesTypeId");
                             cmd.Parameters.AddWithValue("@SOID", BranchID);
                             cmd.Parameters.AddWithValue("@BranchID", BranchID);
                             cmd.Parameters.AddWithValue("@starttime", GetLowDate(LastYearFromDate));
                             cmd.Parameters.AddWithValue("@endtime", GetHighDate(LastYearToDate));
                             dtLastYearroutesale = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
                         DataTable dtLastYearhpaidamount = new DataTable();
-                        if (BranchID == "174")
-                        {
-                            cmd = new MySqlCommand("SELECT   modifiedroutes.Branchid As SuperBranch,branchdata.BranchName, branchdata.sno, modifiedroutes.RouteName, modifidroutssubtab.BranchID, modifiedroutes.Sno AS routeid, SUM(colltion.AmountPaid) AS AmountPaid FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN modifiedroutes ON branchdata.sno = modifiedroutes.BranchID INNER JOIN (SELECT RefNo, Rank, LevelType, BranchID, CDate, EDate FROM   modifiedroutesubtable WHERE  (EDate IS NULL) AND (CDate <= @starttime) OR (EDate > @starttime) AND (CDate <= @starttime)) modifidroutssubtab ON modifiedroutes.Sno = modifidroutssubtab.RefNo INNER JOIN (SELECT  Branchid, AmountPaid, PaidDate FROM   collections WHERE  (PaymentType <> 'Cheque') AND (PaidDate BETWEEN @d1 AND @d2)) colltion ON modifidroutssubtab.BranchID = colltion.Branchid WHERE (branchdata.SalesType IS NOT NULL) AND (branchdata.sno IN ('174','527','4607')) GROUP BY modifidroutssubtab.BranchID ORDER BY branchdata.sno");
-                            cmd.Parameters.AddWithValue("@starttime", GetLowDate(LastYearFromDate));
-                            cmd.Parameters.AddWithValue("@d1", GetLowDate(LastYearFromDate));
-                            cmd.Parameters.AddWithValue("@d2", GetHighDate(LastYearToDate));
-                            cmd.Parameters.AddWithValue("@SOID", BranchID);
-                            cmd.Parameters.AddWithValue("@BranchID", BranchID);
-                            dtLastYearhpaidamount = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
-                        else
-                        {
+                       
                             cmd = new MySqlCommand("SELECT   modifiedroutes.Branchid As SuperBranch,branchdata.BranchName, branchdata.sno, modifiedroutes.RouteName, modifidroutssubtab.BranchID, modifiedroutes.Sno AS routeid, SUM(colltion.AmountPaid) AS AmountPaid FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno INNER JOIN modifiedroutes ON branchdata.sno = modifiedroutes.BranchID INNER JOIN (SELECT RefNo, Rank, LevelType, BranchID, CDate, EDate FROM   modifiedroutesubtable WHERE  (EDate IS NULL) AND (CDate <= @starttime) OR (EDate > @starttime) AND (CDate <= @starttime)) modifidroutssubtab ON modifiedroutes.Sno = modifidroutssubtab.RefNo INNER JOIN (SELECT  Branchid, AmountPaid, PaidDate FROM   collections WHERE  (PaymentType <> 'Cheque') AND (PaidDate BETWEEN @d1 AND @d2)) colltion ON modifidroutssubtab.BranchID = colltion.Branchid WHERE (branchdata.SalesType IS NOT NULL) AND (branchdata.sno = @BranchID) GROUP BY modifidroutssubtab.BranchID ORDER BY branchdata.sno");
                             cmd.Parameters.AddWithValue("@starttime", GetLowDate(LastYearFromDate));
                             cmd.Parameters.AddWithValue("@d1", GetLowDate(LastYearFromDate));
@@ -6186,20 +6164,11 @@ public partial class liveboard : System.Web.UI.Page
                             cmd.Parameters.AddWithValue("@SOID", BranchID);
                             cmd.Parameters.AddWithValue("@BranchID", BranchID);
                             dtLastYearhpaidamount = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
                         DataTable dtsalestype = new DataTable();
-                        if (BranchID == "174")
-                        {
+                        
                             cmd = new MySqlCommand("SELECT  sno, salestype, flag, UserData_sno, status, rank, club_code FROM salestypemanagement where (status = 1) ORDER BY salestype DESC");
                             cmd.Parameters.AddWithValue("@BranchID", BranchID);
                             dtsalestype = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
-                        else
-                        {
-                            cmd = new MySqlCommand("SELECT  sno, salestype, flag, UserData_sno, status, rank, club_code FROM salestypemanagement where (status = 1) ORDER BY salestype DESC");
-                            cmd.Parameters.AddWithValue("@BranchID", BranchID);
-                            dtsalestype = vdbmngr.SelectQuery(cmd).Tables[0];
-                        }
                         DataTable dtAll = new DataTable();
                         dtAll.Merge(dtyesterdayroutesale);
                         dtAll.Merge(dtLastweakroutesale);
@@ -6235,43 +6204,19 @@ public partial class liveboard : System.Web.UI.Page
                         string cate = ddlbarnchCategory.SelectedItem.Value;
                         if (cate == "BranchWiseCollections")
                         {
-                            if (BranchID == "174")
-                            {
-                                string MB1 = "174";
-                                string MB2 = "527";
-                                string MB3 = "4607";
-                                yesterdaysum = Convert.ToDouble(dtyesterdayroutesale.Compute("SUM(salevalue)", "SuperBranch IN (174,527,4607)"));
-                                lastweaksum = Convert.ToDouble(dtLastweakroutesale.Compute("SUM(salevalue)", "SuperBranch IN (174,527,4607)"));
-                                lastmonthsum = Convert.ToDouble(dtLastMonthroutesale.Compute("SUM(salevalue)", "SuperBranch IN (174,527,4607)"));
-                                lastyearsum = Convert.ToDouble(dtLastYearroutesale.Compute("SUM(salevalue)", "SuperBranch IN (174,527,4607)"));
-                            }
-                            else
-                            {
+                           
                                 yesterdaysum = Convert.ToDouble(dtyesterdayroutesale.Compute("SUM(salevalue)", "SuperBranch=" + BranchID + ""));
                                 lastweaksum = Convert.ToDouble(dtLastweakroutesale.Compute("SUM(salevalue)", "SuperBranch=" + BranchID + ""));
                                 lastmonthsum = Convert.ToDouble(dtLastMonthroutesale.Compute("SUM(salevalue)", "SuperBranch=" + BranchID + ""));
                                 lastyearsum = Convert.ToDouble(dtLastYearroutesale.Compute("SUM(salevalue)", "SuperBranch=" + BranchID + ""));
-                            }
                         }
                         else
                         {
-                            if (BranchID == "174")
-                            {
-                                string MB11 = "174";
-                                string MB22 = "527";
-                                string MB33 = "4607";
-                                yesterdaysum = Convert.ToDouble(dtyesterdayroutesale.Compute("SUM(saleQty)", "SuperBranch IN (174,527,4607)"));
-                                lastweaksum = Convert.ToDouble(dtLastweakroutesale.Compute("SUM(saleQty)", "SuperBranch IN (174,527,4607)"));
-                                lastmonthsum = Convert.ToDouble(dtLastMonthroutesale.Compute("SUM(saleQty)", "SuperBranch IN (174,527,4607)"));
-                                lastyearsum = Convert.ToDouble(dtLastYearroutesale.Compute("SUM(saleQty)", "SuperBranch IN (174,527,4607)"));
-                            }
-                            else
-                            {
+                            
                                 yesterdaysum = Convert.ToDouble(dtyesterdayroutesale.Compute("SUM(saleQty)", "SuperBranch=" + BranchID + ""));
                                 lastweaksum = Convert.ToDouble(dtLastweakroutesale.Compute("SUM(saleQty)", "SuperBranch=" + BranchID + ""));
                                 lastmonthsum = Convert.ToDouble(dtLastMonthroutesale.Compute("SUM(saleQty)", "SuperBranch=" + BranchID + ""));
                                 lastyearsum = Convert.ToDouble(dtLastYearroutesale.Compute("SUM(saleQty)", "SuperBranch=" + BranchID + ""));
-                            }
                         }
 
                         foreach (DataRow dr in distincttable.Rows)
