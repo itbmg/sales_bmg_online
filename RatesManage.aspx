@@ -95,7 +95,7 @@
                         <table align="center">
                             <tr>
                                 <td align="center">
-                                    <asp:Button ID="BtnSave" Text="Save" Visible="false" runat="server" CssClass="btn btn-primary"
+                                    <asp:Button ID="BtnSave" Text="Save"  runat="server" CssClass="btn btn-primary"
                                         OnClick="btn_WIDB_Click" />
                                 </td>
                             </tr>

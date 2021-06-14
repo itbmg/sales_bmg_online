@@ -301,13 +301,9 @@
                 if (MasterName == Name) {
                 }
                 else {
-                    alert("This Name Does Not Exist");
-                    return false;
                 }
                 var ledger_code = document.getElementById('txtLedgerCode').value;
                 if (ledger_code == "") {
-                    alert("Enter ledger_code");
-                    return false;
                 }
                 var paymenttype = document.getElementById('ddlPaymentType').value;
                 if (paymenttype == "Select") {
