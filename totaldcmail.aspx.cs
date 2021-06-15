@@ -804,7 +804,7 @@ public partial class totaldcmail : System.Web.UI.Page
             {
                 grdtotal_dcReports.RenderControl(hw);
                 StringReader sr = new StringReader(sw.ToString());
-                string senderID = "no-reply@vyshnavi.in";// use sender's email id here..
+                string senderID = "dd@vyshnavi.in";// use sender's email id here..
                 const string senderPassword = "Vyshnavi@123"; // sender password here...
                 SmtpClient smtp = new SmtpClient
                 {
@@ -825,7 +825,7 @@ public partial class totaldcmail : System.Web.UI.Page
                 //    mm.To.Add(new MailAddress(mailid));
                 //}
 
-                MailMessage mm = new MailMessage(senderID, "apurva@vyshnavi.in");
+                MailMessage mm = new MailMessage(senderID, "");
                 mm.Subject = "Dispatch Details (" + DATE + ")";
                 mm.Body = "Dispatch Details:<hr />" + sw.ToString(); ;
                 mm.IsBodyHtml = true;

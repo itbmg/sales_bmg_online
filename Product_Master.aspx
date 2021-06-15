@@ -462,7 +462,7 @@
                                             <option>ltr</option>
                                             <option>gms</option>
                                             <option>Nos</option>
-                                            <option>Packets</option>
+                                            <option>Pkts</option>
                                             <option>Pouches</option>
                                             <option>Set</option>
                                             <option>Box</option>

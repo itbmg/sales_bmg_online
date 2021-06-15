@@ -1473,13 +1473,13 @@
                 var Amount = document.getElementById("txtCashAmount").value;
                 var debitvochertype = document.getElementById("slctdebittype").value;
                 if (debitvochertype == "Cash") {
-                    if (Amount > 10000) {
-                        alert("Enter the Amount Below Ten Thousend Rupes (OR) Either If You Are Send the money to bank Or branch Please Select Branch OR Bank");
-                        document.getElementById("txtCashAmount").value = "";
-                        document.getElementById("slctdebittype").focus();
-                        return false;
+                    ////if (Amount > 10000) {
+                    ////    alert("Enter the Amount Below Ten Thousend Rupes (OR) Either If You Are Send the money to bank Or branch Please Select Branch OR Bank");
+                    ////    document.getElementById("txtCashAmount").value = "";
+                    ////    document.getElementById("slctdebittype").focus();
+                    ////    return false;
 
-                    }
+                    ////}
                 }
             }
         }

@@ -584,7 +584,7 @@ public partial class sendmail : System.Web.UI.Page
             {
                 grdtotal_dcReports.RenderControl(hw);
                 StringReader sr = new StringReader(sw.ToString());
-                string senderID = "no-reply@vyshnavi.in";// use sender's email id here..
+                string senderID = "ddvyshnavi.in";// use sender's email id here..
                 const string senderPassword = "Vyshnavi@123"; // sender password here...
                 SmtpClient smtp = new SmtpClient
                 {
@@ -598,7 +598,7 @@ public partial class sendmail : System.Web.UI.Page
                 };
                 MailMessage mm = new MailMessage();
                 mm.From = new MailAddress(senderID);
-                string tomailid = "apurva@vyshnavi.in, arrvys@gmail.com, naveen@vyshnavi.in";
+                string tomailid = "";
                 string[] multimailid = tomailid.Split(',');
                 foreach (string mailid in multimailid)
                 {

@@ -472,7 +472,7 @@
                         <div style="width:73%; padding-left:12%;text-align: center;">    
                         <span id="spnAddress" style="font-size: 14px;"></span>
                         <br />
-                           <span id="Span1" style="font-size: 11px;font-weight: bold;">Website: www.vyshnavi.in</span>
+                         <%--  <span id="Span1" style="font-size: 11px;font-weight: bold;">Website: www.vyshnavi.in</span>--%>
                         <br />
                         <br />
                         </div>
