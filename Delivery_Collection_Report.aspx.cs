@@ -252,17 +252,12 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
         {
             var salesoffice = ddlSalesOffice.SelectedItem.Text;
             var salesoff = ddlSalesOffice.SelectedValue;
-            if (salesoff == "ROUTE WISE")
+            if (salesoff == "5" || salesoff == "7" || salesoff == "9")
             {
                 GetReport();
             }
             else
             {
-                if (salesoff == "159")
-                {
-                    //GetReport();
-                    getHYDReport();
-                }
                 if (salesoff == "AGENT WISE")
                 {
                     status = "Nellore";
@@ -283,7 +278,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
         else
         {
             var salesoff = Session["branch"].ToString();
-            if (salesoff == "ROUTE WISE")
+            if (salesoff == "5" || salesoff == "7" || salesoff == "9")
             {
                 GetReport();
             }
@@ -391,7 +386,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             DataTable dttable = vdm.SelectQuery(cmd).Tables[0];
 
-            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno,products_subcategory.tempsub_catsno AS SubCatSno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.tempsubcatsno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.tempsubcatsno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (branchproducts.branch_sno = @BranchId) ORDER BY products_subcategory.tempsub_catsno, branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno,products_subcategory.tempsub_catsno AS SubCatSno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.tempsubcatsno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.tempsubcatsno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (branchproducts.branch_sno = @BranchID) ORDER BY products_subcategory.tempsub_catsno, branchproducts.Rank");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             produtstbl1 = vdm.SelectQuery(cmd).Tables[0];
 
