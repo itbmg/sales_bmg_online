@@ -297,6 +297,7 @@
                 }
                 if (orderunits == "kgs") {
                     totc = parseFloat(totqtyclass / orderqty);
+                    totc = parseFloat(totc).toFixed(2);
                     $(this).closest('tr').find('#txtcans').text(totc);
                 }
                 if (orderunits == "ml") {
@@ -304,12 +305,13 @@
                         totc = Math.floor(totqtyclass / 10.5);
                         totcDecimal = (totqtyclass % 10.5);
                         totcDecimal = parseFloat(totcDecimal).toFixed(2);
-
+                        totc = parseFloat(totc).toFixed(2);
                         $(this).closest('tr').find('#txttubs').text(totc);
                         $(this).closest('tr').find('#txtExtraltrs').text(totcDecimal);
                     }
                     else {
                         totc = Math.floor(totqtyclass / orderqty);
+                        totc = parseFloat(totc).toFixed(2);
                         totcDecimal = (totqtyclass % orderqty);
                         totcDecimal = parseFloat(totcDecimal).toFixed(2);
                         $(this).closest('tr').find('#txttubs').text(totc);

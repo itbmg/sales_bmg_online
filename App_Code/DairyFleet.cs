@@ -37891,7 +37891,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         Products getProducts = new Products();
                         getProducts.snoO = i++.ToString();
                         getProducts.ProductName = dr["ProductName"].ToString();
-                        getProducts.TotalQty = dr["TotalQty"].ToString();
+                        double TotalQty = 0;
+                        double.TryParse(dr["TotalQty"].ToString(), out TotalQty);
+                        TotalQty = Math.Round(TotalQty, 2);
+                        getProducts.TotalQty = TotalQty.ToString();
                         getProducts.Productsno = dr["sno"].ToString();
                         getProducts.tubs = dr["Tubs"].ToString();
                         getProducts.cans = dr["Cans"].ToString();
@@ -37925,7 +37928,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     Products getProducts = new Products();
                     getProducts.snoO = i++.ToString();
                     getProducts.ProductName = dr["ProductName"].ToString();
-                    getProducts.TotalQty = dr["TotalQty"].ToString();
+                    double TotalQty = 0;
+                    double.TryParse(dr["TotalQty"].ToString(), out TotalQty);
+                    TotalQty = Math.Round(TotalQty, 2);
+                    getProducts.TotalQty = TotalQty.ToString();
                     getProducts.Productsno = dr["sno"].ToString();
                     getProducts.tubs = dr["Tubs"].ToString();
                     getProducts.cans = dr["Cans"].ToString();
