@@ -120,14 +120,15 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                     fromdate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
                 }
             }
-            lblDate.Text = fromdate.ToString("dd/MMM/yyyy");
+            lblDate.Text = fromdate.AddDays(-1).ToString("dd/MMM/yyyy");
             string BranchID = ddlSalesOffice.SelectedValue;
-            cmd = new MySqlCommand("select branchdata.branchname,branchroutes.sno as branchid,branchroutes.routename,branchroutesubtable.branchid As Agentid from branchroutes inner join branchroutesubtable ON branchroutes.sno = branchroutesubtable.refno inner join branchdata on branchdata.sno =branchroutesubtable.branchid where  branchroutes.branchid=@branchid");
+            cmd = new MySqlCommand("SELECT     modifiedroutes.RouteName, modifiedroutes.sno as routeid,       modifiedroutesubtable.BranchID as BSno,       branchdata.BranchName, agent_bal_trans.inddate, agent_bal_trans.opp_balance, agent_bal_trans.salesvalue, agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno     INNER JOIN    agent_bal_trans ON agent_bal_trans.agentid = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime)  AND (agent_bal_trans.inddate between @d1 and @d2)        OR(modifiedroutes.BranchID = @BranchID)   AND (agent_bal_trans.inddate between @d1 and @d2)      AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) GROUP BY branchdata.BranchName  ORDER BY modifiedroutes.RouteName");
             cmd.Parameters.AddWithValue("@branchid", BranchID);
-            DataTable dtroutes = vdm.SelectQuery(cmd).Tables[0];
-            cmd = new MySqlCommand("select agentid,inddate,opp_balance,salesvalue,paidamount,clo_balance from agent_bal_trans  where inddate=@inddate");
-            cmd.Parameters.AddWithValue("@inddate", GetLowDate(fromdate));
-            DataTable dtagent_trans = vdm.SelectQuery(cmd).Tables[0];
+            cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate.AddDays(-1)));
+            cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate.AddDays(-1)));
+            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+            cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+            DataTable dtble = vdm.SelectQuery(cmd).Tables[0];
             DataTable dtrouteamount = new DataTable();
             DataTable dtsalescollection = new DataTable();
             Report = new DataTable();
@@ -138,62 +139,97 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Columns.Add("Sale Value").DataType = typeof(Double);
             Report.Columns.Add("Paid Amount").DataType = typeof(Double);
             Report.Columns.Add("Closing Amount").DataType = typeof(Double);
-            double totalsalevalue = 0;
-            double totalamountpaid = 0;
             int Totalcount = 1;
             string RouteName = "";
             int i = 1;
-            DataView view = new DataView(dtroutes);
-            DataTable dtdistinct = view.ToTable(true, "RouteName", "branchid");
-            foreach (DataRow drroutes in dtroutes.Rows)
+            DataView view = new DataView(dtble);
+            string routeid = "";
+            string finalrouteid = "";
+            DataTable distincttable = view.ToTable(true, "BranchName", "BSno", "RouteName", "routeid");
+            double ftotalsalesvalue = 0;
+            double ftotalpaidamount = 0;
+            foreach (DataRow branch in distincttable.Rows)
             {
                 DataRow newrow = Report.NewRow();
-                newrow["Agent Name"] = drroutes["branchname"].ToString();
-                newrow["Sno"] = i++;
-                foreach (DataRow drroute in dtdistinct.Select("branchid='" + drroutes["branchid"].ToString() + "'"))
+                newrow["SNo"] = i;
+                finalrouteid = branch["routeid"].ToString();
+                if (RouteName != branch["RouteName"].ToString())
                 {
-                    if (RouteName != drroute["RouteName"].ToString())
+                    if (Totalcount == 1)
                     {
-                        if (Totalcount == 1)
-                        {
-                            newrow["Route Name"] = drroute["RouteName"].ToString();
-                            Totalcount++;
-                        }
-                        else
-                        {
-                            newrow["Route Name"] = "";
-                        }
-                        RouteName = drroute["RouteName"].ToString();
+                        newrow["Route Name"] = branch["RouteName"].ToString();
+                        Totalcount++;
                     }
                     else
                     {
-                        Totalcount = 1;
+                        DataRow newvar = Report.NewRow();
+                        newvar["Agent Name"] = "Total";
+                        int route = 0;
+                        int.TryParse(routeid, out route);
+                        foreach (DataRow dr in dtble.Select("RouteID='" + route + "'"))
+                        {
+                            if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
+                            {
+                                double salesvalue = 0;
+                                double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
+                                ftotalsalesvalue += salesvalue;
+                                double paidamount = 0;
+                                double.TryParse(dr["paidamount"].ToString(), out paidamount);
+                                ftotalpaidamount += paidamount;
+                            }
+                        }
+                        newvar["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
+                        newvar["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
+
+
+                        double totCurdavg = 0;
+                        totCurdavg = Math.Round(totCurdavg, 2);
+                        Report.Rows.Add(newvar);
+                        ftotalsalesvalue = 0;
+                        ftotalpaidamount = 0;
+                        newrow["Route Name"] = branch["RouteName"].ToString();
+                        Totalcount++;
+                        DataRow space = Report.NewRow();
+                        space["Agent Name"] = "";
+                        Report.Rows.Add(space);
+                        routeid = branch["routeid"].ToString();
                     }
                 }
-                foreach (DataRow drsale in dtagent_trans.Select("agentid='" + drroutes["Agentid"].ToString() + "'"))
+                else
                 {
-                    
-                    double salevalue = 0;
-                    double amountpaid = 0;
-                    double oppbalance = 0;
-                    double.TryParse(drsale["salesvalue"].ToString(), out salevalue);
-                    newrow["Sale Value"] = Math.Round(salevalue, 2);
-                    totalsalevalue += Math.Round(salevalue, 2);
-                    double.TryParse(drsale["paidamount"].ToString(), out amountpaid);
-                    newrow["Paid Amount"] = Math.Round(amountpaid, 2);
-                    totalamountpaid += Math.Round(amountpaid, 2);
-                    double.TryParse(drsale["opp_balance"].ToString(), out oppbalance);
-                    newrow["Oppening Balance"] = Math.Round(oppbalance, 2);
-                    newrow["Closing Amount"] = drsale["clo_balance"].ToString();
-                    Report.Rows.Add(newrow);
+                    newrow["Route Name"] = "";
+                    routeid = branch["routeid"].ToString();
                 }
+                RouteName = branch["RouteName"].ToString();
+                newrow["Agent Name"] = branch["BranchName"].ToString();
+
+                double totalmilkSale = 0;
+                foreach (DataRow dr in dtble.Rows)
+                {
+                    if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
+                    {
+                        newrow["Oppening Balance"] = dr["opp_balance"].ToString();
+                        double salesvalue = 0;
+                        double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
+                        newrow["Sale Value"] = salesvalue;
+                        ftotalsalesvalue += salesvalue;
+                        double paidamount = 0;
+                        double.TryParse(dr["paidamount"].ToString(), out paidamount);
+                        newrow["Paid Amount"] = paidamount;
+                        ftotalpaidamount += paidamount;
+                        newrow["Closing Amount"] = dr["clo_balance"].ToString();
+                    }
+                }
+                Report.Rows.Add(newrow);
+                routeid = branch["routeid"].ToString();
+                i++;
             }
             DataRow newrow2 = Report.NewRow();
             Report.Rows.Add(newrow2);
             DataRow TotRow = Report.NewRow();
             TotRow["Agent Name"] = "Total";
-            TotRow["Sale Value"] = totalsalevalue;
-            TotRow["Paid Amount"] = totalamountpaid;
+            TotRow["Sale Value"] = ftotalsalesvalue;
+            TotRow["Paid Amount"] = ftotalpaidamount;
             Report.Rows.Add(TotRow);
             DataRow newbreak1 = Report.NewRow();
             newbreak1["Agent Name"] = "";
