@@ -24814,6 +24814,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     }
                     if (paymenttype == "Cash")
                     {
+                        DateTime pdate = Convert.ToDateTime(PaidDate);
+
                         cmd = new MySqlCommand("SELECT MAX(sno) as sno,agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@Branchid");
                         cmd.Parameters.AddWithValue("@Branchid", BranchID);
                         DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
@@ -24829,8 +24831,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             vdbmngr.insert(cmd);
                             cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
                             cmd.Parameters.AddWithValue("@agentid", BranchID);
-                            cmd.Parameters.AddWithValue("@d1", GetLowDate(ServerDateCurrentdate.AddDays(-1)));
-                            cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate.AddDays(-1)));
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(pdate.AddDays(-1)));
+                            cmd.Parameters.AddWithValue("@d2", GetHighDate(pdate.AddDays(-1)));
                             DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
                             if (dtIndentbal.Rows.Count > 0)
                             {
@@ -24857,7 +24859,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 double closingvalue = clsvalue - PaidAmount;
                                 cmd = new MySqlCommand("UPDATE agent_bal_trans set  clo_balance=clo_balance-@clAmount  where agentid=@BranchId AND inddate=@inddate");
                                 cmd.Parameters.AddWithValue("@BranchId", BranchID);
-                                cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@inddate", pdate.AddDays(-1));
                                 cmd.Parameters.AddWithValue("@clAmount", closingvalue);
                                 if (vdbmngr.Update(cmd) == 0)
                                 {
@@ -24865,7 +24867,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     cmd.Parameters.AddWithValue("@paidamount", PaidAmount);
                                     cmd.Parameters.AddWithValue("@BranchId", BranchID);
                                     cmd.Parameters.AddWithValue("@opp_balance", clsvalue);
-                                    cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                    cmd.Parameters.AddWithValue("@inddate", pdate.AddDays(-1));
                                     cmd.Parameters.AddWithValue("@salesvalue", 0);
                                     cmd.Parameters.AddWithValue("@clo_balance", closingvalue);
                                     cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
