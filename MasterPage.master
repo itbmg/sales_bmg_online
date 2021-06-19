@@ -1234,7 +1234,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                             </ul>
                         </div>
                     </li>
-                    <li id="liExport" class="more"><a href="#"><i class="fa fa-laptop"></i>&nbsp Export</a>
+                   <%-- <li id="liExport" class="more"><a href="#"><i class="fa fa-laptop"></i>&nbsp Export</a>
                         <div class="drop">
                             <ul id="ul9">
                                 <li id="li49" class="more" style="min-height: 25px;"><a href="#"><i class="fa fa-text-height">
@@ -1254,7 +1254,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                         </ul>
                                     </div>
                                 </li>
-                              <%--  <li id="li86" class="more" style="min-height: 25px;"><a href="#"><i class="fa fa-strikethrough">
+                                <li id="li86" class="more" style="min-height: 25px;"><a href="#"><i class="fa fa-strikethrough">
                                 </i>&nbsp SAP </a>
                                     <div class="drop3">
                                         <ul id="ul19">
@@ -1271,10 +1271,10 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="li89"><a href="SAPPayments.aspx">SAP Payments</a></li>
                                         </ul>
                                     </div>
-                                </li>--%>
+                                </li>
                             </ul>
                         </div>
-                    </li>
+                    </li>--%>
                     <li id="lichartreports" class="more" id="li1"><a href="#"><i class="fa fa-pie-chart">
                     </i>&nbsp Chart Reports</a>
                         <div class="drop">

@@ -130,6 +130,7 @@
                         </div>
                         <asp:Button ID="btnPrint" CssClass="btn btn-primary" Text="Print" OnClientClick="javascript:CallPrint('divPrint');"
                             runat="Server" />
+                        <asp:HyperLink ID="HyperLink1" runat="server" NavigateUrl="~/exporttoxl_utility.ashx">Export to XL</asp:HyperLink>
                         <br />
                         <asp:Label ID="lblmessage" runat="server" Text="" ForeColor="Red" Font-Size="20px"></asp:Label>
                     </ContentTemplate>

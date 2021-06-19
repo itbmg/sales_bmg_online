@@ -100,6 +100,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
     }
     DateTime fromdate = DateTime.Now;
     DateTime Prevdate = DateTime.Now;
+
     void GetReport()
     {
         try
@@ -122,22 +123,34 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             }
             lblDate.Text = fromdate.AddDays(-1).ToString("dd/MMM/yyyy");
             string BranchID = ddlSalesOffice.SelectedValue;
-            cmd = new MySqlCommand("SELECT     modifiedroutes.RouteName, modifiedroutes.sno as routeid,       modifiedroutesubtable.BranchID as BSno,       branchdata.BranchName, agent_bal_trans.inddate, agent_bal_trans.opp_balance, agent_bal_trans.salesvalue, agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno     INNER JOIN    agent_bal_trans ON agent_bal_trans.agentid = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime)  AND (agent_bal_trans.inddate between @d1 and @d2)        OR(modifiedroutes.BranchID = @BranchID)   AND (agent_bal_trans.inddate between @d1 and @d2)      AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) GROUP BY branchdata.BranchName  ORDER BY modifiedroutes.RouteName");
+            cmd = new MySqlCommand("SELECT  modifiedroutes.RouteName, modifiedroutes.sno as routeid,  modifiedroutesubtable.BranchID,       branchdata.BranchName  FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) OR (modifiedroutes.BranchID = @BranchID)AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY modifiedroutes.RouteName");
             cmd.Parameters.AddWithValue("@branchid", BranchID);
+            cmd.Parameters.AddWithValue("@flag", "1");
             cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate.AddDays(-1)));
+            DataTable dtble = vdm.SelectQuery(cmd).Tables[0];
+
+            cmd = new MySqlCommand("SELECT * FROM agent_bal_trans WHERE inddate between @d1 and @d2");
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-            DataTable dtble = vdm.SelectQuery(cmd).Tables[0];
+            DataTable dtagenttrans = vdm.SelectQuery(cmd).Tables[0];
+
+            cmd = new MySqlCommand("SELECT sum(AmountPaid) as AmountPaid,Branchid FROM collections WHERE PaidDate between @d1 and @d2 AND PaymentType <> 'Cash' group by Branchid");
+            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+            cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
+            DataTable dtcollections = vdm.SelectQuery(cmd).Tables[0];
+
             DataTable dtrouteamount = new DataTable();
             DataTable dtsalescollection = new DataTable();
             Report = new DataTable();
             Report.Columns.Add("Sno");
             Report.Columns.Add("Route Name");
+            Report.Columns.Add("Agent Code");
             Report.Columns.Add("Agent Name");
             Report.Columns.Add("Oppening Balance");
             Report.Columns.Add("Sale Value").DataType = typeof(Double);
             Report.Columns.Add("Paid Amount").DataType = typeof(Double);
+            Report.Columns.Add("Bank Transfer").DataType = typeof(Double);
             Report.Columns.Add("Closing Amount").DataType = typeof(Double);
             int Totalcount = 1;
             string RouteName = "";
@@ -145,9 +158,10 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             DataView view = new DataView(dtble);
             string routeid = "";
             string finalrouteid = "";
-            DataTable distincttable = view.ToTable(true, "BranchName", "BSno", "RouteName", "routeid");
+            DataTable distincttable = view.ToTable(true, "BranchName", "BranchID", "RouteName", "routeid");
             double ftotalsalesvalue = 0;
             double ftotalpaidamount = 0;
+            double ftotalbankTransfer = 0;
             foreach (DataRow branch in distincttable.Rows)
             {
                 DataRow newrow = Report.NewRow();
@@ -170,16 +184,29 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         {
                             if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
                             {
-                                double salesvalue = 0;
-                                double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
-                                ftotalsalesvalue += salesvalue;
-                                double paidamount = 0;
-                                double.TryParse(dr["paidamount"].ToString(), out paidamount);
-                                ftotalpaidamount += paidamount;
+                                foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
+                                {
+                                    double banktransfervalue = 0;
+                                    double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
+                                    newrow["Bank Transfer"] = banktransfervalue;
+                                    ftotalbankTransfer += banktransfervalue;
+                                }
+                                foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
+                                {
+                                    double salesvalue = 0;
+                                    double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
+                                    ftotalsalesvalue += salesvalue;
+                                    double paidamount = 0;
+                                    double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
+                                    ftotalpaidamount += paidamount;
+                                }
+
+
                             }
                         }
                         newvar["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
                         newvar["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
+                        newvar["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
 
 
                         double totCurdavg = 0;
@@ -187,6 +214,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         Report.Rows.Add(newvar);
                         ftotalsalesvalue = 0;
                         ftotalpaidamount = 0;
+                        ftotalbankTransfer = 0;
                         newrow["Route Name"] = branch["RouteName"].ToString();
                         Totalcount++;
                         DataRow space = Report.NewRow();
@@ -201,23 +229,76 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                     routeid = branch["routeid"].ToString();
                 }
                 RouteName = branch["RouteName"].ToString();
+                newrow["Agent Code"] = branch["BranchID"].ToString();
                 newrow["Agent Name"] = branch["BranchName"].ToString();
-
                 double totalmilkSale = 0;
                 foreach (DataRow dr in dtble.Rows)
                 {
                     if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
                     {
-                        newrow["Oppening Balance"] = dr["opp_balance"].ToString();
-                        double salesvalue = 0;
-                        double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
-                        newrow["Sale Value"] = salesvalue;
-                        ftotalsalesvalue += salesvalue;
-                        double paidamount = 0;
-                        double.TryParse(dr["paidamount"].ToString(), out paidamount);
-                        newrow["Paid Amount"] = paidamount;
-                        ftotalpaidamount += paidamount;
-                        newrow["Closing Amount"] = dr["clo_balance"].ToString();
+                        DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'");
+                        if (dragenttrans.Length <= 0) 
+                        {
+                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
+                            cmd.Parameters.AddWithValue("@Branchid", dr["BranchID"].ToString());
+                            DataTable dtPrev_trans = vdm.SelectQuery(cmd).Tables[0];
+                            if (dtPrev_trans.Rows.Count > 0)
+                            {
+                                string sno = dtPrev_trans.Rows[0]["sno"].ToString();
+                                if (sno == "")
+                                {
+                                    double closingbalance = 0;
+                                    newrow["Oppening Balance"] = closingbalance;
+                                    newrow["Closing Amount"] = closingbalance;
+                                    newrow["Sale Value"] = closingbalance;
+                                    newrow["Paid Amount"] = closingbalance;
+                                }
+                                else
+                                {
+                                    cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                                    cmd.Parameters.AddWithValue("@sno", dtPrev_trans.Rows[0]["sno"].ToString());
+                                    DataTable dtagent_value = vdm.SelectQuery(cmd).Tables[0];
+                                    if (dtagent_value.Rows.Count > 0)
+                                    {
+                                        double closingbalance = 0;
+                                        double.TryParse(dtagent_value.Rows[0]["clo_balance"].ToString(), out closingbalance);
+                                        closingbalance = Math.Round(closingbalance, 2);
+                                        newrow["Oppening Balance"] = closingbalance;
+                                        newrow["Closing Amount"] = closingbalance;
+                                        newrow["Sale Value"] = 0;
+                                        newrow["Paid Amount"] = 0;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                double closingbalance = 0;
+                                newrow["Oppening Balance"] = closingbalance;
+                                newrow["Closing Amount"] = closingbalance;
+                                newrow["Sale Value"] = closingbalance;
+                                newrow["Paid Amount"] = closingbalance;
+                            }
+                        }
+                        foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
+                        {
+                            double banktransfervalue = 0;
+                            double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
+                            newrow["Bank Transfer"] = banktransfervalue;
+                            ftotalbankTransfer += banktransfervalue;
+                        }
+                        foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
+                        {
+                            newrow["Oppening Balance"] = drtrans["opp_balance"].ToString();
+                            double salesvalue = 0;
+                            double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
+                            newrow["Sale Value"] = salesvalue;
+                            ftotalsalesvalue += salesvalue;
+                            double paidamount = 0;
+                            double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
+                            newrow["Paid Amount"] = paidamount;
+                            ftotalpaidamount += paidamount;
+                            newrow["Closing Amount"] = drtrans["clo_balance"].ToString();
+                        }
                     }
                 }
                 Report.Rows.Add(newrow);
@@ -230,6 +311,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             TotRow["Agent Name"] = "Total";
             TotRow["Sale Value"] = ftotalsalesvalue;
             TotRow["Paid Amount"] = ftotalpaidamount;
+            TotRow["Bank Transfer"] = ftotalbankTransfer;
             Report.Rows.Add(TotRow);
             DataRow newbreak1 = Report.NewRow();
             newbreak1["Agent Name"] = "";
