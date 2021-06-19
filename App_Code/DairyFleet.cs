@@ -13877,7 +13877,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string totalamount { get; set; }
         public string dctype { get; set; }
         public string invoiceno { get; set; }
-
+        public string pktqty { get; set; }
 
     }
     public class Aagent_Invoice
