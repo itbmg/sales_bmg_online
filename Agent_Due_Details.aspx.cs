@@ -121,7 +121,8 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                     fromdate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
                 }
             }
-            lblDate.Text = fromdate.AddDays(-1).ToString("dd/MMM/yyyy");
+            lblDate.Text = fromdate.ToString("dd/MMM/yyyy");
+            Session["filename"] = "AGENT WISE DUE REPORT";
             string BranchID = ddlSalesOffice.SelectedValue;
             cmd = new MySqlCommand("SELECT  modifiedroutes.RouteName, modifiedroutes.sno as routeid,  modifiedroutesubtable.BranchID,       branchdata.BranchName  FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) OR (modifiedroutes.BranchID = @BranchID)AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY modifiedroutes.RouteName");
             cmd.Parameters.AddWithValue("@branchid", BranchID);
@@ -318,6 +319,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Rows.Add(newbreak1);
             grdReports.DataSource = Report;
             grdReports.DataBind();
+            Session["xportdata"] = Report;
         }
         catch (Exception ex)
         {

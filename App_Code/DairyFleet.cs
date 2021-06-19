@@ -22732,7 +22732,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     cmd.Parameters.Add("@BranchId", branchid);
                     vdbmngr.Update(cmd);
 
-                    cmd = new MySqlCommand("SELECT MAX(sno) as sno, agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@Branchid");
+                    cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
                     cmd.Parameters.AddWithValue("@Branchid", branchid);
                     DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                     if (dtagenttrans.Rows.Count > 0)
@@ -22810,7 +22810,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     vdbmngr.Update(cmd);
 
 
-                    cmd = new MySqlCommand("SELECT MAX(sno) as sno, agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@Branchid");
+                    cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
                     cmd.Parameters.AddWithValue("@Branchid", branchid);
                     DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                     if (dtagenttrans.Rows.Count > 0)
@@ -24853,7 +24853,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     {
                         DateTime pdate = Convert.ToDateTime(PaidDate);
 
-                        cmd = new MySqlCommand("SELECT MAX(sno) as sno,agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@Branchid");
+                        cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
                         cmd.Parameters.AddWithValue("@Branchid", BranchID);
                         DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                         if (dtagenttrans.Rows.Count > 0)
@@ -29172,7 +29172,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
             //indent naveen
             DateTime sindentdate = Convert.ToDateTime(indentdate);
-            cmd = new MySqlCommand("SELECT MAX(sno) as sno, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@agentid and inddate between @d1 and @d2");
+            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@agentid and inddate between @d1 and @d2");
             cmd.Parameters.AddWithValue("@agentid", BranchID);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
