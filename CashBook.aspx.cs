@@ -376,7 +376,7 @@ public partial class CashBook : System.Web.UI.Page
             DataView dv = RouteReport.DefaultView;
             dv.Sort = "Reciept No ASC";
             DataTable sortedDT = dv.ToTable();
-            cmd = new MySqlCommand("SELECT CashTo as Payments,ApprovedAmount as Amount,VocherID FROM cashpayables WHERE  (BranchID = @BranchID) AND (DOE BETWEEN @d1 AND @d2) AND (Status = 'A') AND ((VoucherType = 'Debit') OR  (VoucherType = 'SalaryPayble') OR  (VoucherType = 'SalaryAdvance')) and (Status <>'C')");
+            cmd = new MySqlCommand("SELECT CashTo as Payments,ApprovedAmount as Amount,VocherID FROM cashpayables WHERE  (BranchID = @BranchID) AND (DOE BETWEEN @d1 AND @d2) AND (Status = 'P') AND ((VoucherType = 'Debit') OR  (VoucherType = 'SalaryPayble') OR  (VoucherType = 'SalaryAdvance')) and (Status <>'C')");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));

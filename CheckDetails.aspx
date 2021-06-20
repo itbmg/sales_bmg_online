@@ -22,7 +22,7 @@
         $(function () {
             window.history.forward(1);
             var LevelType = '<%=Session["LevelType"] %>';
-            if (LevelType == "AccountsOfficer" || LevelType == "Director") {
+            if (LevelType == "AccountsOfficer" || LevelType == "Director" || LevelType == "Admin") {
                 $('.divsalesOffice').css('display', 'table-row');
                 $('.tdType').css('display', 'table-row');
                 FillSalesOffice();
@@ -91,7 +91,7 @@
             }
             var branchID = "0";
             var LevelType = '<%=Session["LevelType"] %>';
-            if (LevelType == "AccountsOfficer" || LevelType == "Director") {
+            if (LevelType == "AccountsOfficer" || LevelType == "Director" || LevelType == "Admin") {
                 branchID = document.getElementById("ddlsalesOffice").value;
             }
             else {
