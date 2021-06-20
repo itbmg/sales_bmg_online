@@ -22765,7 +22765,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                             string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                             double clsvalue = Convert.ToDouble(closingbalance);
-                            double closingvalue = clsvalue - Math.Abs(actamt);
+                            double closingvalue = total - Math.Abs(actamt);
                             string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
                             cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
                             cmd.Parameters.AddWithValue("@paidamount", Math.Abs(actamt));
@@ -22840,7 +22840,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                             string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                             double clsvalue = Convert.ToDouble(closingbalance);
-                            double closingvalue = clsvalue - Math.Abs(actamt);
+                            double closingvalue = total - Math.Abs(actamt);
                             string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
                             cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
                             cmd.Parameters.AddWithValue("@paidamount", Math.Abs(actamt));
@@ -24883,7 +24883,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                                 string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                                 double clsvalue = Convert.ToDouble(closingbalance);
-                                double closingvalue = clsvalue - PaidAmount;
+                                double closingvalue = total - PaidAmount;
                                 string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
                                 cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
                                 cmd.Parameters.AddWithValue("@paidamount", PaidAmount);
@@ -36047,9 +36047,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                                         string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                                         double clsvalue = Convert.ToDouble(closingbalance);
-                                        double closingvalue = clsvalue - Math.Abs(BranchAmount);
+                                        double closingvalue = total - Math.Abs(BranchAmount);
                                         string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
-                                        cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
+                                        cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=paidamount+@paidamount, clo_balance=@closing where sno=@refno");
                                         cmd.Parameters.AddWithValue("@paidamount", Math.Abs(BranchAmount));
                                         cmd.Parameters.AddWithValue("@refno", maxsno);
                                         cmd.Parameters.AddWithValue("@closing", closingvalue);

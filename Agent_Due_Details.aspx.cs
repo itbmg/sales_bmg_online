@@ -208,8 +208,6 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         newvar["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
                         newvar["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
                         newvar["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
-
-
                         double totCurdavg = 0;
                         totCurdavg = Math.Round(totCurdavg, 2);
                         Report.Rows.Add(newvar);
@@ -263,9 +261,19 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                     {
                                         double closingbalance = 0;
                                         double.TryParse(dtagent_value.Rows[0]["clo_balance"].ToString(), out closingbalance);
-                                        closingbalance = Math.Round(closingbalance, 2);
-                                        newrow["Oppening Balance"] = closingbalance;
-                                        newrow["Closing Amount"] = closingbalance;
+                                        string inddate = dtagent_value.Rows[0]["inddate"].ToString();
+                                        DateTime dtinddate = Convert.ToDateTime(inddate);
+                                        if (dtinddate < fromdate)
+                                        {
+                                            closingbalance = Math.Round(closingbalance, 2);
+                                            newrow["Oppening Balance"] = closingbalance;
+                                            newrow["Closing Amount"] = closingbalance;
+                                        }
+                                        else
+                                        {
+                                            newrow["Oppening Balance"] = 0;
+                                            newrow["Closing Amount"] = 0;
+                                        }
                                         newrow["Sale Value"] = 0;
                                         newrow["Paid Amount"] = 0;
                                     }
@@ -280,9 +288,11 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                 newrow["Paid Amount"] = closingbalance;
                             }
                         }
+                        double banktransfervalue = 0;
+                        //double paidval = 0;
+                             
                         foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
                         {
-                            double banktransfervalue = 0;
                             double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
                             newrow["Bank Transfer"] = banktransfervalue;
                             ftotalbankTransfer += banktransfervalue;
@@ -296,6 +306,20 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             ftotalsalesvalue += salesvalue;
                             double paidamount = 0;
                             double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
+                            //paidval = paidamount;
+                            if (paidamount > 0)
+                            {
+                                paidamount = paidamount - banktransfervalue;
+                                //if (paidamount < 0)
+                                //{
+                                //    paidamount = paidamount;
+                                //}
+                            }
+                            
+                            if(banktransfervalue == 0)
+                            {
+                                newrow["Bank Transfer"] = banktransfervalue;
+                            }
                             newrow["Paid Amount"] = paidamount;
                             ftotalpaidamount += paidamount;
                             newrow["Closing Amount"] = drtrans["clo_balance"].ToString();
