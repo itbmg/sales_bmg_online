@@ -26,7 +26,6 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             {
                 FillSalesOffice();
                 txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
-                // txtTodate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
                 lblTitle.Text = Session["TitleName"].ToString();
             }
         }
@@ -152,7 +151,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Columns.Add("Sale Value").DataType = typeof(Double);
             Report.Columns.Add("Paid Amount").DataType = typeof(Double);
             Report.Columns.Add("Bank Transfer").DataType = typeof(Double);
-            Report.Columns.Add("Closing Amount").DataType = typeof(Double);
+            Report.Columns.Add("Closing Balance").DataType = typeof(Double);
             int Totalcount = 1;
             string RouteName = "";
             int i = 1;
@@ -160,9 +159,17 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             string routeid = "";
             string finalrouteid = "";
             DataTable distincttable = view.ToTable(true, "BranchName", "BranchID", "RouteName", "routeid");
+            double ftotaloppbal = 0;
+            double ftotalClosingbal = 0;
             double ftotalsalesvalue = 0;
             double ftotalpaidamount = 0;
             double ftotalbankTransfer = 0;
+
+            double grand_totaloppbal = 0;
+            double grand_totalClosingbal = 0;
+            double grand_totalsalesvalue = 0;
+            double grand_totalpaidamount = 0;
+            double grand_totalbankTransfer = 0;
             foreach (DataRow branch in distincttable.Rows)
             {
                 DataRow newrow = Report.NewRow();
@@ -191,29 +198,42 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                     double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
                                     newrow["Bank Transfer"] = banktransfervalue;
                                     ftotalbankTransfer += banktransfervalue;
+                                    grand_totalbankTransfer += banktransfervalue;
                                 }
                                 foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
                                 {
                                     double salesvalue = 0;
                                     double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
                                     ftotalsalesvalue += salesvalue;
+                                    grand_totalsalesvalue += salesvalue;
                                     double paidamount = 0;
                                     double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
                                     ftotalpaidamount += paidamount;
+                                    grand_totalpaidamount += paidamount;
+                                    double oppvalue = 0;
+                                    double.TryParse(drtrans["opp_balance"].ToString(), out oppvalue);
+                                    ftotaloppbal += oppvalue;
+                                    grand_totaloppbal += oppvalue;
+                                    double closvalue = 0;
+                                    double.TryParse(drtrans["clo_balance"].ToString(), out closvalue);
+                                    ftotalClosingbal += closvalue;
+                                    grand_totalClosingbal += closvalue;
                                 }
-
-
                             }
                         }
+                        newvar["Oppening Balance"] = Math.Round(ftotaloppbal, 2);
                         newvar["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
                         newvar["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
                         newvar["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
+                        newvar["Closing Balance"] = Math.Round(ftotalClosingbal, 2);
                         double totCurdavg = 0;
                         totCurdavg = Math.Round(totCurdavg, 2);
                         Report.Rows.Add(newvar);
+                        ftotaloppbal = 0;
                         ftotalsalesvalue = 0;
                         ftotalpaidamount = 0;
                         ftotalbankTransfer = 0;
+                        ftotalClosingbal = 0;
                         newrow["Route Name"] = branch["RouteName"].ToString();
                         Totalcount++;
                         DataRow space = Report.NewRow();
@@ -230,7 +250,6 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                 RouteName = branch["RouteName"].ToString();
                 newrow["Agent Code"] = branch["BranchID"].ToString();
                 newrow["Agent Name"] = branch["BranchName"].ToString();
-                double totalmilkSale = 0;
                 foreach (DataRow dr in dtble.Rows)
                 {
                     if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
@@ -248,7 +267,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                 {
                                     double closingbalance = 0;
                                     newrow["Oppening Balance"] = closingbalance;
-                                    newrow["Closing Amount"] = closingbalance;
+                                    newrow["Closing Balance"] = closingbalance;
                                     newrow["Sale Value"] = closingbalance;
                                     newrow["Paid Amount"] = closingbalance;
                                 }
@@ -267,12 +286,16 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                         {
                                             closingbalance = Math.Round(closingbalance, 2);
                                             newrow["Oppening Balance"] = closingbalance;
-                                            newrow["Closing Amount"] = closingbalance;
+                                            newrow["Closing Balance"] = closingbalance;
+                                            ftotaloppbal += closingbalance;
+                                            ftotalClosingbal += closingbalance;
+                                            grand_totaloppbal += closingbalance;
+                                            grand_totalClosingbal += closingbalance;
                                         }
                                         else
                                         {
                                             newrow["Oppening Balance"] = 0;
-                                            newrow["Closing Amount"] = 0;
+                                            newrow["Closing Balance"] = 0;
                                         }
                                         newrow["Sale Value"] = 0;
                                         newrow["Paid Amount"] = 0;
@@ -283,46 +306,49 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             {
                                 double closingbalance = 0;
                                 newrow["Oppening Balance"] = closingbalance;
-                                newrow["Closing Amount"] = closingbalance;
+                                newrow["Closing Balance"] = closingbalance;
                                 newrow["Sale Value"] = closingbalance;
                                 newrow["Paid Amount"] = closingbalance;
                             }
                         }
                         double banktransfervalue = 0;
-                        //double paidval = 0;
-                             
                         foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
                         {
                             double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
                             newrow["Bank Transfer"] = banktransfervalue;
                             ftotalbankTransfer += banktransfervalue;
+                            grand_totalbankTransfer += banktransfervalue;
                         }
                         foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
                         {
-                            newrow["Oppening Balance"] = drtrans["opp_balance"].ToString();
+                            double oppvalue = 0;
+                            double.TryParse(drtrans["opp_balance"].ToString(), out oppvalue);
+                            ftotaloppbal += oppvalue;
+                            grand_totaloppbal += oppvalue;
+                            newrow["Oppening Balance"] = Math.Round(oppvalue, 2); 
                             double salesvalue = 0;
                             double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
                             newrow["Sale Value"] = salesvalue;
                             ftotalsalesvalue += salesvalue;
+                            grand_totalsalesvalue += salesvalue;
                             double paidamount = 0;
                             double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
-                            //paidval = paidamount;
                             if (paidamount > 0)
                             {
                                 paidamount = paidamount - banktransfervalue;
-                                //if (paidamount < 0)
-                                //{
-                                //    paidamount = paidamount;
-                                //}
                             }
-                            
                             if(banktransfervalue == 0)
                             {
                                 newrow["Bank Transfer"] = banktransfervalue;
                             }
                             newrow["Paid Amount"] = paidamount;
                             ftotalpaidamount += paidamount;
-                            newrow["Closing Amount"] = drtrans["clo_balance"].ToString();
+                            grand_totalpaidamount += paidamount;
+                            double closvalue = 0;
+                            double.TryParse(drtrans["clo_balance"].ToString(), out closvalue);
+                            newrow["Closing Balance"] = Math.Round(closvalue, 2);
+                            ftotalClosingbal += closvalue;
+                            grand_totalClosingbal += closvalue;
                         }
                     }
                 }
@@ -330,17 +356,26 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                 routeid = branch["routeid"].ToString();
                 i++;
             }
-            DataRow newrow2 = Report.NewRow();
-            Report.Rows.Add(newrow2);
             DataRow TotRow = Report.NewRow();
             TotRow["Agent Name"] = "Total";
-            TotRow["Sale Value"] = ftotalsalesvalue;
-            TotRow["Paid Amount"] = ftotalpaidamount;
-            TotRow["Bank Transfer"] = ftotalbankTransfer;
+            TotRow["Oppening Balance"] = Math.Round(ftotaloppbal, 2);
+            TotRow["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
+            TotRow["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
+            TotRow["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
+            TotRow["Closing Balance"] = Math.Round(ftotalClosingbal, 2);
             Report.Rows.Add(TotRow);
             DataRow newbreak1 = Report.NewRow();
             newbreak1["Agent Name"] = "";
             Report.Rows.Add(newbreak1);
+
+            DataRow grandtotal = Report.NewRow();
+            grandtotal["Agent Name"] = "Grand Total";
+            grandtotal["Oppening Balance"] = Math.Round(grand_totaloppbal, 2);
+            grandtotal["Sale Value"] = Math.Round(grand_totalsalesvalue, 2);
+            grandtotal["Paid Amount"] = Math.Round(grand_totalpaidamount, 2);
+            grandtotal["Bank Transfer"] = Math.Round(grand_totalbankTransfer, 2);
+            grandtotal["Closing Balance"] = Math.Round(grand_totalClosingbal,2);
+            Report.Rows.Add(grandtotal);
             grdReports.DataSource = Report;
             grdReports.DataBind();
             Session["xportdata"] = Report;

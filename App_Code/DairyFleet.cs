@@ -23931,8 +23931,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 if (collectiontype == "SalesOfficeCollection")
                 {
 
-                    float PaidAmount = 0;
-                    float.TryParse(Amount, out PaidAmount);
+                    double PaidAmount = 0;
+                    double.TryParse(Amount.ToString(), out PaidAmount);
                     currentyear = ServerDateCurrentdate.Year;
                     nextyear = ServerDateCurrentdate.Year + 1;
                     string Branch = soid;
@@ -24056,7 +24056,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@BranchId", BranchID);
                             if (vdbmngr.Update(cmd) == 0)
                             {
-                                float paidamt = PaidAmount * -1;
+                                double paidamt = PaidAmount * -1;
                                 cmd = new MySqlCommand("insert into branchaccounts (BranchId,Amount) values (@BranchId,@Amount)");
                                 cmd.Parameters.AddWithValue("@Amount", paidamt);
                                 cmd.Parameters.AddWithValue("@BranchId", BranchID);
@@ -24678,7 +24678,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 cmd.Parameters.AddWithValue("@BranchId", BranchID);
                                 if (vdbmngr.Update(cmd) == 0)
                                 {
-                                    float paidamt = PaidAmount * -1;
+                                    double paidamt = PaidAmount * -1;
                                     cmd = new MySqlCommand("insert into branchaccounts (BranchId,Amount) values (@BranchId,@Amount)");
                                     cmd.Parameters.AddWithValue("@Amount", paidamt);
                                     cmd.Parameters.AddWithValue("@BranchId", BranchID);
@@ -24775,79 +24775,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 }
                             }
                         }
-                        //if (paymenttype == "Bank Transfer")
-                        //{
-                        //    cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.tbranchname as S_tbranchname, branchdata.whcode as S_whcode, branchdata_1.BranchName AS P_BranchName, branchdata_1.tbranchname AS P_tbranchname, branchdata_1.whcode AS P_whcode,  branchdata_2.BranchName AS A_BranchName, branchdata_2.tbranchname  AS A_tBranchName FROM branchdata INNER JOIN  branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno INNER JOIN branchmappingtable branchmappingtable_1 ON branchdata.sno = branchmappingtable_1.SuperBranch INNER JOIN branchdata branchdata_2 ON branchmappingtable_1.SubBranch = branchdata_2.sno WHERE (branchdata.sno = @BranchId) AND (branchdata_2.sno = @AgentID)");
-                        //    cmd.Parameters.AddWithValue("@BranchId", Branch);//Branch is Salesofficer Branch
-                        //    cmd.Parameters.AddWithValue("@AgentID", BranchID);//BranchID is Agent Branch
-                        //    DataTable dt_branch = vdbmngr.SelectQuery(cmd).Tables[0];
-                        //    string tbranchname = "";//Agent 
-                        //    string t_sobranchname = "";
-                        //    string t_Pbranchname = "";
-                        //    string S_whcode = "";
-                        //    string P_whcode = "";
-                        //    if (dt_branch.Rows.Count > 0)
-                        //    {
-                        //        tbranchname = dt_branch.Rows[0]["A_tBranchName"].ToString();
-                        //        t_sobranchname = dt_branch.Rows[0]["S_tbranchname"].ToString();
-                        //        t_Pbranchname = dt_branch.Rows[0]["P_tbranchname"].ToString();
-                        //        S_whcode = dt_branch.Rows[0]["S_whcode"].ToString();
-                        //        P_whcode = dt_branch.Rows[0]["P_whcode"].ToString();
-                        //    }
-                        //    a_cmd = new SqlCommand("SELECT branchid FROM branchmaster WHERE (whcode = @whcode)");
-                        //    a_cmd.Parameters.AddWithValue("@whcode", S_whcode);//Branch is Salesoffice Wh code
-                        //    DataTable DT_S_WH = Accescontrol_db.SelectQuery(a_cmd).Tables[0];
-                        //    a_cmd = new SqlCommand("SELECT branchid FROM branchmaster WHERE (whcode = @whcode)");
-                        //    a_cmd.Parameters.AddWithValue("@whcode", P_whcode);//Branch is Plant WHcode
-                        //    DataTable DT_P_WH = Accescontrol_db.SelectQuery(a_cmd).Tables[0];
-                        //    if (dt_branch.Rows.Count > 0)
-                        //    {
-                        //        a_cmd = new SqlCommand("INSERT INTO collections (accountno,name, amount, remarks, doe, createdby, status, receiptdate,branch,subbranch,sapimport) VALUES (@accountno,@name, @amount, @remarks, @doe, @createdby, @status, @receiptdate,@branch,@subbranch,@sapimport)");
-                        //        a_cmd.Parameters.AddWithValue("@accountno", faaccuntno);
-                        //        a_cmd.Parameters.AddWithValue("@name", tbranchname);
-                        //        a_cmd.Parameters.AddWithValue("@amount", PaidAmount);
-                        //        a_cmd.Parameters.AddWithValue("@remarks", Remarks);
-                        //        a_cmd.Parameters.AddWithValue("@doe", ServerDateCurrentdate);
-                        //        a_cmd.Parameters.AddWithValue("@createdby", context.Session["UserSno"].ToString());
-                        //        a_cmd.Parameters.AddWithValue("@status", "P");
-                        //        a_cmd.Parameters.AddWithValue("@receiptdate", ServerDateCurrentdate);
-                        //        a_cmd.Parameters.AddWithValue("@branch", DT_P_WH.Rows[0]["branchid"].ToString());
-                        //        a_cmd.Parameters.AddWithValue("@subbranch", DT_S_WH.Rows[0]["branchid"].ToString());
-                        //        a_cmd.Parameters.AddWithValue("@sapimport", "2");
-                        //        Accescontrol_db.insert(a_cmd);
-                        //        a_cmd = new SqlCommand("select MAX(sno) as sno from collections");
-                        //        DataTable dtsno = Accescontrol_db.SelectQuery(a_cmd).Tables[0];
-                        //        string refno = dtsno.Rows[0]["sno"].ToString();
-
-                        //        //Getting Sales Office and Insert into main and sub tables 
-                        //        a_cmd = new SqlCommand("SELECT sno, accountname FROM  headofaccounts_master  where  accountname=@accountname");
-                        //        a_cmd.Parameters.AddWithValue("@accountname", t_sobranchname);
-                        //        DataTable dt_soaccountdetails = Accescontrol_db.SelectQuery(a_cmd).Tables[0];
-
-                        //        a_cmd = new SqlCommand("INSERT INTO collectionsubdetails (collectionrefno, headofaccount, amount) VALUES (@collectionrefno, @headofaccount, @amount)");
-                        //        a_cmd.Parameters.AddWithValue("@collectionrefno", refno);
-                        //        a_cmd.Parameters.AddWithValue("@headofaccount", dt_soaccountdetails.Rows[0]["sno"].ToString());
-                        //        a_cmd.Parameters.AddWithValue("@amount", PaidAmount);
-                        //        Accescontrol_db.insert(a_cmd);
-
-                        //        //Getting Agent Data and Insert into sub tables 
-                        //        a_cmd = new SqlCommand("SELECT sno, accountname FROM  headofaccounts_master  where  accountname=@accountname");
-                        //        a_cmd.Parameters.AddWithValue("@accountname", tbranchname);
-                        //        DataTable dtaccountdetails = Accescontrol_db.SelectQuery(a_cmd).Tables[0];
-
-                        //        a_cmd = new SqlCommand("insert into subaccount_collection (collectionrefno, headofaccount, amount) values (@refno, @headofaccount, @amount)");
-                        //        a_cmd.Parameters.AddWithValue("@refno", refno);
-                        //        a_cmd.Parameters.AddWithValue("@headofaccount", dtaccountdetails.Rows[0]["sno"].ToString());
-                        //        a_cmd.Parameters.AddWithValue("@amount", PaidAmount);
-                        //        Accescontrol_db.insert(a_cmd);
-                        //    }
-                        //    else
-                        //    {
-                        //        cmd = new MySqlCommand("INSERT INTO excepcetions (Name) VALUES (@Name)");
-                        //        cmd.Parameters.AddWithValue("@Name", tbranchname);
-                        //        vdbmngr.insert(cmd);
-                        //    }
-                        //}
                     }
                     if (paymenttype == "Cash" || paymenttype == "Bank Transfer")
                     {
@@ -24876,10 +24803,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
                             if (dtIndentbal.Rows.Count > 0)
                             {
-                                //foreach (DataRow dra in dtagenttrans.Rows)
-                                //{
                                 string oppbalance = dtmaxagenttrans.Rows[0]["opp_balance"].ToString();
                                 string salesvalue = dtmaxagenttrans.Rows[0]["salesvalue"].ToString();
+                                double Prev_amount = 0;
+                                double.TryParse(dtmaxagenttrans.Rows[0]["paidamount"].ToString(), out Prev_amount);
+                                if(Prev_amount > 0)
+                                {
+                                    PaidAmount = PaidAmount + Prev_amount;
+                                }
+
                                 double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                                 string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                                 double clsvalue = Convert.ToDouble(closingbalance);
@@ -24890,7 +24822,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 cmd.Parameters.AddWithValue("@refno", maxsno);
                                 cmd.Parameters.AddWithValue("@closing", closingvalue);
                                 vdbmngr.Update(cmd);
-                                //}
                             }
                             else
                             {
@@ -36040,21 +35971,26 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
                                     if (dtIndentbal.Rows.Count > 0)
                                     {
-                                        //foreach (DataRow dra in dtagenttrans.Rows)
-                                        //{
                                         string oppbalance = dtmaxagenttrans.Rows[0]["opp_balance"].ToString();
                                         string salesvalue = dtmaxagenttrans.Rows[0]["salesvalue"].ToString();
+
+                                        double Prev_amount = 0;
+                                        double.TryParse(dtmaxagenttrans.Rows[0]["paidamount"].ToString(), out Prev_amount);
+                                        if (Prev_amount > 0)
+                                        {
+                                            BranchAmount = BranchAmount + Prev_amount;
+                                        }
+
                                         double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
                                         string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
                                         double clsvalue = Convert.ToDouble(closingbalance);
                                         double closingvalue = total - Math.Abs(BranchAmount);
                                         string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
-                                        cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=paidamount+@paidamount, clo_balance=@closing where sno=@refno");
+                                        cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
                                         cmd.Parameters.AddWithValue("@paidamount", Math.Abs(BranchAmount));
                                         cmd.Parameters.AddWithValue("@refno", maxsno);
                                         cmd.Parameters.AddWithValue("@closing", closingvalue);
                                         vdbmngr.Update(cmd);
-                                        //}
                                     }
                                     else
                                     {
