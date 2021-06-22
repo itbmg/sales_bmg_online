@@ -24793,7 +24793,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@doe", ServerDateCurrentdate);
                             cmd.Parameters.AddWithValue("@entryby", context.Session["UserSno"].ToString());
                             vdbmngr.insert(cmd);
-                            cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                            cmd = new MySqlCommand("SELECT agentid, opp_balance,paidamount, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
                             cmd.Parameters.AddWithValue("@sno", maxsno);
                             DataTable dtmaxagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                             cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
@@ -35960,7 +35960,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     cmd.Parameters.AddWithValue("@entryby", context.Session["UserSno"].ToString());
                                     vdbmngr.insert(cmd);
 
-                                    cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                                    cmd = new MySqlCommand("SELECT agentid, opp_balance,paidamount, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
                                     cmd.Parameters.AddWithValue("@sno", maxsno);
                                     DataTable dtmaxagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
 
