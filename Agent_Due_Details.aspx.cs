@@ -151,6 +151,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Columns.Add("Sale Value").DataType = typeof(Double);
             Report.Columns.Add("Paid Amount").DataType = typeof(Double);
             Report.Columns.Add("Bank Transfer").DataType = typeof(Double);
+           // Report.Columns.Add("JV").DataType = typeof(Double);
             Report.Columns.Add("Closing Balance").DataType = typeof(Double);
             int Totalcount = 1;
             string RouteName = "";
@@ -257,8 +258,9 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'");
                         if (dragenttrans.Length <= 0) 
                         {
-                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
+                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND AND (inddate < @d1)");
                             cmd.Parameters.AddWithValue("@Branchid", dr["BranchID"].ToString());
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
                             DataTable dtPrev_trans = vdm.SelectQuery(cmd).Tables[0];
                             if (dtPrev_trans.Rows.Count > 0)
                             {

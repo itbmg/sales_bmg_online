@@ -30440,8 +30440,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             {
                 dtchequedate = DateTime.Parse(chequeDate);
             }
-            float PaidAmount = 0;
-            float.TryParse(Amount, out PaidAmount);
+            double PaidAmount = 0;
+            double.TryParse(Amount, out PaidAmount);
             DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdbmngr.conn);
             int currentyear = ServerDateCurrentdate.Year;
             int nextyear = ServerDateCurrentdate.Year + 1;
@@ -30560,7 +30560,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     cmd.Parameters.AddWithValue("@BranchId", BranchID);
                     if (vdbmngr.Update(cmd) == 0)
                     {
-                        float paidamt = PaidAmount * -1;
+                        double paidamt = PaidAmount * -1;
                         cmd = new MySqlCommand("insert into branchaccounts (BranchId,Amount) values (@BranchId,@Amount)");
                         cmd.Parameters.AddWithValue("@Amount", paidamt);
                         cmd.Parameters.AddWithValue("@BranchId", BranchID);
@@ -30850,12 +30850,91 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         //vdbmngr.Update(cmd);
                         if (vdbmngr.Update(cmd) == 0)
                         {
-                            float paidamt = PaidAmount * -1;
+                            double paidamt = PaidAmount * -1;
                             cmd = new MySqlCommand("insert into branchaccounts (BranchId,Amount) values (@BranchId,@Amount)");
                             cmd.Parameters.AddWithValue("@Amount", paidamt);
                             cmd.Parameters.AddWithValue("@BranchId", BranchID);
                             vdbmngr.insert(cmd);
                         }
+                        //naveenjv
+
+                        // collection agent_bal_trans
+                        cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid");
+                        cmd.Parameters.AddWithValue("@Branchid", BranchID);
+                        DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
+                        if (dtagenttrans.Rows.Count > 0)
+                        {
+                            string maxsno = dtagenttrans.Rows[0]["sno"].ToString();
+                            cmd = new MySqlCommand("Insert into agent_bal_trans_history(refno, paidamount, cashtype, createddate, entryby) values (@refno,@paidamount,@cashtype,@doe,@entryby)");
+                            cmd.Parameters.AddWithValue("@refno", maxsno);
+                            cmd.Parameters.AddWithValue("@paidamount", Math.Abs(PaidAmount));
+                            cmd.Parameters.AddWithValue("@cashtype", "JV");
+                            cmd.Parameters.AddWithValue("@doe", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@entryby", context.Session["UserSno"].ToString());
+                            vdbmngr.insert(cmd);
+
+                            cmd = new MySqlCommand("SELECT agentid, opp_balance,paidamount, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                            cmd.Parameters.AddWithValue("@sno", maxsno);
+                            DataTable dtmaxagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
+
+                            cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
+                            cmd.Parameters.AddWithValue("@agentid", BranchID);
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(ServerDateCurrentdate).AddDays(-1));
+                            cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate).AddDays(-1));
+                            DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+                            if (dtIndentbal.Rows.Count > 0)
+                            {
+                                string oppbalance = dtmaxagenttrans.Rows[0]["opp_balance"].ToString();
+                                string salesvalue = dtmaxagenttrans.Rows[0]["salesvalue"].ToString();
+
+                                double Prev_amount = 0;
+                                double.TryParse(dtmaxagenttrans.Rows[0]["paidamount"].ToString(), out Prev_amount);
+                                if (Prev_amount > 0)
+                                {
+                                    PaidAmount = PaidAmount + Prev_amount;
+                                }
+
+                                double total = Convert.ToDouble(oppbalance) + Convert.ToDouble(salesvalue);
+                                string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
+                                double clsvalue = Convert.ToDouble(closingbalance);
+                                double closingvalue = total - Math.Abs(PaidAmount);
+                                string inddate = dtmaxagenttrans.Rows[0]["inddate"].ToString();
+                                cmd = new MySqlCommand("UPDATE agent_bal_trans SET paidamount=@paidamount, clo_balance=@closing where sno=@refno");
+                                cmd.Parameters.AddWithValue("@paidamount", Math.Abs(PaidAmount));
+                                cmd.Parameters.AddWithValue("@refno", maxsno);
+                                cmd.Parameters.AddWithValue("@closing", closingvalue);
+                                vdbmngr.Update(cmd);
+                            }
+                            else
+                            {
+                                string closingbalance = dtmaxagenttrans.Rows[0]["clo_balance"].ToString();
+                                double clsvalue = Convert.ToDouble(closingbalance);
+                                double closingvalue = clsvalue - Math.Abs(PaidAmount);
+                                cmd = new MySqlCommand("UPDATE agent_bal_trans set  clo_balance=clo_balance-@clAmount  where agentid=@BranchId AND inddate=@inddate");
+                                cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                                cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@clAmount", closingvalue);
+                                if (vdbmngr.Update(cmd) == 0)
+                                {
+                                    cmd = new MySqlCommand("Insert Into agent_bal_trans(agentid, opp_balance, inddate, salesvalue,  clo_balance, createdate, entryby,paidamount) values (@BranchId,@opp_balance,@inddate, @salesvalue, @clo_balance, @createdate, @entryby,@paidamount)");
+                                    cmd.Parameters.AddWithValue("@paidamount", Math.Abs(PaidAmount));
+                                    cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                                    cmd.Parameters.AddWithValue("@opp_balance", clsvalue);
+                                    cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                    cmd.Parameters.AddWithValue("@salesvalue", 0);
+                                    cmd.Parameters.AddWithValue("@clo_balance", closingvalue);
+                                    cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                                    cmd.Parameters.AddWithValue("@entryby", context.Session["UserSno"].ToString());
+                                    vdbmngr.insert(cmd);
+                                }
+                            }
+                        }
+                        //end agent_bal_trans
+
+
+
+                        //end jv
+
                         string twothousand = "0";
                         string thousand = "0";
                         string fivehundred = "0";
@@ -31142,6 +31221,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         cmd.Parameters.AddWithValue("@Name", tbranchname);
                         vdbmngr.insert(cmd);
                     }
+                }
+                if(PaymentType== "Journal Voucher")
+                {
+
                 }
 
             }
