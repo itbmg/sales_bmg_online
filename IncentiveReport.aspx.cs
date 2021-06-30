@@ -591,9 +591,9 @@ public partial class IncentiveReport : System.Web.UI.Page
                                 {
                                     
                                         lblmsg.Text = "Crates Balance   :" + totcratesbal + "  Cans Balance    :" + totcansbal;
-                                        btnicentivesave.Visible = false;
-                                        btnPrint.Visible = false;
-                                        Button3.Visible = false;
+                                      //  btnicentivesave.Visible = false;
+                                      //  btnPrint.Visible = false;
+                                       // Button3.Visible = false;
                                 }
                             }
                             #endregion

@@ -249,6 +249,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                 $('#liIncentive').css('display', 'none ');
                 $('#li156').css('display', 'none ');
                 $('#liaudit').css('display', 'block ');
+                $('#incentivereport').css('display', 'block ');
             }
             if (Level == "SalesManager") {
                 $('#lidueapproval').css('display', 'block ');
