@@ -232,7 +232,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                 $('#libiprdtsinward').css('display', 'block ');
                 $('#Li_biprdtsclosing').css('display', 'block ');
                 $('#liincentivestructure').css('display', 'block ');
-                $('#liIncentive').css('display', 'none ');
+                $('#liIncentive').css('display', 'block ');
                 $('#li156').css('display', 'none ');
                 $('#liaudit').css('display', 'block ');
             }
@@ -246,7 +246,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                 $('#libiprdtsinward').css('display', 'block ');
                 $('#Li_biprdtsclosing').css('display', 'block ');
                 $('#liincentivestructure').css('display', 'block ');
-                $('#liIncentive').css('display', 'none ');
+                $('#liIncentive').css('display', 'block ');
                 $('#li156').css('display', 'none ');
                 $('#liaudit').css('display', 'block ');
                 $('#incentivereport').css('display', 'block ');
@@ -1031,6 +1031,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="Li159"><a href="AgentWiseTotalIncentive.aspx">Agent Wise Incentive</a></li>
                                             <li id="Li160"><a href="RouteWiseIncentive.aspx">Route Wise Incentive</a></li>
                                             <li id="Li161"><a href="monthlyagentwiseincentive.aspx">Incentive Statement</a></li>
+                                            <li id="Liincentiveapproval"><a href="incentiveapproval.aspx">Incentive Approval</a></li>
                                         </ul>
                                     </div>
                                 </li>
