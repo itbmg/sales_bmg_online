@@ -135,7 +135,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
             DataTable dtagenttrans = vdm.SelectQuery(cmd).Tables[0];
 
-            cmd = new MySqlCommand("SELECT sum(AmountPaid) as AmountPaid,Branchid FROM collections WHERE PaidDate between @d1 and @d2 AND PaymentType <> 'Cash' group by Branchid");
+            cmd = new MySqlCommand("SELECT sum(AmountPaid) as AmountPaid,Branchid, PaymentType FROM collections WHERE PaidDate between @d1 and @d2 AND PaymentType <> 'Cash' group by Branchid, PaymentType");
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
             DataTable dtcollections = vdm.SelectQuery(cmd).Tables[0];
@@ -151,7 +151,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Columns.Add("Sale Value").DataType = typeof(Double);
             Report.Columns.Add("Paid Amount").DataType = typeof(Double);
             Report.Columns.Add("Bank Transfer").DataType = typeof(Double);
-           // Report.Columns.Add("JV").DataType = typeof(Double);
+            Report.Columns.Add("JV/Incentive").DataType = typeof(Double);
             Report.Columns.Add("Closing Balance").DataType = typeof(Double);
             int Totalcount = 1;
             string RouteName = "";
@@ -165,12 +165,15 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             double ftotalsalesvalue = 0;
             double ftotalpaidamount = 0;
             double ftotalbankTransfer = 0;
+            double ftotaljv = 0;
 
             double grand_totaloppbal = 0;
             double grand_totalClosingbal = 0;
             double grand_totalsalesvalue = 0;
             double grand_totalpaidamount = 0;
             double grand_totalbankTransfer = 0;
+            double grand_totaljv = 0;
+            
             foreach (DataRow branch in distincttable.Rows)
             {
                 DataRow newrow = Report.NewRow();
@@ -195,11 +198,24 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             {
                                 foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
                                 {
-                                    double banktransfervalue = 0;
-                                    double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
-                                    newrow["Bank Transfer"] = banktransfervalue;
-                                    ftotalbankTransfer += banktransfervalue;
-                                    grand_totalbankTransfer += banktransfervalue;
+                                    string PaymentType = drcollections["PaymentType"].ToString();
+                                    if (PaymentType == "Bank Transfer")
+                                    {
+                                        double banktransfervalue = 0;
+                                        double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
+                                        newrow["Bank Transfer"] = banktransfervalue;
+                                        ftotalbankTransfer += banktransfervalue;
+                                        grand_totalbankTransfer += banktransfervalue;
+                                    }
+                                    if (PaymentType == "Journal Voucher" || PaymentType == "Incentive")
+                                    {
+                                        double jvvalue = 0;
+                                        double.TryParse(drcollections["AmountPaid"].ToString(), out jvvalue);
+                                        newrow["JV/Incentive"] = jvvalue;
+                                        ftotaljv += jvvalue;
+                                        grand_totaljv += jvvalue;
+                                    }
+                                    
                                 }
                                 foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
                                 {
@@ -226,6 +242,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         newvar["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
                         newvar["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
                         newvar["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
+                        newvar["JV/Incentive"] = Math.Round(ftotaljv, 2);
                         newvar["Closing Balance"] = Math.Round(ftotalClosingbal, 2);
                         double totCurdavg = 0;
                         totCurdavg = Math.Round(totCurdavg, 2);
@@ -258,9 +275,9 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'");
                         if (dragenttrans.Length <= 0) 
                         {
-                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND AND (inddate < @d1)");
+                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND (inddate < @d1)");
                             cmd.Parameters.AddWithValue("@Branchid", dr["BranchID"].ToString());
-                            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
+                            cmd.Parameters.AddWithValue("@d1", fromdate.AddDays(-1));
                             DataTable dtPrev_trans = vdm.SelectQuery(cmd).Tables[0];
                             if (dtPrev_trans.Rows.Count > 0)
                             {
@@ -314,12 +331,26 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             }
                         }
                         double banktransfervalue = 0;
+                        double jvvalue = 0;
                         foreach (DataRow drcollections in dtcollections.Select("Branchid='" + dr["BranchID"].ToString() + "'"))
                         {
-                            double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
-                            newrow["Bank Transfer"] = banktransfervalue;
-                            ftotalbankTransfer += banktransfervalue;
-                            grand_totalbankTransfer += banktransfervalue;
+                            //JV/Incentive
+                            string PaymentType = drcollections["PaymentType"].ToString();
+                            if (PaymentType == "Bank Transfer")
+                            {
+                                double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
+                                newrow["Bank Transfer"] = banktransfervalue;
+                                ftotalbankTransfer += banktransfervalue;
+                                grand_totalbankTransfer += banktransfervalue;
+                            }
+                            if (PaymentType == "Journal Voucher" || PaymentType == "Incentive")
+                            {
+                                
+                                double.TryParse(drcollections["AmountPaid"].ToString(), out jvvalue);
+                                newrow["JV/Incentive"] = jvvalue;
+                                ftotaljv += jvvalue;
+                                grand_totaljv += jvvalue;
+                            }
                         }
                         foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
                         {
@@ -338,10 +369,15 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             if (paidamount > 0)
                             {
                                 paidamount = paidamount - banktransfervalue;
+                                paidamount = paidamount - jvvalue;
                             }
                             if(banktransfervalue == 0)
                             {
                                 newrow["Bank Transfer"] = banktransfervalue;
+                            }
+                            if (jvvalue == 0)
+                            {
+                                newrow["JV/Incentive"] = jvvalue;
                             }
                             newrow["Paid Amount"] = paidamount;
                             ftotalpaidamount += paidamount;
@@ -364,6 +400,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             TotRow["Sale Value"] = Math.Round(ftotalsalesvalue, 2);
             TotRow["Paid Amount"] = Math.Round(ftotalpaidamount, 2);
             TotRow["Bank Transfer"] = Math.Round(ftotalbankTransfer, 2);
+            TotRow["JV/Incentive"] = Math.Round(ftotaljv, 2);
             TotRow["Closing Balance"] = Math.Round(ftotalClosingbal, 2);
             Report.Rows.Add(TotRow);
             DataRow newbreak1 = Report.NewRow();
@@ -376,6 +413,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             grandtotal["Sale Value"] = Math.Round(grand_totalsalesvalue, 2);
             grandtotal["Paid Amount"] = Math.Round(grand_totalpaidamount, 2);
             grandtotal["Bank Transfer"] = Math.Round(grand_totalbankTransfer, 2);
+            grandtotal["JV/Incentive"] = Math.Round(grand_totaljv, 2);
             grandtotal["Closing Balance"] = Math.Round(grand_totalClosingbal,2);
             Report.Rows.Add(grandtotal);
             grdReports.DataSource = Report;

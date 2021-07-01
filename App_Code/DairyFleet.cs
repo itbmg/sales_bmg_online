@@ -49448,7 +49448,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         cmd = new MySqlCommand("Insert into agent_bal_trans_history(refno, paidamount, cashtype, createddate, entryby) values (@refno,@paidamount,@cashtype,@doe,@entryby)");
                         cmd.Parameters.AddWithValue("@refno", maxsno);
                         cmd.Parameters.AddWithValue("@paidamount", incentiveamount);
-                        cmd.Parameters.AddWithValue("@cashtype", "incentive");
+                        cmd.Parameters.AddWithValue("@cashtype", PaymentType);
                         cmd.Parameters.AddWithValue("@doe", ServerDateCurrentdate);
                         cmd.Parameters.AddWithValue("@entryby", context.Session["UserSno"].ToString());
                         vdbmngr.insert(cmd);
