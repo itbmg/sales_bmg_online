@@ -129,8 +129,8 @@ public partial class Periodic_Due_Report : System.Web.UI.Page
                     todate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
                 }
             }
-            lblDate.Text = fromdate.ToString("dd/MMM/yyyy");
-            Session["filename"] = "AGENT WISE DUE REPORT";
+            lblDate.Text = fromdate.ToString("dd/MMM/yyyy") + "    To    " + todate.ToString("dd/MMM/yyyy");
+            Session["filename"] = "Branch Wise Due Consolidate";
             string BranchID = ddlSalesOffice.SelectedValue;
             cmd = new MySqlCommand("SELECT  branchroutes.RouteName, branchroutes.sno as routeid,  branchroutesubtable.BranchID, branchdata.BranchName  FROM    branchroutes   INNER JOIN    branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo   INNER JOIN    branchdata ON branchroutesubtable.BranchID = branchdata.sno  WHERE (branchroutes.BranchID = @BranchID) and (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY branchroutes.RouteName");
             cmd.Parameters.AddWithValue("@branchid", BranchID);

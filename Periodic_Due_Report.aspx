@@ -43,12 +43,12 @@
     </div>
     <section class="content-header">
         <h1>
-            AgentWise Due Transaction<small>Preview</small>
+            Branch Wise Due Consolidate<small>Preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i>Operations</a></li>
             <li><a href="#"><i></i>Due Details</a></li>
-            <li><a href="#">AgentWise Due Transaction</a></li>
+            <li><a href="#">Branch Wise Due Consolidate</a></li>
         </ol>
     </section>
     <section class="content">
