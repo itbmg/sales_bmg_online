@@ -2830,23 +2830,15 @@
                                 <tr>
                                     <td style="width: 130px;">
                                         <asp:DropDownList ID="ddltype" runat="server" CssClass="form-control" onchange="bindplantdetails()">
-                                            <asp:ListItem Value="Vyshnavi Group" Text="Vyshnavi Group">Vyshnavi Group</asp:ListItem>
-                                            <%--<asp:ListItem Value="SVDS" Text="SVDS">SVDS</asp:ListItem>
-                                            <asp:ListItem Value="SVF" Text="SVF">SVF</asp:ListItem>--%>
+                                            <asp:ListItem Value="Vyshnavi Group" Text="BMG Group">BMG Group</asp:ListItem>
                                         </asp:DropDownList>
-                                        <%--<select id="ddlType" class="form-control" onchange="ddlTypeChange(this);">
-                                    <option>Vyshnavi Group</option>
-                                    <option>SVDS</option>
-                                    <option>SVF</option>
-                                </select>--%>
                                     </td>
                                     <td style="width: 2%;">
                                     </td>
                                     <td style="width: 130px;" id="divPlant">
                                         <asp:DropDownList ID="ddlPlant" runat="server" CssClass="form-control">
                                         </asp:DropDownList>
-                                        <%-- <select id="ddlPlant" class="form-control" onchange="ddlPlantNameChange(this);">
-                                        </select>--%>
+                                      
                                     </td>
                                     <td style="width: 2%;">
                                     </td>

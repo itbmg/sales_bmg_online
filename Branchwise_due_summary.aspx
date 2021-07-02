@@ -1,4 +1,5 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="Periodic_Due_Report.aspx.cs" Inherits="Periodic_Due_Report" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true"
+    CodeFile="Branchwise_due_summary.aspx.cs" Inherits="Branchwise_due_summary" %>
 
 <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="asp" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
@@ -11,13 +12,6 @@
             newWin.document.open();
             newWin.document.write('<html><body   onload="window.print()">' + divToPrint.innerHTML + '</body></html>');
             newWin.document.close();
-        }
-        function OrderValidate() {
-            var fromDate = document.getElementById('<%=txtdate.ClientID %>').value;
-            if (fromDate == "") {
-                alert("Select Date");
-                return false;
-            }
         }
     </script>
     <script type="text/javascript">
@@ -43,19 +37,19 @@
     </div>
     <section class="content-header">
         <h1>
-            AgentWise Periodic Due Details<small>Preview</small>
+            BranchWise Due Report<small>Preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i>Operations</a></li>
             <li><a href="#"><i></i>Due Details</a></li>
-            <li><a href="#">AgentWise Periodic Due Details</a></li>
+            <li><a href="#">BranchWise Due Report</a></li>
         </ol>
     </section>
     <section class="content">
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    <i style="padding-right: 5px;" class="fa fa-cog"></i>AgentWise Periodic Due Details
+                    <i style="padding-right: 5px;" class="fa fa-cog"></i>BranchWise Due Report Details
                 </h3>
             </div>
             <div class="box-body">
@@ -71,20 +65,20 @@
                                 </td>
                                 <td style="width: 5px;">
                                 </td>
-                                <td>
-                                    <asp:TextBox ID="txtdate" runat="server" Width="205px" CssClass="form-control"></asp:TextBox>
-                                    <asp:CalendarExtender ID="enddate_CalendarExtender" runat="server" Enabled="True"
-                                        TargetControlID="txtdate" Format="dd-MM-yyyy HH:mm">
-                                    </asp:CalendarExtender>
-                                </td>
-                                 <td style="width: 5px;">
-                                </td>
-                                <td>
-                                    <asp:TextBox ID="txtTodate" runat="server" Width="205px" CssClass="form-control"></asp:TextBox>
-                                    <asp:CalendarExtender ID="CalendarExtender1" runat="server" Enabled="True"
-                                        TargetControlID="txtTodate" Format="dd-MM-yyyy HH:mm">
-                                    </asp:CalendarExtender>
-                                </td>
+                                <td style="width:5px;"></td>
+                                    <td>
+                                        <asp:TextBox ID="txtFromdate" runat="server" Width="205px" CssClass="form-control"></asp:TextBox>
+                                        <asp:CalendarExtender ID="enddate_CalendarExtender" runat="server" Enabled="True"
+                                            TargetControlID="txtFromdate" Format="dd-MM-yyyy HH:mm">
+                                        </asp:CalendarExtender>
+                                    </td>
+                                <td style="width:5px;"></td>
+                                    <td>
+                                        <asp:TextBox ID="txtTodate" runat="server" Width="205px" CssClass="form-control"></asp:TextBox>
+                                        <asp:CalendarExtender ID="CalendarExtender1" runat="server" Enabled="True" TargetControlID="txtTodate"
+                                            Format="dd-MM-yyyy HH:mm">
+                                        </asp:CalendarExtender>
+                                    </td>
                                 <td style="width: 5px;">
                                 </td>
                                 <td>
@@ -101,24 +95,27 @@
                                 <div style="left: 0%; text-align: center;">
                                     <asp:Label ID="lblTitle" runat="server" Font-Bold="true" Font-Size="26px" ForeColor="#0252aa"
                                         Text=""></asp:Label>
-                                    <%--<span style="font-size: 26px; font-weight: bold; color: #0252aa;">BMG Milk Dairy Farm
-                              </span>--%>
                                     <br />
                                 </div>
                                 <div align="center">
-                                    <span style="font-size: 18px; text-decoration: underline; color: #0252aa;">SALESOFFICE
-                                        DUE REPORT </span>
+                                    <span style="font-size: 18px; text-decoration: underline; color: #0252aa;">BranchWise Due Report </span>
                                 </div>
                                 <div style="width: 100%;">
                                     <br />
                                     <div>
                                         <div style="width: 40%; float: left; padding-left: 4%;">
-                                            <span style="color: #0252aa; margin-right: 4%; font-size: 14px;">Date: </span>
-                                            <asp:Label ID="lblDate" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
+                                            <span style="color: #0252aa; margin-right: 4%; font-size: 14px;">From Date: </span>
+                                            <asp:Label ID="lbl_fromDate" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
+                                             <span style="color: #0252aa; margin-right: 4%; font-size: 14px;">To Date: </span>
+                                            <asp:Label ID="lbl_selttodate" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
                                         </div>
-                                        <span style="color: #0252aa; font-size: 14px; margin-right: 4%;">SalesOffice Name:
-                                        </span>
-                                        <asp:Label ID="lblRouteName" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
+                                        <div>
+                                            <div style="width: 40%; float: left; padding-left: 7%;">
+                                                <span style="font-weight: bold;">SalesOffice Name: </span>
+                                                <asp:Label ID="lblSalesOffice" runat="server" Style="font-size: 11px;" ForeColor="Red"
+                                                    Text=""></asp:Label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <br />
