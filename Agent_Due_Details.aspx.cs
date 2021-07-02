@@ -252,6 +252,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         ftotalpaidamount = 0;
                         ftotalbankTransfer = 0;
                         ftotalClosingbal = 0;
+                        ftotaljv = 0;
                         newrow["Route Name"] = branch["RouteName"].ToString();
                         Totalcount++;
                         DataRow space = Report.NewRow();
