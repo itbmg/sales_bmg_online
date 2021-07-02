@@ -840,7 +840,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                                 <li id="litimingreport"><a href="PlantConsolidateSales.aspx">PlantWiseSaleSummary</a></li>
                                                 <%--<li id="litimingreport"><a href="TimingReport.aspx">Timing Report</a></li>--%>
                                                 <%-- <li id="liTimeline"><a href="TimeLine.aspx">Time Line</a></li>--%>
-                                                <li id="liagentdelivery"><a href="AgentDelivery.aspx">Agent Delivery</a></li>
+                                              <%--  <li id="liagentdelivery"><a href="AgentDelivery.aspx">Agent Delivery</a></li>--%>
                                                 <li id="li66"><a href="RouteVerification.aspx">Trip Sheet</a></li>
                                                 <li id="liagentack" style="display: none;"><a href="AgentAcknoledgement.aspx">Agent
                                                     Acknoledgement</a></li>
@@ -929,7 +929,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="PlantSales"><a href="PlantSales.aspx">Net Sale</a></li>
                                             <li id="lidaywisedc"><a href="MonthlyProductwiseTransaction.aspx">Monthly Product Wise
                                                 Transaction</a></li>
-                                            <li id="li67"><a href="Deliverychallan_print.aspx">DC with UOM</a></li>
+                                           <%-- <li id="li67"><a href="Deliverychallan_print.aspx">DC with UOM</a></li>--%>
                                             <li id="li184"><a href="dcvssale.aspx">DC vs Sales Comparison</a></li>
                                             <li id="liReturnDC"><a href="ReturnDC.aspx">Return DC</a></li>
                                             
