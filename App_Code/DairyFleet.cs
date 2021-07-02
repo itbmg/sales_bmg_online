@@ -49420,8 +49420,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
 
                     cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, paidamount, salesvalue, clo_balance FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
                     cmd.Parameters.AddWithValue("@agentid", agentid);
-                    cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(paymentdate));
+                    cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate).AddDays(-1));
+                    cmd.Parameters.AddWithValue("@d2", GetHighDate(paymentdate).AddDays(-1));
                     DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                     if (dtagenttrans.Rows.Count > 0)
                     {
@@ -49461,7 +49461,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
 
                         cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
                         cmd.Parameters.AddWithValue("@agentid", agentid);
-                        cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate.AddDays(1)));
+                        cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate));
                         cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate));
                         DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
                         if (dtIndentbal.Rows.Count > 0)
@@ -49494,9 +49494,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         DataTable dtlasttrans = vdbmngr.SelectQuery(cmd).Tables[0];
                         if (dtlasttrans.Rows.Count > 0)
                         {
-
                             string maxsno = dtlasttrans.Rows[0]["sno"].ToString();
-
                             cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, paidamount, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
                             cmd.Parameters.AddWithValue("@sno", maxsno);
                             DataTable dtmaxtrans = vdbmngr.SelectQuery(cmd).Tables[0];
@@ -49534,14 +49532,14 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 cmd.Parameters.AddWithValue("@paidamount", totpaidamount);
                                 cmd.Parameters.AddWithValue("@refno", maxsno);
                                 cmd.Parameters.AddWithValue("@closing", totalclosingvalue);
-                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate));
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate).AddDays(-1);
                                 if(vdbmngr.Update(cmd) == 0)
                                 {
                                     double clsvalue = clobalance - incentiveamount;
                                     cmd = new MySqlCommand("INSERT INTO agent_bal_trans(agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount,createdate, entryby) VALUES (@agentid, @oppbalance, @inddate, @salesvalue, @clobalance, @paidamount,@createdate, @entryby)");
                                     cmd.Parameters.AddWithValue("@agentid", agentid);
                                     cmd.Parameters.AddWithValue("@oppbalance", clobalance);
-                                    cmd.Parameters.AddWithValue("@inddate", paymentdate);
+                                    cmd.Parameters.AddWithValue("@inddate", paymentdate.AddDays(-1);
                                     cmd.Parameters.AddWithValue("@salesvalue", "0");
                                     cmd.Parameters.AddWithValue("@clobalance", clsvalue);
                                     cmd.Parameters.AddWithValue("@paidamount", incentiveamount);
@@ -49551,7 +49549,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 }
                                 cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
                                 cmd.Parameters.AddWithValue("@agentid", BranchID);
-                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate.AddDays(1)));
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate));
                                 DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
                                 if (dtIndentbal.Rows.Count > 0)

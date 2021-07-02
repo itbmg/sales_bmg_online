@@ -368,8 +368,8 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
                             if (paidamount > 0)
                             {
-                                paidamount = paidamount - banktransfervalue;
-                                paidamount = paidamount - jvvalue;
+                                double otheramount = banktransfervalue + jvvalue;
+                                paidamount = paidamount - otheramount;
                             }
                             if(banktransfervalue == 0)
                             {
