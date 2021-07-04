@@ -808,6 +808,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                                 <li id="liroutewisedeliverymontly"><a href="monthlyroutewisedelivery.aspx">Monthly Route
                                                     Wise Delivery</a></li>
                                                 <li id="licollection"><a href="Delivery_Collection_Report.aspx">Net Sales Report</a></li>
+                                                <li id="lidcvssale"><a href="dcvssale.aspx">Branch Day Wise Qty Summary</a></li>
                                                 <li id="li23"><a href="ClosingStock.aspx">Closing Stock</a></li>
                                                 <li id="lioffereport"><a href="OfferIndent.aspx">Offer Indent Delivery</a></li>
                                                 <li id="li12"><a href="Routewisesaleqty.aspx">Route Wise Sale Qty</a></li>
@@ -913,6 +914,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="agentincentivereport"><a href="AgentWiseTotalIncentive.aspx">Agent Wise Incentive</a></li>
                                             <li id="Li16"><a href="RouteWiseIncentive.aspx">Route Wise Incentive</a></li>
                                             <li id="Liincentivestatement"><a href="monthlyagentwiseincentive.aspx">Incentive Statement</a></li>
+                                            <li id="LiIncentiveStructureApproval"><a href="IncentiveStructureApproval.aspx">Incentive Structure Approval</a></li>
                                         </ul>
                                     </div>
                                 </li>
@@ -930,7 +932,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="lidaywisedc"><a href="MonthlyProductwiseTransaction.aspx">Monthly Product Wise
                                                 Transaction</a></li>
                                            <%-- <li id="li67"><a href="Deliverychallan_print.aspx">DC with UOM</a></li>--%>
-                                            <li id="li184"><a href="dcvssale.aspx">DC vs Sales Comparison</a></li>
+                                            <%--<li id="li184"><a href="dcvssale.aspx">DC vs Sales Comparison</a></li>--%>
                                             <li id="liReturnDC"><a href="ReturnDC.aspx">Return DC</a></li>
                                             
                                         </ul>

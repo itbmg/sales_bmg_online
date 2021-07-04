@@ -117,8 +117,6 @@ public partial class dcvssale : System.Web.UI.Page
     DataTable dtSortedCategoryAndSubCat = new DataTable();
 
     DataTable dtCatgoryAndSub = new DataTable();
-
-
     void GetReport()
     {
         try
@@ -147,12 +145,9 @@ public partial class dcvssale : System.Web.UI.Page
                     todate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
                 }
             }
-
-            
-            
-
-
-            lblsoname.Text = ddlSalesOffice.SelectedItem.Text;
+            lblSalesOffice.Text = ddlSalesOffice.SelectedItem.Text;
+            lbl_fromDate.Text = txtdate.Text;
+            lbl_selttodate.Text = txtTodate.Text;
             DataTable tempbranchindentsale = new DataTable();
             cmd = new MySqlCommand("SELECT TripInfo.Sno, ROUND(SUM(ProductInfo.Qty), 2) AS dispatchqty, TripInfo.BranchName, TripInfo.Branch_Id, TripInfo.DispName, TripInfo.BranchID, DATE_FORMAT(TripInfo.I_Date, '%d %b %y') AS I_Date  FROM    (SELECT        tripdata.Sno, tripdata.AssignDate, tripdata.I_Date, branchdata_1.BranchName, dispatch.BranchID, dispatch.Branch_Id, dispatch.GroupId, dispatch.CompanyId, dispatch.DispName   FROM            branchdata INNER JOIN  dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN  tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN branchdata branchdata_1 ON dispatch.Branch_Id = branchdata_1.sno   WHERE        (dispatch.Branch_Id = @BranchID) AND (tripdata.AssignDate BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @SUBBRANCH)) TripInfo INNER JOIN (SELECT        Sno, Qty FROM            (SELECT        tripdata_1.Sno, tripsubdata.Qty   FROM            tripdata tripdata_1 INNER JOIN tripsubdata ON tripdata_1.Sno = tripsubdata.Tripdata_sno  WHERE        (tripdata_1.AssignDate BETWEEN @d1 AND @d2)) TripSubInfo) ProductInfo ON TripInfo.Sno = ProductInfo.Sno  GROUP BY TripInfo.DispName, TripInfo.BranchID, TripInfo.I_Date  ORDER BY TripInfo.AssignDate");
             cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
@@ -160,7 +155,6 @@ public partial class dcvssale : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
             DataTable dtDispatchesbranches = vdm.SelectQuery(cmd).Tables[0];
-
 
             cmd = new MySqlCommand("SELECT DATE_FORMAT(clotrans.IndDate,'%d %b %y') as inddate,clotrans.BranchId,Sum(closubtranprodcts.StockQty) as openingstock FROM clotrans INNER JOIN closubtranprodcts ON clotrans.Sno = closubtranprodcts.RefNo WHERE (clotrans.BranchId = @BranchID) AND (clotrans.IndDate BETWEEN @d1 AND @d2) AND (clotrans.Transaction_Type = 0) GROUP BY clotrans.IndDate");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
@@ -174,16 +168,11 @@ public partial class dcvssale : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
             DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
 
-
-
-
-
             cmd = new MySqlCommand("SELECT SUM(Leaks.VLeaks) AS vleaks, SUM(Leaks.VReturns) AS vreturns, SUM(Leaks.TotalLeaks) AS totleaks, SUM(Leaks.ReturnQty) AS returnqty, Leaks.AssignDate,Leaks.ReturnDCTime, ff.BranchID FROM (SELECT leakages.VLeaks, leakages.VReturns, leakages.TotalLeaks, productsdata.ProductName, tripdata_1.Sno, leakages.ReturnQty, tripdata_1.AssignDate,tripdata_1.ReturnDCTime FROM tripdata tripdata_1 INNER JOIN leakages ON tripdata_1.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (tripdata_1.I_Date BETWEEN @d1 AND @d2)) Leaks INNER JOIN (SELECT DispName, Sno, DespSno, BranchID FROM (SELECT dispatch.DispName, tripdata.Sno, dispatch.sno AS DespSno, dispatch.BranchID FROM branchdata INNER JOIN dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @BranchID)) TripInfo) ff ON ff.Sno = Leaks.Sno GROUP BY Leaks.AssignDate ORDER BY Leaks.AssignDate");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
             DataTable DtLeksAndReturns = vdm.SelectQuery(cmd).Tables[0];
-
 
             cmd = new MySqlCommand("SELECT dispatch.DispName, dispatch.sno, dispatch.BranchID, tripdata.I_Date,tripdata.sno as TripSno FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (dispatch.BranchID = @BranchID) AND (tripdata.I_Date BETWEEN @d1 AND @d2)  and (dispatch.DispType='SO') and (tripdata.Status<>'C')  group by tripdata.Sno ORDER BY tripdata.I_Date");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
@@ -211,10 +200,7 @@ public partial class dcvssale : System.Web.UI.Page
                 {
                     TripDataSno = "0";
                 }
-
                 dtShortAndFree.Merge(dtLeakble);
-
-
                 cmd = new MySqlCommand("SELECT ShortQty,DATE_FORMAT(tripdata.I_date,'%d %b %y') as inddate,ProductID,LeakQty,ReturnQty,FreeMilk FROM leakages  inner join tripdata on tripdata.Sno=leakages.TripID  WHERE (tripdata.DEmpId = @DEmpId) AND (tripdata.I_Date BETWEEN @d1 AND @d2) and (leakages.VarifyStatus IS NULL)");
                 cmd.Parameters.AddWithValue("@DEmpId", dtLeakble.Rows[0]["EmpId"].ToString());
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
@@ -229,8 +215,6 @@ public partial class dcvssale : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
             DataTable dtsalesofficeshortfree = vdm.SelectQuery(cmd).Tables[0];
             dtShortAndFree.Merge(dtsalesofficeshortfree);
-
-            
 
             cmd = new MySqlCommand("SELECT clotrans.BranchId,Sum(closubtranprodcts.StockQty) as ClosingStock, DATE_FORMAT(clotrans.IndDate,'%d %b %y') as inddate FROM clotrans INNER JOIN closubtranprodcts ON clotrans.Sno = closubtranprodcts.RefNo WHERE (clotrans.BranchId = @BranchID) AND (clotrans.IndDate BETWEEN @d1 AND @d2) AND (clotrans.Transaction_Type = 0) GROUP BY inddate");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
@@ -253,7 +237,6 @@ public partial class dcvssale : System.Web.UI.Page
                 Report.Columns.Add("Free").DataType = typeof(Double); ;
                 Report.Columns.Add("CL Stock").DataType = typeof(Double); ;
                 int i = 1;
-                double totalsalevalue = 0;
                 DataView view = new DataView(dtDispatchesbranches);
                 DataTable distincttable = view.ToTable(true, "I_date");
                 string BRANCHID = ddlSalesOffice.SelectedValue;
@@ -265,7 +248,6 @@ public partial class dcvssale : System.Web.UI.Page
                     double shortqty = 0;
                     double freeqty = 0;
                     double leakqty = 0;
-                    double Vleakqty = 0;
                     double saleqty = 0;
                     double opqty = 0;
                     double cloqty = 0;
@@ -273,7 +255,6 @@ public partial class dcvssale : System.Web.UI.Page
                     double returnqty = 0;
                     double tfree = 0;
                     double tshort = 0;
-                    double trqty = 0;
                     DateTime Date = Convert.ToDateTime(branch["I_date"].ToString()).AddDays(1);
                     DateTime Date_2 = Convert.ToDateTime(branch["I_date"].ToString()).AddDays(-1);
                     string Date1 = Date.ToString("dd MMM yyyy");
@@ -284,23 +265,23 @@ public partial class dcvssale : System.Web.UI.Page
                         double dcqty = 0;
                         double.TryParse(drrdelivery["dispatchqty"].ToString(), out dcqty);
                         DispQty += dcqty;
-                        newrow["DC Qty"] = Math.Round(DispQty, 0);
+                        newrow["DC Qty"] = Math.Round(DispQty, 2);
                     }
                     foreach (DataRow drropening in dtOppening_stock.Select("BranchId='" + BRANCHID + "'AND inddate='" + Date2 + "'"))
                     {
                         double.TryParse(drropening["openingstock"].ToString(), out opqty);
-                        newrow["Op Stock"] = Math.Round(opqty, 0); //drrdelivery["DeliveryQty"].ToString();
+                        newrow["Op Stock"] = Math.Round(opqty, 2); //drrdelivery["DeliveryQty"].ToString();
                     }
                     foreach (DataRow drrdelivery in dtAgent.Select("SuperBranch='" + BRANCHID + "'AND IndentDate='" + branch["I_date"].ToString() + "'"))
                     {
                         double.TryParse(drrdelivery["DeliveryQty"].ToString(), out saleqty);
-                        newrow["Sales"] = Math.Round(saleqty, 0); //drrdelivery["DeliveryQty"].ToString();
+                        newrow["Sales"] = Math.Round(saleqty, 2); //drrdelivery["DeliveryQty"].ToString();
                     }
                     foreach (DataRow drleaks in DtLeksAndReturns.Select("BranchID='" + BRANCHID + "'AND AssignDate='" + branch["I_date"].ToString() + "'"))
                     {
                         double.TryParse(drleaks["totleaks"].ToString(), out leakqty);
-                        newrow["Lekages"] = Math.Round(leakqty, 0); //drleaks["Leaks"].ToString();
-                        newrow["Returns"] = Math.Round(returnqty, 0); //drleaks["Return"].ToString();
+                        newrow["Lekages"] = Math.Round(leakqty, 2); //drleaks["Leaks"].ToString();
+                        newrow["Returns"] = Math.Round(returnqty, 2); //drleaks["Return"].ToString();
                         totalleakreturn += leakqty;
                         totalleakreturn += returnqty;
                     }
@@ -315,12 +296,12 @@ public partial class dcvssale : System.Web.UI.Page
                         tfree += freeqty;
                         tshort += shortqty;
                     }
-                    newrow["Free"] = Math.Round(tfree, 0); //drfree["ShortQty"].ToString();
-                    newrow["Short"] = Math.Round(tshort, 0);
+                    newrow["Free"] = Math.Round(tfree, 2); //drfree["ShortQty"].ToString();
+                    newrow["Short"] = Math.Round(tshort, 2);
                     foreach (DataRow drrclosing in dtclosing_stock.Select("BranchId='" + BRANCHID + "'AND inddate='" + branch["I_date"].ToString() + "'"))
                     {
                         double.TryParse(drrclosing["ClosingStock"].ToString(), out cloqty);
-                        newrow["CL Stock"] = Math.Round(cloqty, 0); //drrdelivery["DeliveryQty"].ToString();
+                        newrow["CL Stock"] = Math.Round(cloqty, 2); //drrdelivery["DeliveryQty"].ToString();
                     }
                     //double mixedqy = saleqty + totalshortfree + totalleakreturn;
                     //double Total = DispQty - mixedqy;

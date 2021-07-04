@@ -115,10 +115,25 @@
                                 <div align="center">
                                     <span style="font-size: 18px; color: #0252aa;">Sales office Wise Summary</span>
                                 </div>
-                                <div align="center">
-                                     <asp:Label ID="lblsoname" runat="server" Font-Bold="true" Font-Size="18px" ForeColor="#0252aa"
-                                        Text=""></asp:Label>
+                                <div style="width: 100%;">
+                                    <br />
+                                    <div>
+                                        <div style="width: 40%; float: left; padding-left: 4%;">
+                                            <span style="color: #0252aa; margin-right: 4%; font-size: 14px;">From Date: </span>
+                                            <asp:Label ID="lbl_fromDate" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
+                                             <span style="color: #0252aa; margin-right: 4%; font-size: 14px;">To Date: </span>
+                                            <asp:Label ID="lbl_selttodate" runat="server" ForeColor="Red" Font-Size="14px" Text=""></asp:Label>
+                                        </div>
+                                        <div>
+                                            <div style="width: 40%; float: left; padding-left: 7%;">
+                                                <span style="font-weight: bold;">SalesOffice Name: </span>
+                                                <asp:Label ID="lblSalesOffice" runat="server" Style="font-size: 11px;" ForeColor="Red"
+                                                    Text=""></asp:Label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                <br />
                                 <asp:GridView ID="grdReports" runat="server" ForeColor="White" Width="100%" CssClass="gridcls"
                                     GridLines="Both" Font-Bold="true">
                                     <EditRowStyle BackColor="#999999" />
