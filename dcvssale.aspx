@@ -113,7 +113,7 @@
                                     <br />
                                 </div>
                                 <div align="center">
-                                    <span style="font-size: 18px; color: #0252aa;">DC VS SALES BRANCH WISE</span>
+                                    <span style="font-size: 18px; color: #0252aa;">Sales office Wise Summary</span>
                                 </div>
                                 <div align="center">
                                      <asp:Label ID="lblsoname" runat="server" Font-Bold="true" Font-Size="18px" ForeColor="#0252aa"
