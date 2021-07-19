@@ -229,8 +229,9 @@ public partial class dcvssale : System.Web.UI.Page
                 Report.Columns.Add("Date");
                 int count = 0;
                 Report.Columns.Add("DC Qty").DataType = typeof(Double);
-                Report.Columns.Add("OP Stock").DataType = typeof(Double); ;
+                Report.Columns.Add("OP Stock").DataType = typeof(Double); ; 
                 Report.Columns.Add("Sales").DataType = typeof(Double); ;
+                Report.Columns.Add("Sales Value").DataType = typeof(Double); ;
                 Report.Columns.Add("Lekages").DataType = typeof(Double); ;
                 Report.Columns.Add("Returns").DataType = typeof(Double); ;
                 Report.Columns.Add("Short").DataType = typeof(Double); ;
@@ -249,6 +250,7 @@ public partial class dcvssale : System.Web.UI.Page
                     double freeqty = 0;
                     double leakqty = 0;
                     double saleqty = 0;
+                    double salevalue = 0;
                     double opqty = 0;
                     double cloqty = 0;
                     double DispQty = 0;
@@ -276,6 +278,9 @@ public partial class dcvssale : System.Web.UI.Page
                     {
                         double.TryParse(drrdelivery["DeliveryQty"].ToString(), out saleqty);
                         newrow["Sales"] = Math.Round(saleqty, 2); //drrdelivery["DeliveryQty"].ToString();
+
+                        double.TryParse(drrdelivery["salevalue"].ToString(), out salevalue);
+                        newrow["Sales Value"] = Math.Round(salevalue, 2);
                     }
                     foreach (DataRow drleaks in DtLeksAndReturns.Select("BranchID='" + BRANCHID + "'AND AssignDate='" + branch["I_date"].ToString() + "'"))
                     {

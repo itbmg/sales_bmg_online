@@ -99,6 +99,7 @@
                                         <asp:ListItem>Bank Transfer</asp:ListItem>
                                         <asp:ListItem>Incentive</asp:ListItem>
                                         <asp:ListItem>Journal Voucher</asp:ListItem>
+                                        <asp:ListItem>Route Collections</asp:ListItem>
                                     </asp:DropDownList>
                                 </td>
                                 <td style="width: 5px;">

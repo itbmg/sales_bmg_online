@@ -45592,6 +45592,12 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 cmd.Parameters.AddWithValue("@dt", GetLowDate(fromdate.AddDays(-1)));
 
                 DataTable dtbranchammount = vdm.SelectQuery(cmd).Tables[0];
+
+                cmd = new MySqlCommand("SELECT * FROM agent_bal_trans WHERE inddate between @d1 and @d2");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                DataTable dtagenttrans = vdm.SelectQuery(cmd).Tables[0];
+
                 cmd = new MySqlCommand("SELECT  inventory_monitor.Inv_Sno, inventory_monitor.Qty,modifiedroutesubtable.BranchID FROM dispatch INNER JOIN modifiedroutes ON dispatch.Route_id = modifiedroutes.Sno INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN inventory_monitor ON modifiedroutesubtable.BranchID = inventory_monitor.BranchId WHERE (dispatch.sno = @dispsno) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @dt) OR (dispatch.sno = @dispsno) AND (modifiedroutesubtable.EDate > @dt) AND (modifiedroutesubtable.CDate <= @dt) ");
                 //if (chkDispatch.Checked == true)
                 //{
@@ -46253,10 +46259,62 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     {
                         DataRow newRow = dtreport.NewRow();
                         newRow["Agent Code"] = dr["BranchId"].ToString();
+
+                        //Akbar
+                        DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'");
+                        if (dragenttrans.Length <= 0)
+                        {
+                            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND (inddate < @d1)");
+                            cmd.Parameters.AddWithValue("@Branchid", dr["BranchID"].ToString());
+                            cmd.Parameters.AddWithValue("@d1", fromdate.AddDays(-1));
+                            DataTable dtPrev_trans = vdm.SelectQuery(cmd).Tables[0];
+                            if (dtPrev_trans.Rows.Count > 0)
+                            {
+                                string sno = dtPrev_trans.Rows[0]["sno"].ToString();
+                                if (sno == "")
+                                {
+                                    double closingbalance = 0;
+                                    newRow["Oppening Balance"] = closingbalance;
+                                }
+                                else
+                                {
+                                    cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                                    cmd.Parameters.AddWithValue("@sno", dtPrev_trans.Rows[0]["sno"].ToString());
+                                    DataTable dtagent_value = vdm.SelectQuery(cmd).Tables[0];
+                                    if (dtagent_value.Rows.Count > 0)
+                                    {
+                                        double closingbalance = 0;
+                                        double.TryParse(dtagent_value.Rows[0]["clo_balance"].ToString(), out closingbalance);
+                                        string inddate = dtagent_value.Rows[0]["inddate"].ToString();
+                                        DateTime dtinddate = Convert.ToDateTime(inddate);
+                                        if (dtinddate < fromdate)
+                                        {
+                                            newRow["Oppening Balance"] = closingbalance;
+                                        }
+                                        else
+                                        {
+                                            newRow["Oppening Balance"] = 0;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                double closingbalance = 0;
+                                newRow["Oppening Balance"] = closingbalance;
+                            }
+                        }
+                        else
+                        {
+                            foreach (DataRow drr in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
+                            {
+                                newRow["Oppening Balance"] = drr["opp_balance"].ToString();
+                            }
+                        }
+                        //akbar
                         newRow["Agent Name"] = dr["BranchName"].ToString();
                         newRow["Sale Value"] = "0";
                         newRow["Amount To Be Paid"] = "0";
-                        newRow["Oppening Balance"] = dr["Amount"].ToString();
                         newRow["Paid Amount"] = "0";
                         newRow["Due Amount"] = "0";
                         newRow["today sale"] = "0";
@@ -46505,15 +46563,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             ToDayDue = todaysalevalue - todaypaid;
                             newRow1["ToDayDue"] = ToDayDue;
 
-                            float aopp = 0;
-                            aopp = oppamt + paidamt - salevalue;
+                            //float aopp = 0;
+                            //aopp = oppamt + paidamt - salevalue;
                             float totaldue = 0;
-                            totaldue = aopp + todaysalevalue - todaypaid;
+                            totaldue = oppamt + todaysalevalue - todaypaid;
                             float amounttobepaid = 0;
-                            amounttobepaid = aopp + todaysalevalue;
+                            amounttobepaid = oppamt + todaysalevalue;
                             if (dr["sno"].ToString() == "20")
                             {
-                                newRow1["Oppening Balance"] = aopp;
+                                newRow1["Oppening Balance"] = oppamt;
                                 newRow1["Amount To Be Paid"] = amounttobepaid;
                                 newRow1["Paid Amount"] = Math.Round(todaypaid, 2);
                                 newRow1["Due Amount"] = Math.Round(totaldue, 2);
