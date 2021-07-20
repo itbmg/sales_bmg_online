@@ -174,6 +174,8 @@
                             <br />
                             <asp:Button ID="btnPrint" CssClass="btn btn-primary" Text="Print" OnClientClick="javascript:CallPrint('divPrint');"
                                 runat="Server" />
+                             <asp:Button ID="Button1" CssClass="btn btn-primary" Text="Save" OnClick="btn_Save_Click"
+                                runat="Server" />
                             <asp:Label ID="lblmsg" runat="server" Text="" ForeColor="Red" Font-Size="20px"></asp:Label>
                         </asp:Panel>
                         <br />
