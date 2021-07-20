@@ -589,24 +589,19 @@ public partial class IncentiveReport : System.Web.UI.Page
                                 }
                                 else
                                 {
-                                    
-                                        lblmsg.Text = "Crates Balance   :" + totcratesbal + "  Cans Balance    :" + totcansbal;
-                                      //  btnicentivesave.Visible = false;
-                                      //  btnPrint.Visible = false;
-                                       // Button3.Visible = false;
+                                    lblmsg.Text = "Crates Balance   :" + totcratesbal + "  Cans Balance    :" + totcansbal;
                                 }
                             }
                             #endregion
 
                             grdReports.DataSource = Report;
                             grdReports.DataBind();
-
                             Session["xportdata"] = Report;
                             Session["xporttype"] = "Incentive Report";
                             Session["agentname"] = ddlAgentName.SelectedItem.Text;
                             Session["routename"] = ddlRouteName.SelectedItem.Text;
                             Session["date"] = ServerDateCurrentdate.ToString("dd-MM-yyyy hh:mm");
-                            
+
                         }
 
                     }
