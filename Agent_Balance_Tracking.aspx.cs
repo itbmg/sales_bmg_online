@@ -173,7 +173,7 @@ public partial class Agent_Balance_Tracking : System.Web.UI.Page
                 double diff = branchamount - transactionamout;
                 newrow["BranchClosing"] = branchamount;
                 newrow["Transaction Closing"] = transactionamout;
-                newrow["Difference"] = Math.Round(diff, 2);
+                newrow["Difference"] = Math.Round(diff);
                 Report.Rows.Add(newrow);
             }
             grdReports.DataSource = Report;
