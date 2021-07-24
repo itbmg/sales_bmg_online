@@ -31,6 +31,8 @@ public partial class ProductWiseTotalDCReport : System.Web.UI.Page
             if (!Page.IsCallback)
             {
                 lblTitle.Text = Session["TitleName"].ToString();
+                txtfromdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+                txttodate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
             }
         }
     }

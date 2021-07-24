@@ -43,19 +43,19 @@
     </div>
     <section class="content-header">
         <h1>
-            Branch Wise Due Consolidate<small>Preview</small>
+            AgentWise Periodic Due Details<small>Preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i>Operations</a></li>
             <li><a href="#"><i></i>Due Details</a></li>
-            <li><a href="#">Branch Wise Due Consolidate</a></li>
+            <li><a href="#">AgentWise Periodic Due Details</a></li>
         </ol>
     </section>
     <section class="content">
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    <i style="padding-right: 5px;" class="fa fa-cog"></i>AgentWise Due Transaction Details
+                    <i style="padding-right: 5px;" class="fa fa-cog"></i>AgentWise Periodic Due Details
                 </h3>
             </div>
             <div class="box-body">

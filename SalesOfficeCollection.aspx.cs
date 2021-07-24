@@ -196,6 +196,14 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
             }
+            if (Status == "Route Collections")
+            {
+                cmd = new MySqlCommand("SELECT  collections.PaymentType,collections.Remarks,collections.PaidDate,collections.AmountPaid, branchroutes.RouteName as DispName, branchroutes.sno as routeid,  branchroutesubtable.BranchID, branchdata.BranchName,branchdata.sno  FROM    branchroutes   INNER JOIN    branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo   INNER JOIN    branchdata ON branchroutesubtable.BranchID = branchdata.sno  INNER JOIN collections ON branchdata.sno=collections.Branchid    WHERE (branchroutes.BranchID = @BranchID) and (branchdata.flag=@flag) and (collections.PaidDate between @d1 and @d2) and (collections.tripId <> 'NULL') GROUP BY branchdata.BranchName  ORDER BY DispName ");
+                cmd.Parameters.AddWithValue("@BranchID", BranchID);
+                cmd.Parameters.AddWithValue("@flag", "1");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+            }
             DataTable dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
 
             Report = new DataTable();
@@ -217,26 +225,37 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 newrow["Agent Code"] = branch["sno"].ToString();
                 newrow["Agent Name"] = branch["BranchName"].ToString();
                 //newrow["Refno"] = branch["ReceiptNo"].ToString();
-                newrow["ReceiptNo"] = branch["ReceiptNo"].ToString();
                 newrow["Collected Amount"] = branch["AmountPaid"].ToString();
-                newrow["Collected Time"] = branch["PaidDate"].ToString();
-                if (branch["PaymentType"].ToString() == "Cheque")
-                {
-                    newrow["Payment Type"] = "Cheque No:" + branch["ChequeNo"].ToString() + "" + "Status:" + branch["CheckStatus"].ToString() + "";
-                }
-                else
+               
+                if (Status == "Route Collections")
                 {
                     newrow["Payment Type"] = branch["PaymentType"].ToString();
-                }
-                if (branch["tripId"].ToString() == "")
-                {
-                    newrow["Collection Type"] = "Sales Office";
+                    newrow["Collection Type"] = "Trip";
+                    newrow["Narration"] = branch["Remarks"].ToString();
+                    newrow["Collected Time"] = branch["PaidDate"].ToString();
                 }
                 else
                 {
-                    newrow["Collection Type"] = "Trip";
+                    if (branch["PaymentType"].ToString() == "Cheque")
+                    {
+                        newrow["Payment Type"] = "Cheque No:" + branch["ChequeNo"].ToString() + "" + "Status:" + branch["CheckStatus"].ToString() + "";
+                    }
+                    else
+                    {
+                        newrow["Payment Type"] = branch["PaymentType"].ToString();
+                    }
+                    if (branch["tripId"].ToString() == "")
+                    {
+                        newrow["Collection Type"] = "Sales Office";
+                    }
+                    else
+                    {
+                        newrow["Collection Type"] = "Trip";
+                    }
+                    newrow["Narration"] = branch["Remarks"].ToString();
+                    newrow["ReceiptNo"] = branch["ReceiptNo"].ToString();
+                    newrow["Collected Time"] = branch["PaidDate"].ToString();
                 }
-                newrow["Narration"] = branch["Remarks"].ToString();
                 Report.Rows.Add(newrow);
             }
             DataRow TotRow = Report.NewRow();

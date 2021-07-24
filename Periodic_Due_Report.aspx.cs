@@ -24,6 +24,7 @@ public partial class Periodic_Due_Report : System.Web.UI.Page
             {
                 FillSalesOffice();
                 txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+                txtTodate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
                 lblTitle.Text = Session["TitleName"].ToString();
             }
         }
@@ -130,7 +131,7 @@ public partial class Periodic_Due_Report : System.Web.UI.Page
                 }
             }
             lblDate.Text = fromdate.ToString("dd/MMM/yyyy") + "    To    " + todate.ToString("dd/MMM/yyyy");
-            Session["filename"] = "Branch Wise Due Consolidate";
+            Session["filename"] = "AgentWise Due Periodic Details";
             string BranchID = ddlSalesOffice.SelectedValue;
             cmd = new MySqlCommand("SELECT  branchroutes.RouteName, branchroutes.sno as routeid,  branchroutesubtable.BranchID, branchdata.BranchName  FROM    branchroutes   INNER JOIN    branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo   INNER JOIN    branchdata ON branchroutesubtable.BranchID = branchdata.sno  WHERE (branchroutes.BranchID = @BranchID) and (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY branchroutes.RouteName");
             cmd.Parameters.AddWithValue("@branchid", BranchID);

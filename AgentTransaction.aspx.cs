@@ -35,6 +35,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                 lblTitle.Text = Session["TitleName"].ToString();
             }
         }
+        Button1.Visible = false;
     }
     void FillAgentName()
     {
@@ -262,7 +263,7 @@ public partial class AgentTransaction : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
             DataTable dtAgentIncentive = vdm.SelectQuery(cmd).Tables[0];
-           
+
             cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(VarifyDate, '%d/%b/%y') AS VarifyDate, CheckStatus FROM collections WHERE (Branchid = @BranchID) AND (CheckStatus = 'V') AND (VarifyDate BETWEEN @d1 AND @d2) GROUP BY VarifyDate");
             cmd.Parameters.AddWithValue("@BranchID", ddlAgentName.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
@@ -426,7 +427,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                     newrow["Paid Amount"] = amtpaid - incentiveamtpaid;
                     newrow["Incentive/JV"] = incentiveamtpaid;
                     newrow["Amount Debited"] = debitedamount;
-                    double tot_amount = amtpaid ;
+                    double tot_amount = amtpaid;
                     double totalbalance = totalamt - tot_amount;
                     newrow["Bal Amount"] = Math.Round(totalbalance);
                     oppcarry = totalbalance;
@@ -488,6 +489,60 @@ public partial class AgentTransaction : System.Web.UI.Page
             }
         }
         return p.Substring(0, i) + " " + p.Substring(i, p.Length - i);
+    }
+    protected void btn_Save_Click(object sender, EventArgs e)
+    {
+        try
+        {
+            vdm = new VehicleDBMgr();
+            DataTable dtbalance = (DataTable)Session["xportdata"];
+            DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdm.conn);
+            foreach (DataRow dr in dtbalance.Rows)
+            {
+                double openingbalance = 0;
+                double.TryParse(dr["Opp Bal "].ToString(), out openingbalance);
+                double paidamout = 0;
+                double.TryParse(dr["Paid Amount "].ToString(), out paidamout);
+                double ince_Jv_amount = 0;
+                double.TryParse(dr["Incentive/JV "].ToString(), out ince_Jv_amount);
+                double closing = 0;
+                double.TryParse(dr["Bal Amount "].ToString(), out closing);
+                double totalpaidamount = paidamout + ince_Jv_amount;
+                //double closingamount = openingbalance - totalpaidamount;
+                if (dr["DeliverDate "].ToString() != "Total")
+                {
+                    DateTime Date = Convert.ToDateTime(dr["DeliverDate "].ToString()).AddDays(-1);
+                    string inddate = Date.ToString("yyyy-MM-dd");
+                    cmd = new MySqlCommand("update agent_bal_trans  set opp_balance=@opp_balance,salesvalue=@salesvalue,paidamount=@paidamount,clo_balance=@clo_balance  where agentid=@agentid and inddate=@inddate");
+                    cmd.Parameters.AddWithValue("@opp_balance", openingbalance);
+                    cmd.Parameters.AddWithValue("@salesvalue", dr["Sale Value "].ToString());
+                    cmd.Parameters.AddWithValue("@paidamount", totalpaidamount);
+                    cmd.Parameters.AddWithValue("@clo_balance", closing);
+                    cmd.Parameters.AddWithValue("@agentid", ddlAgentName.SelectedValue);
+                    cmd.Parameters.AddWithValue("@inddate", inddate);
+                    if (vdm.Update(cmd) == 0)
+                    {
+                        cmd = new MySqlCommand("insert into agent_bal_trans(agentid,opp_balance,inddate,salesvalue,paidamount,clo_balance,createdate)values(@agentid,@opp_balance,@inddate,@salesvalue,@paidamount,@clo_balance,@createdate)");
+                        cmd.Parameters.AddWithValue("@agentid", ddlAgentName.SelectedValue);
+                        cmd.Parameters.AddWithValue("@opp_balance", openingbalance);
+                        cmd.Parameters.AddWithValue("@inddate", inddate);
+                        cmd.Parameters.AddWithValue("@salesvalue", dr["Sale Value "].ToString());
+                        cmd.Parameters.AddWithValue("@paidamount", totalpaidamount);
+                        cmd.Parameters.AddWithValue("@clo_balance", closing);
+                        cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                        vdm.insert(cmd);
+                    }
+                }
+                else
+                {
+                    string empty = "";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
     protected void btn_Export_Click(object sender, EventArgs e)
     {

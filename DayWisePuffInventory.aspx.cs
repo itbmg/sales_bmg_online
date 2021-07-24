@@ -34,6 +34,8 @@ public partial class DayWisePuffInventory : System.Web.UI.Page
                 FillSalesOffice();
                 //txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
                 //lblTitle.Text = Session["TitleName"].ToString();
+                txtdate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
+                txttodate.Text = DateTime.Now.ToString("dd-MM-yyyy HH:mm");
             }
         }
     }
