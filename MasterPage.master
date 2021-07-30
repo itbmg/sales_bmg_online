@@ -757,7 +757,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                         <ul id="ultools">
                                             <li id="liSalesEdit"><a href="EditIndent.aspx">Sales Edit</a></li>
                                             <li id="LiCollectionsedit"><a href="EditCollections.aspx">Amount Collections Edit</a></li>
-                                            <li id="LiLeaksEdit"><a href="EditLeaks.aspx">Leakage Edit</a></li>
+                                            <li id="LiLeaksEdit"><a href="NewEditLeaks.aspx">Leakage Edit</a></li>
                                             <li id="LiDcEdit"><a href="EditDC.aspx">DC Edit</a></li>
                                             <li id="LiCahsbookEdit"><a href="EditCashBook.aspx">CashBook Edit</a></li>
                                             <li id="liInventoryEdit"><a href="InventoryEdit.aspx">Inventory Edit</a></li>

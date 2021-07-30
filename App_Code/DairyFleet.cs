@@ -50249,14 +50249,14 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 cmd.Parameters.AddWithValue("@paidamount", totpaidamount);
                                 cmd.Parameters.AddWithValue("@refno", maxsno);
                                 cmd.Parameters.AddWithValue("@closing", totalclosingvalue);
-                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate).AddDays(-1);
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(paymentdate).AddDays(-1));
                                 if(vdbmngr.Update(cmd) == 0)
                                 {
                                     double clsvalue = clobalance - incentiveamount;
                                     cmd = new MySqlCommand("INSERT INTO agent_bal_trans(agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount,createdate, entryby) VALUES (@agentid, @oppbalance, @inddate, @salesvalue, @clobalance, @paidamount,@createdate, @entryby)");
                                     cmd.Parameters.AddWithValue("@agentid", agentid);
                                     cmd.Parameters.AddWithValue("@oppbalance", clobalance);
-                                    cmd.Parameters.AddWithValue("@inddate", paymentdate.AddDays(-1);
+                                    cmd.Parameters.AddWithValue("@inddate", paymentdate.AddDays(-1));
                                     cmd.Parameters.AddWithValue("@salesvalue", "0");
                                     cmd.Parameters.AddWithValue("@clobalance", clsvalue);
                                     cmd.Parameters.AddWithValue("@paidamount", incentiveamount);
