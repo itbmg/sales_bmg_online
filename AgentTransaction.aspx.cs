@@ -35,7 +35,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                 lblTitle.Text = Session["TitleName"].ToString();
             }
         }
-        Button1.Visible = false;
+        //Button1.Visible = false;
     }
     void FillAgentName()
     {
@@ -431,11 +431,11 @@ public partial class AgentTransaction : System.Web.UI.Page
                     double totalbalance = totalamt - tot_amount;
                     newrow["Bal Amount"] = Math.Round(totalbalance);
                     oppcarry = totalbalance;
-                    if (Amount + amtpaid + debitedamount != 0)
-                    {
-                        Report.Rows.Add(newrow);
-                        i++;
-                    }
+                    //if (Amount + amtpaid + debitedamount != 0)
+                    //{
+                    Report.Rows.Add(newrow);
+                    i++;
+                    //}
                     totsale = totsale - Amount;
                 }
                 DataRow newvartical = Report.NewRow();
@@ -522,7 +522,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                     cmd.Parameters.AddWithValue("@inddate", inddate);
                     if (vdm.Update(cmd) == 0)
                     {
-                        cmd = new MySqlCommand("insert into agent_bal_trans(agentid,opp_balance,inddate,salesvalue,paidamount,clo_balance,createdate)values(@agentid,@opp_balance,@inddate,@salesvalue,@paidamount,@clo_balance,@createdate)");
+                        cmd = new MySqlCommand("insert into agent_bal_trans(agentid,opp_balance,inddate,salesvalue,paidamount,clo_balance,createdate,entryby)values(@agentid,@opp_balance,@inddate,@salesvalue,@paidamount,@clo_balance,@createdate,@entryby)");
                         cmd.Parameters.AddWithValue("@agentid", ddlAgentName.SelectedValue);
                         cmd.Parameters.AddWithValue("@opp_balance", openingbalance);
                         cmd.Parameters.AddWithValue("@inddate", inddate);
@@ -530,6 +530,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@paidamount", totalpaidamount);
                         cmd.Parameters.AddWithValue("@clo_balance", closing);
                         cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                        cmd.Parameters.AddWithValue("@entryby", "1000");
                         vdm.insert(cmd);
                     }
                 }

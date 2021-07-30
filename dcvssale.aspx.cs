@@ -205,7 +205,7 @@ public partial class dcvssale : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@DEmpId", dtLeakble.Rows[0]["EmpId"].ToString());
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
-                 DtTripId = vdm.SelectQuery(cmd).Tables[0];
+                DtTripId = vdm.SelectQuery(cmd).Tables[0];
             }
 
             dtShortAndFree.Merge(DtTripId);
@@ -285,6 +285,7 @@ public partial class dcvssale : System.Web.UI.Page
                     foreach (DataRow drleaks in DtLeksAndReturns.Select("BranchID='" + BRANCHID + "'AND AssignDate='" + branch["I_date"].ToString() + "'"))
                     {
                         double.TryParse(drleaks["totleaks"].ToString(), out leakqty);
+                        double.TryParse(drleaks["returnqty"].ToString(), out returnqty);
                         newrow["Lekages"] = Math.Round(leakqty, 2); //drleaks["Leaks"].ToString();
                         newrow["Returns"] = Math.Round(returnqty, 2); //drleaks["Return"].ToString();
                         totalleakreturn += leakqty;
