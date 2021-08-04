@@ -139,6 +139,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 BranchID = "158";
             }
             string Status = ddlStatus.SelectedValue;
+            DataTable dtroutecollection = new DataTable();
             if (Status == "ALL")
             {
                 // cmd.Parameters.AddWithValue("SELECT branchdata.sno, branchdata.BranchName, branchaccounts.Amount FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN branchaccounts ON branchdata.sno = branchaccounts.BranchId WHERE (dispatch.sno = 5)");
@@ -146,6 +147,17 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@brnchid", BranchID);
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                DataTable dt = vdm.SelectQuery(cmd).Tables[0];
+
+                cmd = new MySqlCommand("SELECT  'Route_Collections' as collectiotype,collections.PaymentType,collections.Remarks,collections.PaidDate,collections.AmountPaid, branchroutes.RouteName as DispName, branchroutes.sno as routeid,  branchroutesubtable.BranchID, branchdata.BranchName,branchdata.sno  FROM    branchroutes   INNER JOIN    branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo   INNER JOIN    branchdata ON branchroutesubtable.BranchID = branchdata.sno  INNER JOIN collections ON branchdata.sno=collections.Branchid    WHERE (branchroutes.BranchID = @BranchID) and (branchdata.flag=@flag) and (collections.PaidDate between @d1 and @d2) and (collections.tripId <> 'NULL') GROUP BY branchdata.BranchName  ORDER BY DispName ");
+                cmd.Parameters.AddWithValue("@BranchID", BranchID);
+                cmd.Parameters.AddWithValue("@flag", "1");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                DataTable dt1 = vdm.SelectQuery(cmd).Tables[0];
+                dtroutecollection.Merge(dt);
+                dtroutecollection.Merge(dt1);
+
             }
             if (Status == "Cash")
             {
@@ -154,6 +166,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "Cash");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
 
             }
             if (Status == "Cheque")
@@ -163,6 +176,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "Cheque");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
             }
             if (Status == "DD")
             {
@@ -171,6 +185,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "DD");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
             }
             if (Status == "Bank Transfer")
             {
@@ -179,6 +194,8 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "Bank Transfer");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
+
             }
             if (Status == "Incentive")
             {
@@ -187,6 +204,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "Incentive");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
             }
             if (Status == "Journal Voucher")
             {
@@ -195,6 +213,8 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@pt", "Journal Voucher");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
+
             }
             if (Status == "Route Collections")
             {
@@ -203,8 +223,8 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@flag", "1");
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
             }
-            DataTable dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
 
             Report = new DataTable();
             Report.Columns.Add("Route Name");
@@ -227,7 +247,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 //newrow["Refno"] = branch["ReceiptNo"].ToString();
                 newrow["Collected Amount"] = branch["AmountPaid"].ToString();
                
-                if (Status == "Route Collections")
+                if (Status == "Route Collections" || branch["collectiotype"].ToString()== "Route_Collections")
                 {
                     newrow["Payment Type"] = branch["PaymentType"].ToString();
                     newrow["Collection Type"] = "Trip";
@@ -271,11 +291,6 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 }
             }
             Report.Rows.Add(TotRow);
-
-
-
-
-
             grdReports.DataSource = Report;
             grdReports.DataBind();
 
