@@ -23410,7 +23410,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     double.TryParse(dtmaxagentbal.Rows[0]["clo_balance"].ToString(), out clobalance);
                     if (diff > 0)
                     {
-                        cmd = new MySqlCommand("UPDATE agent_bal_trans set salesvalue=salesvalue-@Amount, clo_balance=clo_balance-@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount-@Amount, clo_balance=clo_balance-@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
                         cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
                         cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
                         cmd.Parameters.AddWithValue("@Amount", diff);
@@ -23448,7 +23448,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     else
                     {
                         diff = presentamt - prevamt;
-                        cmd = new MySqlCommand("UPDATE agent_bal_trans set salesvalue=salesvalue+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
                         cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
                         cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
                         cmd.Parameters.AddWithValue("@Amount", diff);
