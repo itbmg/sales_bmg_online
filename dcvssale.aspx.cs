@@ -209,7 +209,7 @@ public partial class dcvssale : System.Web.UI.Page
             }
 
             dtShortAndFree.Merge(DtTripId);
-            cmd = new MySqlCommand("SELECT branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as inddate, branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID)");
+            cmd = new MySqlCommand("SELECT branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as inddate, branchleaktrans.LeakQty as puffleaks,branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID)");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
@@ -295,8 +295,11 @@ public partial class dcvssale : System.Web.UI.Page
                     {
                         double.TryParse(drfree["ShortQty"].ToString(), out shortqty);
                         double.TryParse(drfree["FreeMilk"].ToString(), out freeqty);
+                        double.TryParse(drfree["puffleaks"].ToString(), out leakqty);
                         //newrow["Free"] = Math.Round(freeqty, 0); //drfree["ShortQty"].ToString();
                         //newrow["Short"] = Math.Round(shortqty, 0);// drfree["qty"].ToString();
+                        totalleakreturn += leakqty;
+                        newrow["Lekages"] = Math.Round(totalleakreturn, 2);
                         totalshortfree += freeqty;
                         totalshortfree += shortqty;
                         tfree += freeqty;
