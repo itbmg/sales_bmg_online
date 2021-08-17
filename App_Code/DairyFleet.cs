@@ -21194,6 +21194,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string ReturnStatus { get; set; }
         public string tabletype { get; set; }
         public string BranchId { get; set; }
+        public string PuffLeaks { get; set; }
         
     }
     private void GetsoandPlantDespNames(HttpContext context)
@@ -22020,7 +22021,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
             else
             {
-                cmd = new MySqlCommand("SELECT 'BranchLeaks' as tabletype,branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as EntryDate, branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk, branchleaktrans.TripId as Sno,branchleaktrans.ProdId as ProductID,Productsdata.ProductName,Productsdata.Rank  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno INNER JOIN Productsdata ON branchleaktrans.ProdId=Productsdata.sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID) order by Productsdata.Rank");
+                cmd = new MySqlCommand("SELECT 'BranchLeaks' as tabletype,branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as EntryDate, branchleaktrans.LeakQty as puffleaks,branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk, branchleaktrans.TripId as Sno,branchleaktrans.ProdId as ProductID,Productsdata.ProductName,Productsdata.Rank  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno INNER JOIN Productsdata ON branchleaktrans.ProdId=Productsdata.sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID) order by Productsdata.Rank");
                 cmd.Parameters.AddWithValue("@BranchID", soid);
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(dtinddate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(dtinddate));
@@ -22043,6 +22044,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 dtall_leakages.Columns.Add("ProductName");
                 dtall_leakages.Columns.Add("EntryDate");
                 dtall_leakages.Columns.Add("TotalLeaks");
+                dtall_leakages.Columns.Add("PuffLeaks");
                 dtall_leakages.Columns.Add("ShortQty");
                 dtall_leakages.Columns.Add("FreeMilk");
                 dtall_leakages.Columns.Add("ReturnQty");
@@ -22061,16 +22063,19 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         double totshrt = 0;
                         double totretrn = 0;
                         double totfree = 0;
+                        double totPuffLeaks = 0;
                         foreach (DataRow drleaks in dtShortAndFree.Select("ProductId='" + drall["ProductId"].ToString() + "'"))
                         {
                             string paiddate = drleaks["EntryDate"].ToString();
                             string TotalLeaks = drleaks["TotalLeaks"].ToString();
                             string Shortmilk = drleaks["ShortQty"].ToString();
                             string freemilk = drleaks["FreeMilk"].ToString();
+                            string puffleaks = drleaks["puffleaks"].ToString();
                             double leak = 0;
                             double shortqty = 0;
                             double free = 0;
                             double returnqty = 0;
+                            double PuffLeaks = 0;
                             if (paiddate != "")
                             {
                                 collecteddate = drleaks["EntryDate"].ToString();
@@ -22079,6 +22084,19 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             if (paiddate == "")
                             {
                                 newrow["EntryDate"] = collecteddate;
+                            }
+                            if (ddledittype == "Sales Office")
+                            {
+                                if (puffleaks == "")
+                                {
+                                    newrow["PuffLeaks"] = totPuffLeaks;
+                                }
+                                if (puffleaks != "")
+                                {
+                                    double.TryParse(drleaks["puffleaks"].ToString(), out PuffLeaks);
+                                    totPuffLeaks += PuffLeaks;
+                                    newrow["PuffLeaks"] = totPuffLeaks;
+                                }
                             }
                             if (TotalLeaks == "")
                             {
@@ -22113,17 +22131,17 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                             //if (ddledittype == "Routes")
                             //{
-                                string retunmilk = drleaks["ReturnQty"].ToString();
-                                if (retunmilk == "")
-                                {
-                                    newrow["ReturnQty"] = totretrn;
-                                }
-                                if (retunmilk != "")
-                                {
-                                    double.TryParse(drleaks["ReturnQty"].ToString(), out returnqty);
-                                    totretrn += returnqty;
-                                    newrow["ReturnQty"] = totretrn;
-                                }
+                            string retunmilk = drleaks["ReturnQty"].ToString();
+                            if (retunmilk == "")
+                            {
+                                newrow["ReturnQty"] = totretrn;
+                            }
+                            if (retunmilk != "")
+                            {
+                                double.TryParse(drleaks["ReturnQty"].ToString(), out returnqty);
+                                totretrn += returnqty;
+                                newrow["ReturnQty"] = totretrn;
+                            }
                             //}
                             newrow["Sno"] = drleaks["Sno"].ToString();//tripdata sno
                             //newrow["BranchId"] = drleaks["Branch_Id"].ToString();
@@ -22136,9 +22154,11 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         double totshrt = 0;
                         double totfree = 0;
                         double totretrn = 0;
+                        double totpuff = 0;
                         newrow["EntryDate"] = collecteddate;
                         newrow["TotalLeaks"] = totleak;
                         newrow["ShortQty"] = totshrt;
+                        newrow["PuffLeaks"] = totpuff;
                         newrow["FreeMilk"] = totfree;
                         newrow["ReturnQty"] = totretrn;
                         newrow["ProductName"] = "0";
@@ -22160,6 +22180,19 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     string Shortmilk = dr["ShortQty"].ToString();
                     string retunmilk = dr["ReturnQty"].ToString();
                     string freemilk = dr["FreeMilk"].ToString();
+                    if (ddledittype == "Sales Office")
+                    {
+                        string pufleaks = dr["PuffLeaks"].ToString();
+
+                        if (pufleaks == "")
+                        {
+                            GetLeakreturn.PuffLeaks = "0";
+                        }
+                        if (pufleaks != "")
+                        {
+                            GetLeakreturn.PuffLeaks = dr["PuffLeaks"].ToString();
+                        }
+                    }
 
                     if (paiddate != "")
                     {
@@ -22351,88 +22384,118 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     float returnqt = 0;
                     float freeqty = 0;
                     float shortqt = 0;
+                    float puffleaks = 0;
                     float.TryParse(o.LeakQty, out leak);
                     float.TryParse(o.FreeQty, out freeqty);
                     float.TryParse(o.ReturnQty, out returnqt);
-                    float.TryParse(o.ShortQty, out shortqt);
+                    float.TryParse(o.Puffleaks, out puffleaks);
 
 
                     float Prevleak = 0;
                     float Prevreturnqty = 0;
                     float Prevfreeqty = 0;
                     float Prevshortqty = 0;
+                    float Prevpuffqty = 0;
                     float.TryParse(o.PrevLeakQty, out Prevleak);
                     float.TryParse(o.PrevFreeQty, out Prevfreeqty);
                     float.TryParse(o.PrevReturnQty, out Prevreturnqty);
                     float.TryParse(o.PrevShortQty, out Prevshortqty);
+                    float.TryParse(o.PrevPuffleaks, out Prevpuffqty);
+
                     //if (tabletype == "BranchLeaks")
                     //{
-                    cmd = new MySqlCommand("delete from  branchleaktrans WHERE (TripId = @TripId) and (ProdId=@ProdId)");
-                    cmd.Parameters.AddWithValue("@TripId", tripid);
-                    cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
-                    if (leak != Prevleak)
-                        vdbmngr.Delete(cmd);
-                    else if (freeqty != Prevfreeqty)
-                        vdbmngr.Delete(cmd);
-                    else if (shortqt != Prevshortqty)
-                        vdbmngr.Delete(cmd);
 
-                    cmd = new MySqlCommand("select* from branchleaktrans where TripId = @TripId and ProdId = @ProdId");
-                    cmd.Parameters.AddWithValue("@TripId", tripid);
-                    cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
-                    DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
-                    if (dt.Rows.Count == 0)
+                    if (puffleaks != Prevpuffqty)
                     {
-                        cmd = new MySqlCommand("INSERT INTO branchleaktrans (EmpId,TripId,ProdId,DOE,BranchID,FreeQty,ShortQty) VALUES (@EmpId,@TripId,@ProdId,@DOE,@BranchID,@FreeQty,@ShortQty)");
+                        cmd = new MySqlCommand("UPDATE  branchleaktrans SET EmpId=EmpId,ProdId=@ProdId,DOE=@DOE,BranchID=@BranchID,LeakQty=@LeakQty where TripId=@TripId and ProdId=@ProdId");
                         cmd.Parameters.AddWithValue("@EmpId", context.Session["UserSno"]);
                         cmd.Parameters.AddWithValue("@TripID", o.TripId);
                         cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
                         cmd.Parameters.AddWithValue("@DOE", ServerDateCurrentdate);
                         cmd.Parameters.AddWithValue("@BranchID", soid);
-                        cmd.Parameters.AddWithValue("@FreeQty", o.FreeQty);
-                        cmd.Parameters.AddWithValue("@ShortQty", o.ShortQty);
-                        if (leak != Prevleak)
+                        cmd.Parameters.AddWithValue("@LeakQty", o.Puffleaks);
+                        if (vdbmngr.Update(cmd) == 0)
+                        {
+                            cmd = new MySqlCommand("INSERT INTO branchleaktrans (EmpId,TripId,ProdId,DOE,BranchID,LeakQty) VALUES (@EmpId,@TripId,@ProdId,@DOE,@BranchID,@LeakQty)");
+                            cmd.Parameters.AddWithValue("@EmpId", context.Session["UserSno"]);
+                            cmd.Parameters.AddWithValue("@TripID", o.TripId);
+                            cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
+                            cmd.Parameters.AddWithValue("@DOE", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@BranchID", soid);
+                            cmd.Parameters.AddWithValue("@LeakQty", o.Puffleaks);
                             vdbmngr.insert(cmd);
-                        else if (freeqty != Prevfreeqty)
-                            vdbmngr.insert(cmd);
-                        else if (shortqt != Prevshortqty)
-                            vdbmngr.insert(cmd);
+                        }
                     }
-                    cmd = new MySqlCommand("DELETE FROM leakages WHERE (TripID = @dcno) and (ProductID=@ProductID)");
-                    cmd.Parameters.AddWithValue("@dcno", tripid);
-                    cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
-                    if (leak != Prevleak)
-                        vdbmngr.Delete(cmd);
-                    else if (freeqty != Prevfreeqty)
-                        vdbmngr.Delete(cmd);
-                    else if (shortqt != Prevshortqty)
-                        vdbmngr.Delete(cmd);
-                    else if (returnqt != Prevreturnqty)
-                        vdbmngr.Delete(cmd);
-
-                    cmd = new MySqlCommand("select* from leakages where TripId = @TripId and ProductID = @ProductID");
-                    cmd.Parameters.AddWithValue("@TripId", tripid);
-                    cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
-                    DataTable dtl = vdbmngr.SelectQuery(cmd).Tables[0];
-                    if (dtl.Rows.Count == 0)
+                    else
                     {
-                        cmd = new MySqlCommand("INSERT INTO leakages (TripID, EntryDate, ProductID, ReturnQty,TotalLeaks, VarifyStatus, VarifyReturnStatus,Modified_EmpId) VALUES (@TripID, @EntryDate, @ProductID, @ReturnQty,@TotalLeaks, @VarifyStatus, @VarifyReturnStatus,@Modified_EmpId)");
-                        cmd.Parameters.AddWithValue("@TripID", o.TripId);
-                        cmd.Parameters.AddWithValue("@EntryDate", ServerDateCurrentdate);
-                        cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
-                        cmd.Parameters.AddWithValue("@ReturnQty", o.ReturnQty);
-                        cmd.Parameters.AddWithValue("@TotalLeaks", o.LeakQty);
-                        cmd.Parameters.AddWithValue("@VarifyStatus", null);
-                        cmd.Parameters.AddWithValue("@VarifyReturnStatus", null);
-                        cmd.Parameters.AddWithValue("@Modified_EmpId", context.Session["UserSno"]);
+
+                        cmd = new MySqlCommand("delete from  branchleaktrans WHERE (TripId = @TripId) and (ProdId=@ProdId)");
+                        cmd.Parameters.AddWithValue("@TripId", tripid);
+                        cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
                         if (leak != Prevleak)
-                            vdbmngr.insert(cmd);
+                            vdbmngr.Delete(cmd);
                         else if (freeqty != Prevfreeqty)
-                            vdbmngr.insert(cmd);
-                        else if (returnqt != Prevreturnqty)
-                            vdbmngr.insert(cmd);
+                            vdbmngr.Delete(cmd);
                         else if (shortqt != Prevshortqty)
-                            vdbmngr.insert(cmd);
+                            vdbmngr.Delete(cmd);
+
+                        cmd = new MySqlCommand("select* from branchleaktrans where TripId = @TripId and ProdId = @ProdId");
+                        cmd.Parameters.AddWithValue("@TripId", tripid);
+                        cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
+                        DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
+                        if (dt.Rows.Count == 0)
+                        {
+                            cmd = new MySqlCommand("INSERT INTO branchleaktrans (EmpId,TripId,ProdId,DOE,BranchID,FreeQty,ShortQty) VALUES (@EmpId,@TripId,@ProdId,@DOE,@BranchID,@FreeQty,@ShortQty)");
+                            cmd.Parameters.AddWithValue("@EmpId", context.Session["UserSno"]);
+                            cmd.Parameters.AddWithValue("@TripID", o.TripId);
+                            cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
+                            cmd.Parameters.AddWithValue("@DOE", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@BranchID", soid);
+                            cmd.Parameters.AddWithValue("@FreeQty", o.FreeQty);
+                            cmd.Parameters.AddWithValue("@ShortQty", o.ShortQty);
+                            if (leak != Prevleak)
+                                vdbmngr.insert(cmd);
+                            else if (freeqty != Prevfreeqty)
+                                vdbmngr.insert(cmd);
+                            else if (shortqt != Prevshortqty)
+                                vdbmngr.insert(cmd);
+                        }
+                        cmd = new MySqlCommand("DELETE FROM leakages WHERE (TripID = @dcno) and (ProductID=@ProductID)");
+                        cmd.Parameters.AddWithValue("@dcno", tripid);
+                        cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
+                        if (leak != Prevleak)
+                            vdbmngr.Delete(cmd);
+                        else if (freeqty != Prevfreeqty)
+                            vdbmngr.Delete(cmd);
+                        else if (shortqt != Prevshortqty)
+                            vdbmngr.Delete(cmd);
+                        else if (returnqt != Prevreturnqty)
+                            vdbmngr.Delete(cmd);
+
+                        cmd = new MySqlCommand("select* from leakages where TripId = @TripId and ProductID = @ProductID");
+                        cmd.Parameters.AddWithValue("@TripId", tripid);
+                        cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
+                        DataTable dtl = vdbmngr.SelectQuery(cmd).Tables[0];
+                        if (dtl.Rows.Count == 0)
+                        {
+                            cmd = new MySqlCommand("INSERT INTO leakages (TripID, EntryDate, ProductID, ReturnQty,TotalLeaks, VarifyStatus, VarifyReturnStatus,Modified_EmpId) VALUES (@TripID, @EntryDate, @ProductID, @ReturnQty,@TotalLeaks, @VarifyStatus, @VarifyReturnStatus,@Modified_EmpId)");
+                            cmd.Parameters.AddWithValue("@TripID", o.TripId);
+                            cmd.Parameters.AddWithValue("@EntryDate", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@ProductID", o.Productsno);
+                            cmd.Parameters.AddWithValue("@ReturnQty", o.ReturnQty);
+                            cmd.Parameters.AddWithValue("@TotalLeaks", o.LeakQty);
+                            cmd.Parameters.AddWithValue("@VarifyStatus", null);
+                            cmd.Parameters.AddWithValue("@VarifyReturnStatus", null);
+                            cmd.Parameters.AddWithValue("@Modified_EmpId", context.Session["UserSno"]);
+                            if (leak != Prevleak)
+                                vdbmngr.insert(cmd);
+                            else if (freeqty != Prevfreeqty)
+                                vdbmngr.insert(cmd);
+                            else if (returnqt != Prevreturnqty)
+                                vdbmngr.insert(cmd);
+                            else if (shortqt != Prevshortqty)
+                                vdbmngr.insert(cmd);
+                        }
                     }
                 }
             }
@@ -37179,10 +37242,12 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string offerqty { get; set; }
         public string Tabletype { get; set; }
 
+        public string Puffleaks { get; set; }
         public string PrevLeakQty { get; set; }
         public string PrevFreeQty { get; set; }
         public string PrevReturnQty { get; set; }
         public string PrevShortQty { get; set; }
+        public string PrevPuffleaks { get; set; }
     }
 
     class offerorderdetails

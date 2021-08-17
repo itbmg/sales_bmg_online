@@ -243,8 +243,10 @@ public partial class dcvssale : System.Web.UI.Page
                 string BRANCHID = ddlSalesOffice.SelectedValue;
                 foreach (DataRow branch in distincttable.Rows)
                 {
-                    double totalleakreturn = 0;
-                    double totalshortfree = 0;
+                    double totalleak = 0;
+                    double totalreturn = 0;
+                    double totalshort = 0;
+                    double totalfree = 0;
                     DataRow newrow = Report.NewRow();
                     double shortqty = 0;
                     double freeqty = 0;
@@ -288,8 +290,8 @@ public partial class dcvssale : System.Web.UI.Page
                         double.TryParse(drleaks["returnqty"].ToString(), out returnqty);
                         newrow["Lekages"] = Math.Round(leakqty, 2); //drleaks["Leaks"].ToString();
                         newrow["Returns"] = Math.Round(returnqty, 2); //drleaks["Return"].ToString();
-                        totalleakreturn += leakqty;
-                        totalleakreturn += returnqty;
+                        totalleak += leakqty;
+                        totalreturn += returnqty;
                     }
                     foreach (DataRow drfree in dtShortAndFree.Select("inddate='" + branch["I_date"].ToString() + "'"))
                     {
@@ -298,10 +300,10 @@ public partial class dcvssale : System.Web.UI.Page
                         double.TryParse(drfree["puffleaks"].ToString(), out leakqty);
                         //newrow["Free"] = Math.Round(freeqty, 0); //drfree["ShortQty"].ToString();
                         //newrow["Short"] = Math.Round(shortqty, 0);// drfree["qty"].ToString();
-                        totalleakreturn += leakqty;
-                        newrow["Lekages"] = Math.Round(totalleakreturn, 2);
-                        totalshortfree += freeqty;
-                        totalshortfree += shortqty;
+                        totalleak += leakqty;
+                        newrow["Lekages"] = Math.Round(totalleak, 2);
+                        totalfree += freeqty;
+                        totalshort += shortqty;
                         tfree += freeqty;
                         tshort += shortqty;
                     }

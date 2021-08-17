@@ -245,7 +245,6 @@
                 alert("Select Edit Type");
                 return false;
             }
-            
             var data = { 'operation': 'GetNewEditLeaksReturnsClick', 'RouteID': ddlRouteName, 'soid': ddlSalesOffice, 'IndDate': txtDate, 'ddledittype': ddledittype };
             var s = function (msg) {
                 if (msg) {
@@ -304,7 +303,7 @@
             var Indentdetails = new Array();
             $(rows).each(function (i, obj) {
                // if ($(this).find('#txtIndentNo').text() != "" && $(this).find('#hdnProductSno').text() != "") {
-                Indentdetails.push({ Tripid: $(this).find('#txtIndentNo').text(), EntryDate: $(this).find('#txtdate').text(), TableType: $(this).find('#hdntabletype').val(), Branch_id: $(this).find('#hdnbranchid').val(), Productsno: $(this).find('#hdnProductSno').val(), LeakQty: $(this).find('#txtleak').val(), PrevLeakQty: $(this).find('#hdnleak').val(), ShortQty: $(this).find('#txtShortQty').val(), PrevShortQty: $(this).find('#hdnShortQty').val(), FreeQty: $(this).find('#txtfreeqty').val(), PrevFreeQty: $(this).find('#hdnfreeqty').val(), ReturnQty: $(this).find('#txtreturnqty').val(), PrevReturnQty: $(this).find('#hdnreturnqty').val() });
+                Indentdetails.push({ Tripid: $(this).find('#txtIndentNo').text(), EntryDate: $(this).find('#txtdate').text(), TableType: $(this).find('#hdntabletype').val(), Branch_id: $(this).find('#hdnbranchid').val(), Productsno: $(this).find('#hdnProductSno').val(), PuffLeaks: $(this).find('#txtpuffleak').val(), Prevpuffleaks: $(this).find('#hdnpuffleak').val(), LeakQty: $(this).find('#txtleak').val(), PrevLeakQty: $(this).find('#hdnleak').val(), ShortQty: $(this).find('#txtShortQty').val(), PrevShortQty: $(this).find('#hdnShortQty').val(), FreeQty: $(this).find('#txtfreeqty').val(), PrevFreeQty: $(this).find('#hdnfreeqty').val(), ReturnQty: $(this).find('#txtreturnqty').val(), PrevReturnQty: $(this).find('#hdnreturnqty').val() });
                // }
             });
             var rows1 = $("#table_Returninventory_details tr:gt(0)");
