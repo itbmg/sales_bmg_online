@@ -22070,7 +22070,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             string TotalLeaks = drleaks["TotalLeaks"].ToString();
                             string Shortmilk = drleaks["ShortQty"].ToString();
                             string freemilk = drleaks["FreeMilk"].ToString();
-                            string puffleaks = drleaks["puffleaks"].ToString();
                             double leak = 0;
                             double shortqty = 0;
                             double free = 0;
@@ -22087,6 +22086,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                             if (ddledittype == "Sales Office")
                             {
+                                string puffleaks = drleaks["puffleaks"].ToString();
+
                                 if (puffleaks == "")
                                 {
                                     newrow["PuffLeaks"] = totPuffLeaks;
@@ -22193,7 +22194,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             GetLeakreturn.PuffLeaks = dr["PuffLeaks"].ToString();
                         }
                     }
-
+                    else
+                    {
+                        GetLeakreturn.PuffLeaks = "0";
+                    }
                     if (paiddate != "")
                     {
                         collecteddate = dr["EntryDate"].ToString();
