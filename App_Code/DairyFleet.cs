@@ -23322,7 +23322,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             context.Response.Write(response);
         }
     }
-
     private void btnEditCollectionSaveClick(HttpContext context)
     {
         try
@@ -23467,17 +23466,21 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 if (dtagentbal.Rows.Count > 0)
                 {
                     string sno = dtagentbal.Rows[0]["sno"].ToString();
-                    cmd = new MySqlCommand("SELECT sno, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                    cmd = new MySqlCommand("SELECT sno, paidamount, clo_balance FROM agent_bal_trans WHERE sno=@sno");
                     cmd.Parameters.AddWithValue("@sno", sno);
                     DataTable dtmaxagentbal = vdbmngr.SelectQuery(cmd).Tables[0];
-                    double salevalue = 0;
-                    double.TryParse(dtmaxagentbal.Rows[0]["salesvalue"].ToString(), out salevalue);
+                    double existpaidamount = 0;
+                    double.TryParse(dtmaxagentbal.Rows[0]["paidamount"].ToString(), out existpaidamount);
 
                     double clobalance = 0;
                     double.TryParse(dtmaxagentbal.Rows[0]["clo_balance"].ToString(), out clobalance);
+
+                    double closingamount = 0;
+
                     if (diff > 0)
                     {
-                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount-@Amount, clo_balance=clo_balance-@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+                        closingamount = clobalance + diff;
+                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount-@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
                         cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
                         cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
                         cmd.Parameters.AddWithValue("@Amount", diff);
@@ -23496,26 +23499,33 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 string csno = dr["sno"].ToString();
                                 double existoppbal = 0;
                                 double opp_balance = 0;
-                                double.TryParse(dr["opp_balance"].ToString(), out opp_balance);
-                                existoppbal = opp_balance - diff;
+                                //double.TryParse(dr["opp_balance"].ToString(), out opp_balance);
+                                existoppbal = closingamount;
 
-                                double existclovalue = 0;
-                                double clo_balance = 0;
-                                double.TryParse(dr["clo_balance"].ToString(), out clo_balance);
-                                existclovalue = clo_balance - diff;
+                                double salesvalue = 0;
+                                double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
+
+                                double ppaidamount = 0;
+                                double.TryParse(dr["paidamount"].ToString(), out ppaidamount);
+
+                                double existtotvalue = existoppbal + salesvalue;
+                                double clo_balance = existtotvalue - ppaidamount;
+                                double existclovalue = clo_balance;
 
                                 cmd = new MySqlCommand("UPDATE agent_bal_trans SET opp_balance=@oppbal, clo_balance=@closing where sno=@refno");
-                                cmd.Parameters.AddWithValue("@oppbal", existoppbal);
+                                cmd.Parameters.AddWithValue("@oppbal", closingamount);
                                 cmd.Parameters.AddWithValue("@refno", csno);
                                 cmd.Parameters.AddWithValue("@closing", existclovalue);
                                 vdbmngr.Update(cmd);
+                                closingamount = existclovalue;
                             }
                         }
                     }
                     else
                     {
                         diff = presentamt - prevamt;
-                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+                        closingamount = clobalance - diff;
+                        cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount+@Amount, clo_balance=clo_balance-@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
                         cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
                         cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
                         cmd.Parameters.AddWithValue("@Amount", diff);
@@ -23532,20 +23542,24 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             {
                                 string csno = dr["sno"].ToString();
                                 double existoppbal = 0;
-                                double opp_balance = 0;
-                                double.TryParse(dr["opp_balance"].ToString(), out opp_balance);
-                                existoppbal = opp_balance + diff;
+                                existoppbal = closingamount;
 
-                                double existclovalue = 0;
-                                double clo_balance = 0;
-                                double.TryParse(dr["clo_balance"].ToString(), out clo_balance);
-                                existclovalue = clo_balance + diff;
+                                double salesvalue = 0;
+                                double.TryParse(dr["salesvalue"].ToString(), out salesvalue);
+
+                                double ppaidamount = 0;
+                                double.TryParse(dr["paidamount"].ToString(), out ppaidamount);
+
+                                double existtotvalue = existoppbal + salesvalue;
+                                double clo_balance = existtotvalue - ppaidamount;
+                                double existclovalue = clo_balance;
 
                                 cmd = new MySqlCommand("UPDATE agent_bal_trans SET opp_balance=@oppbal, clo_balance=@closing where sno=@refno");
                                 cmd.Parameters.AddWithValue("@oppbal", existoppbal);
                                 cmd.Parameters.AddWithValue("@refno", csno);
                                 cmd.Parameters.AddWithValue("@closing", existclovalue);
                                 vdbmngr.Update(cmd);
+                                closingamount = existclovalue;
                             }
                         }
                     }
@@ -23574,7 +23588,258 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             context.Response.Write(response);
         }
     }
-   
+    //private void btnEditCollectionSaveClick(HttpContext context)
+    //{
+    //    try
+    //    {
+    //        vdbmngr = new VehicleDBMgr();
+    //        var js = new JavaScriptSerializer();
+    //        DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdbmngr.conn);
+    //        DateTime dtapril = new DateTime();
+    //        DateTime dtmarch = new DateTime();
+    //        int currentyear = ServerDateCurrentdate.Year;
+    //        int nextyear = ServerDateCurrentdate.Year + 1;
+    //        if (ServerDateCurrentdate.Month > 3)
+    //        {
+    //            string apr = "4/1/" + currentyear;
+    //            dtapril = DateTime.Parse(apr);
+    //            string march = "3/31/" + nextyear;
+    //            dtmarch = DateTime.Parse(march);
+    //        }
+    //        if (ServerDateCurrentdate.Month <= 3)
+    //        {
+    //            string apr = "4/1/" + (currentyear - 1);
+    //            dtapril = DateTime.Parse(apr);
+    //            string march = "3/31/" + (nextyear - 1);
+    //            dtmarch = DateTime.Parse(march);
+    //        }
+    //        var title1 = context.Request.Params[1];
+    //        Orders obj = js.Deserialize<Orders>(title1);
+    //        string indentdate = obj.indentdate;
+    //        string Denominations = obj.Denominations;
+    //        string ColAmount = obj.ColAmount;
+    //        string SubAmount = obj.SubAmount;
+    //        string soid = obj.SalesOfficeID;
+    //        string tripsno = "0";
+    //        foreach (orderdetail o in obj.data)
+    //        {
+    //            string branchid = o.Branchid;
+    //            string tripid = o.TripId;
+    //            string paiddate = o.PaidDate;
+    //            string paidamount = o.PaidAmount;
+    //            float prevamt = 0;
+    //            float presentamt = 0;
+    //            float.TryParse(paidamount, out presentamt);
+    //            cmd = new MySqlCommand("SELECT Branchid, AmountPaid, tripId FROM collections WHERE (Branchid = @branchid) AND (tripId = @tripid)");
+    //            cmd.Parameters.AddWithValue("@branchid", branchid);
+    //            cmd.Parameters.AddWithValue("@tripid", tripid);
+    //            tripsno = tripid;
+    //            DataTable dtcollection = vdbmngr.SelectQuery(cmd).Tables[0];
+    //            if (dtcollection.Rows.Count > 0)
+    //            {
+    //                float.TryParse(dtcollection.Rows[0]["AmountPaid"].ToString(), out prevamt);
+    //            }
+    //            float actamt = presentamt - prevamt;
+    //            cmd = new MySqlCommand("UPDATE cashreceipts SET AmountPaid = @amtpaid WHERE (AgentID = @branchid) AND (Tripid = @tripid)");
+    //            cmd.Parameters.AddWithValue("@branchid", branchid);
+    //            cmd.Parameters.AddWithValue("@tripid", tripid);
+    //            cmd.Parameters.AddWithValue("@amtpaid", paidamount);
+    //            vdbmngr.Update(cmd);
+    //            cmd = new MySqlCommand("UPDATE collections SET AmountPaid = @amountpaid WHERE (Branchid = @branchid) AND (tripId = @tripid) ");
+    //            cmd.Parameters.AddWithValue("@branchid", branchid);
+    //            cmd.Parameters.AddWithValue("@tripid", tripid);
+    //            cmd.Parameters.AddWithValue("@amountpaid", paidamount);
+    //            DateTime dtpaiddt = new DateTime();
+    //            dtpaiddt = DateTime.Parse(paiddate);
+    //            //cmd.Parameters.AddWithValue("@paiddate",paiddate);
+    //            //cmd.Parameters.AddWithValue("@paytime",ServerDateCurrentdate);
+    //            if (vdbmngr.Update(cmd) == 0)
+    //            {
+
+    //                if (prevamt != presentamt)
+    //                {
+    //                    cmd = new MySqlCommand("Select IFNULL(MAX(Receipt),0)+1 as Sno  from cashreceipts where BranchID=@BranchID AND (DOE BETWEEN @d1 AND @d2)");
+    //                    cmd.Parameters.AddWithValue("@BranchID", soid);
+    //                    cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril));
+    //                    cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch));
+    //                    DataTable dtReceipt = vdbmngr.SelectQuery(cmd).Tables[0];
+    //                    string CashReceiptNo = dtReceipt.Rows[0]["Sno"].ToString();
+    //                    cmd = new MySqlCommand("INSERT INTO collections (Branchid, AmountPaid, PaidDate, PaymentType, tripId, PayTime,ReceiptNo) VALUES (@Branchid, @AmountPaid, @PaidDate, @PaymentType, @tripId, @PayTime,@ReceiptNo)");
+    //                    cmd.Parameters.AddWithValue("@Branchid", branchid);
+    //                    cmd.Parameters.AddWithValue("@AmountPaid", paidamount);
+    //                    cmd.Parameters.AddWithValue("@PaidDate", dtpaiddt);
+    //                    cmd.Parameters.AddWithValue("@PaymentType", "Cash");
+    //                    cmd.Parameters.AddWithValue("@tripId", tripid);
+    //                    cmd.Parameters.AddWithValue("@PayTime", ServerDateCurrentdate);
+    //                    cmd.Parameters.AddWithValue("@ReceiptNo", CashReceiptNo);
+    //                    vdbmngr.insert(cmd);
+
+    //                    cmd = new MySqlCommand("SELECT Sno, EmpId, AssignDate, Status, Userdata_sno, Remarks, Permissions, Denominations, CollectedAmount, SubmittedAmount, Cdate, ReceivedAmount, VehicleNo,RecieptNo, I_Date, DEmpId, ATripid, InvStatus, GPStatus, PlanStatus, DespatchStatus, Plantime, DispTime, SOTransfer, BranchID, ReturnDCTime, Modified_EmpID,ModifiedDate, DCNo, DispatcherID, Password FROM tripdata WHERE (Sno = @tripId)");
+    //                    cmd.Parameters.AddWithValue("@tripId", tripid);
+    //                    DataTable dtempid_receipt = vdbmngr.SelectQuery(cmd).Tables[0];
+    //                    int Trip_empid = 0;
+    //                    int Trip_Receipt = 0;
+    //                    if (dtempid_receipt.Rows.Count > 0)
+    //                    {
+    //                        int.TryParse(dtempid_receipt.Rows[0]["EmpId"].ToString(), out Trip_empid);
+    //                        int.TryParse(dtempid_receipt.Rows[0]["RecieptNo"].ToString(), out Trip_Receipt);
+    //                    }
+    //                    cmd = new MySqlCommand("insert into cashreceipts (BranchId,ReceivedFrom,AgentID,AmountPaid,DOE,Create_by,Modified_by,Remarks,OppBal,Receipt,Tripid,GroupRef) values (@BranchId,@ReceivedFrom,@AgentID,@AmountPaid,@DOE, @Create_by,@Modified_by,@Remarks,@OppBal,@Receipt,@Tripid,@GroupRef)");
+    //                    cmd.Parameters.AddWithValue("@BranchId", soid);
+    //                    cmd.Parameters.AddWithValue("@ReceivedFrom", "Agent");
+    //                    cmd.Parameters.AddWithValue("@AgentID", branchid);
+    //                    cmd.Parameters.AddWithValue("@AmountPaid", paidamount);
+    //                    cmd.Parameters.AddWithValue("DOE", ServerDateCurrentdate);
+    //                    cmd.Parameters.AddWithValue("@Modified_by", context.Session["UserSno"].ToString());
+    //                    cmd.Parameters.AddWithValue("@Create_by", Trip_empid);
+    //                    cmd.Parameters.AddWithValue("@Tripid", tripid);
+    //                    cmd.Parameters.AddWithValue("@GroupRef", Trip_Receipt);
+
+    //                    cmd.Parameters.AddWithValue("@Remarks", "Sync Error");
+    //                    double opp = 0;
+    //                    cmd.Parameters.AddWithValue("@OppBal", opp);
+    //                    cmd.Parameters.AddWithValue("@Receipt", CashReceiptNo);
+    //                    vdbmngr.insert(cmd);
+    //                }
+
+    //            }
+    //            if (prevamt > presentamt)
+    //            {
+    //                cmd = new MySqlCommand("Update branchaccounts set Amount=Amount+@Amount where BranchId=@BranchId");
+    //                cmd.Parameters.Add("@Amount", Math.Abs(actamt));
+    //                cmd.Parameters.Add("@BranchId", branchid);
+    //                vdbmngr.Update(cmd);
+
+    //            }
+    //            if (prevamt < presentamt)
+    //            {
+    //                float prevsamt = Math.Abs(actamt);
+
+    //                cmd = new MySqlCommand("Update branchaccounts set Amount=Amount-@Amount where BranchId=@BranchId");
+    //                cmd.Parameters.Add("@Amount", prevsamt);
+    //                cmd.Parameters.Add("@BranchId", branchid);
+    //                vdbmngr.Update(cmd);
+
+    //            }
+
+    //            double diff = prevamt - presentamt;
+    //            DateTime sindentdate = dtpaiddt.AddDays(-1);
+    //            cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@agentid and inddate between @d1 and @d2");
+    //            cmd.Parameters.AddWithValue("@agentid", branchid);
+    //            cmd.Parameters.AddWithValue("@d1", GetLowDate(dtpaiddt).AddDays(-1));
+    //            cmd.Parameters.AddWithValue("@d2", GetHighDate(dtpaiddt).AddDays(-1));
+    //            DataTable dtagentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+    //            if (dtagentbal.Rows.Count > 0)
+    //            {
+    //                string sno = dtagentbal.Rows[0]["sno"].ToString();
+    //                cmd = new MySqlCommand("SELECT sno, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+    //                cmd.Parameters.AddWithValue("@sno", sno);
+    //                DataTable dtmaxagentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+    //                double salevalue = 0;
+    //                double.TryParse(dtmaxagentbal.Rows[0]["salesvalue"].ToString(), out salevalue);
+
+    //                double clobalance = 0;
+    //                double.TryParse(dtmaxagentbal.Rows[0]["clo_balance"].ToString(), out clobalance);
+    //                if (diff > 0)
+    //                {
+    //                    cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount-@Amount, clo_balance=clo_balance-@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+    //                    cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
+    //                    cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
+    //                    cmd.Parameters.AddWithValue("@Amount", diff);
+    //                    cmd.Parameters.AddWithValue("@BranchId", branchid);
+    //                    vdbmngr.Update(cmd);
+
+    //                    cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
+    //                    cmd.Parameters.AddWithValue("@agentid", branchid);
+    //                    cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate).AddDays(1));
+    //                    cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate));
+    //                    DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+    //                    if (dtIndentbal.Rows.Count > 0)
+    //                    {
+    //                        foreach (DataRow dr in dtIndentbal.Rows)
+    //                        {
+    //                            string csno = dr["sno"].ToString();
+    //                            double existoppbal = 0;
+    //                            double opp_balance = 0;
+    //                            double.TryParse(dr["opp_balance"].ToString(), out opp_balance);
+    //                            existoppbal = opp_balance - diff;
+
+    //                            double existclovalue = 0;
+    //                            double clo_balance = 0;
+    //                            double.TryParse(dr["clo_balance"].ToString(), out clo_balance);
+    //                            existclovalue = clo_balance - diff;
+
+    //                            cmd = new MySqlCommand("UPDATE agent_bal_trans SET opp_balance=@oppbal, clo_balance=@closing where sno=@refno");
+    //                            cmd.Parameters.AddWithValue("@oppbal", existoppbal);
+    //                            cmd.Parameters.AddWithValue("@refno", csno);
+    //                            cmd.Parameters.AddWithValue("@closing", existclovalue);
+    //                            vdbmngr.Update(cmd);
+    //                        }
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    diff = presentamt - prevamt;
+    //                    cmd = new MySqlCommand("UPDATE agent_bal_trans set paidamount=paidamount+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate between @d1 and @d2");
+    //                    cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate));
+    //                    cmd.Parameters.AddWithValue("@d2", GetHighDate(sindentdate));
+    //                    cmd.Parameters.AddWithValue("@Amount", diff);
+    //                    cmd.Parameters.AddWithValue("@BranchId", branchid);
+    //                    vdbmngr.Update(cmd);
+    //                    cmd = new MySqlCommand("SELECT sno, agentid, opp_balance, inddate, salesvalue, clo_balance, paidamount FROM agent_bal_trans WHERE agentid=@agentid AND inddate between @d1 and @d2");
+    //                    cmd.Parameters.AddWithValue("@agentid", branchid);
+    //                    cmd.Parameters.AddWithValue("@d1", GetLowDate(sindentdate).AddDays(1));
+    //                    cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate));
+    //                    DataTable dtIndentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+    //                    if (dtIndentbal.Rows.Count > 0)
+    //                    {
+    //                        foreach (DataRow dr in dtIndentbal.Rows)
+    //                        {
+    //                            string csno = dr["sno"].ToString();
+    //                            double existoppbal = 0;
+    //                            double opp_balance = 0;
+    //                            double.TryParse(dr["opp_balance"].ToString(), out opp_balance);
+    //                            existoppbal = opp_balance + diff;
+
+    //                            double existclovalue = 0;
+    //                            double clo_balance = 0;
+    //                            double.TryParse(dr["clo_balance"].ToString(), out clo_balance);
+    //                            existclovalue = clo_balance + diff;
+
+    //                            cmd = new MySqlCommand("UPDATE agent_bal_trans SET opp_balance=@oppbal, clo_balance=@closing where sno=@refno");
+    //                            cmd.Parameters.AddWithValue("@oppbal", existoppbal);
+    //                            cmd.Parameters.AddWithValue("@refno", csno);
+    //                            cmd.Parameters.AddWithValue("@closing", existclovalue);
+    //                            vdbmngr.Update(cmd);
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //        cmd = new MySqlCommand("Update tripdata set Denominations=@Denominations,CollectedAmount=@CollectedAmount,SubmittedAmount=@SubmittedAmount where sno=@sno");
+    //        double colllectionAmount = 0;
+    //        double.TryParse(ColAmount, out colllectionAmount);
+    //        //colAmount = Math.Round(colAmount, 2);
+    //        cmd.Parameters.AddWithValue("@CollectedAmount", colllectionAmount);
+    //        double SubmittedAmount = 0;
+    //        double.TryParse(SubAmount, out SubmittedAmount);
+    //        //SubAmount = Math.Round(SubAmount, 2);
+    //        cmd.Parameters.AddWithValue("@SubmittedAmount", SubmittedAmount);
+    //        cmd.Parameters.AddWithValue("@Denominations", Denominations);
+    //        cmd.Parameters.AddWithValue("@sno", tripsno);
+    //        vdbmngr.Update(cmd);
+    //        string msg = "Collections Successfully Updated ";
+    //        string response = GetJson(msg);
+    //        context.Response.Write(response);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        string msg = ex.Message;
+    //        string response = GetJson(msg);
+    //        context.Response.Write(response);
+    //    }
+    //}
+
     private DateTime GetLowMonthRetrive(DateTime dt)
     {
         double Day, Hour, Min, Sec;
