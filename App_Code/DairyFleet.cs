@@ -13925,6 +13925,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string dctype { get; set; }
         public string branchname { get; set; }
         public string buyercompanyname { get; set; }
+        public string Op_balance { get; set; }
     }
     public class Aagent_Inventary
     {
@@ -14282,12 +14283,62 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     {
                         DcNo = "" + countdc;
                     }
+                    Aagent_Invoice obj1 = new Aagent_Invoice();
 
+                    cmd = new MySqlCommand("SELECT * FROM agent_bal_trans WHERE agentid=@agentid and  inddate between @d1 and @d2");
+                    cmd.Parameters.Add("@agentid", AgentId);
+                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                    DataTable dtagenttrans = vdbmngr.SelectQuery(cmd).Tables[0];
+                    //DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + AgentId + "'");
+                    if (dtagenttrans.Rows.Count == 0)
+                    {
+                        cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND (inddate < @d1)");
+                        cmd.Parameters.AddWithValue("@Branchid", AgentId);
+                        cmd.Parameters.AddWithValue("@d1", fromdate.AddDays(-1));
+                        DataTable dtPrev_trans = vdbmngr.SelectQuery(cmd).Tables[0];
+                        if (dtPrev_trans.Rows.Count > 0)
+                        {
+                            string sno = dtPrev_trans.Rows[0]["sno"].ToString();
+                            if (sno == "")
+                            {
+                                obj1.Op_balance = "0"; ;
+                            }
+                            else
+                            {
+                                cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                                cmd.Parameters.AddWithValue("@sno", dtPrev_trans.Rows[0]["sno"].ToString());
+                                DataTable dtagent_value = vdbmngr.SelectQuery(cmd).Tables[0];
+                                if (dtagent_value.Rows.Count > 0)
+                                {
+                                    double closingbalance = 0;
+                                    double.TryParse(dtagent_value.Rows[0]["clo_balance"].ToString(), out closingbalance);
+                                    string inddate = dtagent_value.Rows[0]["inddate"].ToString();
+                                    DateTime dtinddate = Convert.ToDateTime(inddate);
+                                    if (dtinddate < fromdate)
+                                    {
+                                        obj1.Op_balance  = Math.Round(closingbalance, 2).ToString();
+                                    }
+                                    else
+                                    {
+                                        obj1.Op_balance = "0";
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            obj1.Op_balance ="0";
+                        }
+                    }
+                    else
+                    {
+                        obj1.Op_balance = dtagenttrans.Rows[0]["opp_balance"].ToString();
+                    }
 
                     string BranchId = context.Session["branch"].ToString();
                     DcNo = dtbrnchaddress.Rows[0]["BranchCode"].ToString() + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DcNo;
                     string fromstate = dtbrnchaddress.Rows[0]["stateid"].ToString();
-                    Aagent_Invoice obj1 = new Aagent_Invoice();
                     obj1.AgentAddress = AgentAddress;
                     string address = dtbrnchaddress.Rows[0]["doorno"].ToString() + "," + dtbrnchaddress.Rows[0]["street"].ToString() + "," + dtbrnchaddress.Rows[0]["area"].ToString() + "," + dtbrnchaddress.Rows[0]["city"].ToString() + "," + dtbrnchaddress.Rows[0]["mandal"].ToString() + "," + dtbrnchaddress.Rows[0]["district"].ToString() + "," + dtbrnchaddress.Rows[0]["pincode"].ToString() + "," + dtbrnchaddress.Rows[0]["phonenumber"].ToString() + "," + dtbrnchaddress.Rows[0]["emailid"].ToString();
                     obj1.BranchAddress = address;

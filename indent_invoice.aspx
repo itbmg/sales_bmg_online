@@ -209,6 +209,7 @@
             document.getElementById('span_toGSTIN').innerHTML = "";
             document.getElementById('lbltile').innerHTML = "";
             document.getElementById('spnAddress').innerHTML = "";
+            document.getElementById('spn_OPbalance').innerHTML =
             document.getElementById('spngstnno').innerHTML = "";
             document.getElementById('spninvoiceno').innerHTML = "";
             document.getElementById('spninvoicedate').innerHTML = "";
@@ -240,6 +241,7 @@
                 document.getElementById('span_toGSTIN').innerHTML = msg[0].togstin;
                 document.getElementById('lbltile').innerHTML = msg[0].titlename;
                 document.getElementById('spnAddress').innerHTML = msg[0].BranchAddress;
+                document.getElementById('spn_OPbalance').innerHTML = msg[0].Op_balance;
                 document.getElementById('spngstnno').innerHTML = msg[0].fromgstn;
                 document.getElementById('spninvoiceno').innerHTML = msg[0].invoiceno;
                 document.getElementById('spninvoicedate').innerHTML = msg[0].invoicedate;
@@ -477,6 +479,7 @@
                         <br />
                         <br />
                         </div>
+                        
                         <div style="width:73%; padding-left:12%;text-align: center;display:none;">
                         <span id="spngstnno" style="font-size: 14px;"></span>
                         <br />
@@ -620,8 +623,12 @@
                             </tr>
                         </tbody></table>
                     </div>
-                    <div style="font-family: Arial; font-weight: bold; color: Black; text-align:center; border:2px solid gray;">
-                      <br />
+                             
+
+                    <div style="font-family: Arial; font-weight: bold; color: Black; text-align:right; border:2px solid gray;">
+                        <label style="font-size: 14px;font-weight: bold;">
+                                        OppBalance: </label>
+                           <span id="spn_OPbalance" style="font-size: 11px;padding-right: 20px;"></span>
                       </div>
                    <div id="div_itemdetails">
                     </div>
