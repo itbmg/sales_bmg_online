@@ -383,10 +383,10 @@ public partial class RelizationReport : System.Web.UI.Page
                         if (branch["IndentDate"].ToString() != "")
                         {
                             DateTime Date = Convert.ToDateTime(branch["IndentDate"].ToString());
-                            DateTime Date_2 = Convert.ToDateTime(branch["IndentDate"].ToString()).AddDays(-1);
+                            DateTime Date_2 = Convert.ToDateTime(branch["IndentDate"].ToString()).AddDays(1);
                             string Date1 = Date.ToString("dd MMM yyyy");
                             string Date2 = Date_2.ToString("dd MMM yy");
-                            newrow["Date"] = Date1;
+                            newrow["Date"] = Date2;
                             int j = 0;
 
                             double tdqty = 0; double tsvalue = 0; double tavgrate = 0;
@@ -530,17 +530,24 @@ public partial class RelizationReport : System.Web.UI.Page
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM  branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno WHERE(branchmappingtable.SuperBranch = @branchid)");
                 cmd.Parameters.Add("@branchid", "4");
                 Dtbranchnames = vdm.SelectQuery(cmd).Tables[0];
-                DataTable dtbranches_indent_sale = new DataTable();
-                foreach (DataRow branch1 in Dtbranchnames.Rows)
-                {
-                    cmd = new MySqlCommand("SELECT TripInfo.Sno, ROUND(SUM(ProductInfo.Qty), 2) AS SubcatQty,ROUND(SUM(ProductInfo.Qty*ProductInfo.UnitPrice),2 ) AS SubcatValue, ProductInfo.subcatsno,TripInfo.BranchName, TripInfo.Branch_Id, TripInfo.DispName, TripInfo.BranchID, DATE_FORMAT(TripInfo.I_Date, '%d %b %y') AS IndentDate  FROM    (SELECT        tripdata.Sno, tripdata.AssignDate, tripdata.I_Date, branchdata_1.BranchName, dispatch.BranchID, dispatch.Branch_Id, dispatch.GroupId, dispatch.CompanyId, dispatch.DispName   FROM            branchdata INNER JOIN  dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN  tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN branchdata branchdata_1 ON dispatch.Branch_Id = branchdata_1.sno   WHERE (dispatch.Branch_Id = @BranchID) AND (tripdata.AssignDate BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @SUBBRANCH)) TripInfo INNER JOIN (SELECT Sno, Qty,UnitPrice,subcatsno FROM (SELECT tripdata_1.Sno, tripsubdata.Qty,productsdata.UnitPrice,products_subcategory.sno as subcatsno FROM tripdata tripdata_1 INNER JOIN tripsubdata ON tripdata_1.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (tripdata_1.AssignDate BETWEEN @d1 AND @d2)) TripSubInfo) ProductInfo ON TripInfo.Sno = ProductInfo.Sno  GROUP BY TripInfo.BranchID, ProductInfo.subcatsno  ORDER BY TripInfo.BranchID, ProductInfo.subcatsno");
-                    cmd.Parameters.AddWithValue("@BranchID", "4");
-                    cmd.Parameters.AddWithValue("@SUBBRANCH", branch1["sno"].ToString());
-                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(todate).AddDays(-1));
-                    DataTable dtDispatchesbranches = vdm.SelectQuery(cmd).Tables[0];
-                    dtbranches_indent_sale.Merge(dtDispatchesbranches);
-                }
+                //DataTable dtbranches_indent_sale = new DataTable();
+                //foreach (DataRow branch1 in Dtbranchnames.Rows)
+                //{
+                //    //cmd = new MySqlCommand("SELECT TripInfo.Sno, ROUND(SUM(ProductInfo.Qty), 2) AS SubcatQty,ROUND(SUM(ProductInfo.Qty*ProductInfo.UnitPrice),2 ) AS SubcatValue, ProductInfo.subcatsno,TripInfo.BranchName, TripInfo.Branch_Id, TripInfo.DispName, TripInfo.BranchID, DATE_FORMAT(TripInfo.I_Date, '%d %b %y') AS IndentDate  FROM    (SELECT        tripdata.Sno, tripdata.AssignDate, tripdata.I_Date, branchdata_1.BranchName, dispatch.BranchID, dispatch.Branch_Id, dispatch.GroupId, dispatch.CompanyId, dispatch.DispName   FROM            branchdata INNER JOIN  dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN  tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN branchdata branchdata_1 ON dispatch.Branch_Id = branchdata_1.sno   WHERE (dispatch.Branch_Id = @BranchID) AND (tripdata.AssignDate BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @SUBBRANCH)) TripInfo INNER JOIN (SELECT Sno, Qty,UnitPrice,subcatsno FROM (SELECT tripdata_1.Sno, tripsubdata.Qty,productsdata.UnitPrice,products_subcategory.sno as subcatsno FROM tripdata tripdata_1 INNER JOIN tripsubdata ON tripdata_1.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (tripdata_1.AssignDate BETWEEN @d1 AND @d2)) TripSubInfo) ProductInfo ON TripInfo.Sno = ProductInfo.Sno  GROUP BY TripInfo.BranchID, ProductInfo.subcatsno  ORDER BY TripInfo.BranchID, ProductInfo.subcatsno");
+                //    //cmd = new MySqlCommand("SELECT ROUND(SUM(indents_subtable.DeliveryQty), 2) AS SubcatQty, ROUND(SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost), 2) AS SubcatValue, products_subcategory.sno as subcatsno,ROUND(SUM((DeliveryQty * UnitCost) / DeliveryQty)) AS AvgRate, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate, branchmappingtable.SuperBranch as BranchId FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchmappingtable ON indents.Branch_id = branchmappingtable.SubBranch INNER JOIN branchmappingtable AS branchmappingtable_1 ON branchmappingtable.SuperBranch= branchmappingtable_1.SubBranch WHERE(indents.I_date BETWEEN @d1 AND @d2) AND(branchmappingtable_1.SuperBranch = @branchid) GROUP BY products_subcategory.sno branchmappingtable.SuperBranch ORDER BY products_subcategory.sno");
+
+                //    cmd.Parameters.AddWithValue("@BranchID", "4");
+                //    cmd.Parameters.AddWithValue("@SUBBRANCH", branch1["sno"].ToString());
+                //    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
+                //    cmd.Parameters.AddWithValue("@d2", GetHighDate(todate).AddDays(-1));
+                //    DataTable dtDispatchesbranches = vdm.SelectQuery(cmd).Tables[0];
+                //    dtbranches_indent_sale.Merge(dtDispatchesbranches);
+                //}
+                cmd = new MySqlCommand("SELECT ROUND(SUM(indents_subtable.DeliveryQty), 2) AS SubcatQty, ROUND(SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost), 2) AS SubcatValue, products_subcategory.sno as subcatsno,ROUND(SUM((DeliveryQty * UnitCost) / DeliveryQty)) AS AvgRate, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate, branchmappingtable.SuperBranch as BranchId FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchmappingtable ON indents.Branch_id = branchmappingtable.SubBranch INNER JOIN branchmappingtable AS branchmappingtable_1 ON branchmappingtable.SuperBranch= branchmappingtable_1.SubBranch WHERE(indents.I_date BETWEEN @d1 AND @d2) AND(branchmappingtable_1.SuperBranch = @branchid) GROUP BY subcatsno, branchmappingtable.SuperBranch ORDER BY products_subcategory.sno");
+                cmd.Parameters.AddWithValue("@branchid", "4");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(todate).AddDays(-1));
+                DataTable dtbranches_indent_sale = vdm.SelectQuery(cmd).Tables[0];
                 cmd = new MySqlCommand("SELECT products_subcategory.sno,products_subcategory.SubCatName  from products_subcategory  INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno");
                 DataTable dtsubcategory = vdm.SelectQuery(cmd).Tables[0];
                 if (dtbranches_indent_sale.Rows.Count > 0)
@@ -607,20 +614,21 @@ public partial class RelizationReport : System.Web.UI.Page
                                 if (dqty != 0)
                                 {
                                     avg = svalue / dqty;
+                                    newrow[SubcatName + "Qty"] = drrdelivery["SubcatQty"].ToString();
+                                    newrow[SubcatName + "Value"] = drrdelivery["SubcatValue"].ToString();
+                                    newrow[SubcatName + "AvgRate"] = Math.Round(avg, 2).ToString();
                                 }
-                                newrow[SubcatName + "Qty"] = drrdelivery["SubcatQty"].ToString();
-                                newrow[SubcatName + "Value"] = drrdelivery["SubcatValue"].ToString();
-                                newrow[SubcatName + "AvgRate"] = Math.Round(avg, 2).ToString();
 
                                 tdqty += dqty;
                                 tsvalue += svalue;
                                 if (tdqty != 0)
                                 {
                                     tavgrate = tsvalue / tdqty;
+                                    newrow["TotalQty"] = Math.Round(tdqty, 2).ToString();
+                                    newrow["Value"] = Math.Round(tsvalue, 2).ToString();
+                                    newrow["AvgRate"] = Math.Round(tavgrate, 2).ToString();
                                 }
-                                newrow["TotalQty"] = Math.Round(tdqty, 2).ToString();
-                                newrow["Value"] = Math.Round(tsvalue, 2).ToString();
-                                newrow["AvgRate"] = Math.Round(tavgrate, 2).ToString();
+
                             }
                             //double dcqty = 0;
                             //double.TryParse(drrdelivery["DeliveryQty"].ToString(), out dcqty);
