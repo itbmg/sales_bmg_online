@@ -162,10 +162,11 @@ public partial class RelizationReport : System.Web.UI.Page
                 cmd.Parameters.Add("@branchid", "4");
                 Dtbranchnames = vdm.SelectQuery(cmd).Tables[0];
 
-                cmd = new MySqlCommand("SELECT  SubBranch, ROUND(SUM(DeliveryQty) ) AS SaleQty,  ROUND(SUM(DeliveryQty * UnitCost)) AS SaleValue,ROUND(SUM((DeliveryQty * UnitCost)/DeliveryQty)) AS AvgRate,IndentDate FROM (SELECT t1.SubBranch, t1.SuperBranch, t2.DeliveryQty, t2.unitQty, t2.UnitCost,DATE_FORMAT(t2.I_date, '%d %b %y') AS IndentDate FROM (SELECT branchmappingtable.SubBranch, branchmappingtable_1.SuperBranch FROM branchmappingtable INNER JOIN branchmappingtable branchmappingtable_1 ON branchmappingtable.SubBranch = branchmappingtable_1.SubBranch WHERE (branchmappingtable_1.SuperBranch = @branchid) GROUP BY branchmappingtable.SubBranch, branchmappingtable_1.SuperBranch) t1 LEFT OUTER JOIN (SELECT indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, branchmappingtable_2.SuperBranch, branchmappingtable_2.SubBranch,ind.I_date FROM branchmappingtable branchmappingtable_2 INNER JOIN (SELECT IndentNo, Branch_id, I_date FROM indents WHERE (I_date BETWEEN @d1 AND @d2)) ind ON branchmappingtable_2.SubBranch = ind.Branch_id INNER JOIN indents_subtable ON ind.IndentNo = indents_subtable.IndentNo) t2 ON t2.SuperBranch = t1.SubBranch) derivedtbl_1 GROUP BY IndentDate,SubBranch order by IndentDate,SubBranch");
+                //cmd = new MySqlCommand("SELECT  SubBranch, ROUND(SUM(DeliveryQty) ) AS SaleQty,  ROUND(SUM(DeliveryQty * UnitCost)) AS SaleValue,ROUND(SUM((DeliveryQty * UnitCost)/DeliveryQty)) AS AvgRate,DATE_FORMAT(I_date, '%d %b %y') AS IndentDate FROM (SELECT t1.SubBranch, t1.SuperBranch, t2.DeliveryQty, t2.unitQty, t2.UnitCost,t2.I_date FROM (SELECT branchmappingtable.SubBranch, branchmappingtable_1.SuperBranch FROM branchmappingtable INNER JOIN branchmappingtable branchmappingtable_1 ON branchmappingtable.SubBranch = branchmappingtable_1.SubBranch WHERE (branchmappingtable_1.SuperBranch = @branchid) GROUP BY branchmappingtable.SubBranch, branchmappingtable_1.SuperBranch) t1 LEFT OUTER JOIN (SELECT indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, branchmappingtable_2.SuperBranch, branchmappingtable_2.SubBranch,ind.I_date FROM branchmappingtable branchmappingtable_2 INNER JOIN (SELECT IndentNo, Branch_id, I_date FROM indents WHERE (I_date BETWEEN @d1 AND @d2)) ind ON branchmappingtable_2.SubBranch = ind.Branch_id INNER JOIN indents_subtable ON ind.IndentNo = indents_subtable.IndentNo) t2 ON t2.SuperBranch = t1.SubBranch) derivedtbl_1 GROUP BY SubBranch,IndentDate order by IndentDate asc");
+                cmd = new MySqlCommand("SELECT ROUND(SUM(indents_subtable.DeliveryQty), 2) AS SaleQty, ROUND(SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost), 2) AS SaleValue, ROUND(SUM((DeliveryQty * UnitCost) / DeliveryQty)) AS AvgRate, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate, branchmappingtable.SuperBranch as SubBranch FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchmappingtable ON indents.Branch_id = branchmappingtable.SubBranch INNER JOIN branchmappingtable AS branchmappingtable_1 ON branchmappingtable.SuperBranch= branchmappingtable_1.SubBranch WHERE(indents.I_date BETWEEN @d1 AND @d2) AND(branchmappingtable_1.SuperBranch = @branchid) GROUP BY IndentDate,  branchmappingtable.SuperBranch ORDER BY indents.I_date");
                 cmd.Parameters.Add("@branchid", "4");
-                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(todate).AddDays(-1));
                 DataTable dtbranches_indent_sale = vdm.SelectQuery(cmd).Tables[0];
                 if (dtbranches_indent_sale.Rows.Count > 0)
                 {
@@ -187,6 +188,10 @@ public partial class RelizationReport : System.Web.UI.Page
                     int i = 1;
                     DataView view = new DataView(dtbranches_indent_sale);
                     DataTable distincttable = view.ToTable(true, "IndentDate");
+                    //DataView dv = distincttable.DefaultView;
+                    //dv.Sort = "IndentDate ASC";
+                    //DataTable disticntdates = dv.ToTable();
+
                     //string BRANCHID = ddlSalesOffice.SelectedValue;
                     foreach (DataRow branch in distincttable.Rows)
                     {
@@ -208,7 +213,7 @@ public partial class RelizationReport : System.Web.UI.Page
                         double tshort = 0;
                         if (branch["IndentDate"].ToString() != "")
                         {
-                            DateTime Date = Convert.ToDateTime(branch["IndentDate"].ToString());
+                            DateTime Date = Convert.ToDateTime(branch["IndentDate"].ToString()).AddDays(1);
                             DateTime Date_2 = Convert.ToDateTime(branch["IndentDate"].ToString()).AddDays(-1);
                             string Date1 = Date.ToString("dd MMM yyyy");
                             string Date2 = Date_2.ToString("dd MMM yy");
@@ -221,7 +226,7 @@ public partial class RelizationReport : System.Web.UI.Page
                                 string Date4 = "";
                                 if (drrdelivery["IndentDate"].ToString() != "")
                                 {
-                                    DateTime Date_3 = Convert.ToDateTime(drrdelivery["IndentDate"].ToString());
+                                    DateTime Date_3 = Convert.ToDateTime(drrdelivery["IndentDate"].ToString()).AddDays(1);
                                     Date4 = Date_3.ToString("dd MMM yyyy");
                                 }
                                 if (Date1 == Date4)
@@ -287,6 +292,7 @@ public partial class RelizationReport : System.Web.UI.Page
                         }
                     }
                     Report.Rows.Add(newvartical);
+                    
                     foreach (DataColumn col in Report.Columns)
                     {
                         string Pname = col.ToString();
@@ -540,7 +546,6 @@ public partial class RelizationReport : System.Web.UI.Page
                 if (dtbranches_indent_sale.Rows.Count > 0)
                 {
                     Report = new DataTable();
-                    Report.Columns.Add("SNo");
                     Report.Columns.Add("BranchName");
                     int count = 0;
                     DataView view = new DataView(dtbranches_indent_sale);
@@ -589,7 +594,6 @@ public partial class RelizationReport : System.Web.UI.Page
                         {
                             if (branch["sno"].ToString() == drrdelivery["BranchId"].ToString())
                             {
-                                newrow["SNo"] = j++;
                                 string SubcatName = "";
                                 foreach (DataRow drbname in dtsubcategory.Select("sno='" + drrdelivery["subcatsno"].ToString() + "'"))
                                 {
@@ -662,6 +666,51 @@ public partial class RelizationReport : System.Web.UI.Page
             }
             grdReports.DataSource = Report;
             grdReports.DataBind();
+            foreach (GridViewRow row in grdReports.Rows)
+            {
+                string text = row.Cells[0].Text;
+                if (text == "Total")
+                {
+                    int count = row.Cells.Count;
+                    string t_value="";
+                    string t_qty="";
+                    int j = 2;int k = 3;
+                    double tt_value = 0;
+                    double tt_qty = 0;
+                    for (int i = 1; i < count - 3; i++)
+                    {
+                        t_value = row.Cells[j].Text;
+                        t_qty = row.Cells[i].Text;
+                        //j++;
+                        double.TryParse(t_value, out tt_value);
+                        double.TryParse(t_qty, out tt_qty);
+                        double tt_avg = tt_value / tt_qty;
+                        row.Cells[k].Text = Math.Round(tt_avg, 2).ToString();
+                        k++;
+                        j = k + 1;
+                        i = k - 1;
+                        k = j + 1;
+                    }
+                    //row.Cells[3].Text = Math.Round(tt_avg, 2).ToString();
+
+                    //t_value = row.Cells[5].Text;
+                    //t_qty = row.Cells[4].Text;
+                    //double.TryParse(t_value, out tt_value);
+                    //double.TryParse(t_qty, out tt_qty);
+                    //tt_avg = tt_value / tt_qty;
+                    //row.Cells[6].Text = Math.Round(tt_avg, 2).ToString();
+
+
+
+                    //t_value = row.Cells[8].Text;
+                    //t_qty = row.Cells[7].Text;
+                    //double.TryParse(t_value, out tt_value);
+                    //double.TryParse(t_qty, out tt_qty);
+                    //tt_avg = tt_value / tt_qty;
+                    //row.Cells[9].Text = Math.Round(tt_avg, 2).ToString();
+
+                }
+            }
         }
         catch (Exception ex)
         {

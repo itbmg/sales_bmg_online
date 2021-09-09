@@ -52,18 +52,18 @@
     </div>
     <section class="content-header">
         <h1>
-            Sales office Wise Summary<small>Preview</small>
+            Relization<small>Preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i>Operations</a></li>
-            <li><a href="#">Sales office Wise Summary</a></li>
+            <li><a href="#">Relization</a></li>
         </ol>
     </section>
     <section class="content">
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    <i style="padding-right: 5px;" class="fa fa-cog"></i>Sales office Wise Summary
+                    <i style="padding-right: 5px;" class="fa fa-cog"></i>Relization
                 </h3>
             </div>
             <div class="box-body">
@@ -124,7 +124,7 @@
                                     <br />
                                 </div>
                                 <div align="center">
-                                    <span style="font-size: 18px; color: #0252aa;">Sales office Wise Summary</span>
+                                    <span style="font-size: 18px; color: #0252aa;">Relization</span>
                                 </div>
                                 <div style="width: 100%;">
                                     <br />
@@ -145,7 +145,7 @@
                                     </div>
                                 </div>
                                 <br />
-                                <asp:GridView ID="grdReports" runat="server" ForeColor="White" Width="100%" CssClass="gridcls"
+                                <asp:GridView ID="grdReports" runat="server" ForeColor="White" Width="100%" CssClass="table table-bordered table-hover dataTable no-footer"
                                     GridLines="Both" Font-Bold="true" OnDataBound="OnDataBound" OnRowDataBound="OnRowDataBound">
                                     <EditRowStyle BackColor="#999999" />
                                     <FooterStyle BackColor="Gray" Font-Bold="False" ForeColor="White" />
