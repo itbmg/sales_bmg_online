@@ -13888,7 +13888,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string dctype { get; set; }
         public string invoiceno { get; set; }
         public string pktqty { get; set; }
-
+        public string TempInvoice { get; set; }
+        
     }
     public class Aagent_Invoice
     {
@@ -13926,6 +13927,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string branchname { get; set; }
         public string buyercompanyname { get; set; }
         public string Op_balance { get; set; }
+        public string TempInvoice { get; set; }
     }
     public class Aagent_Inventary
     {
@@ -14350,6 +14352,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     obj1.ponumber = pono;
                     obj1.grnno = grnno;
                     obj1.invoiceno = DcNo;
+                    obj1.TempInvoice = countdc.ToString();
                     obj1.city = dtbrnchaddress.Rows[0]["city"].ToString();
                     obj1.invoicedate = fromdate.AddDays(1).ToString("dd/MM/yyyy");
                     obj1.frmstatename = dtbrnchaddress.Rows[0]["statename"].ToString();
@@ -14718,6 +14721,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     obj1.salestype = salestype;
                     obj1.ponumber = pono;
                     obj1.grnno = grnno;
+                    obj1.TempInvoice = countdc.ToString();
                     obj1.invoiceno = DcNo;
                     obj1.city = dtbrnchaddress.Rows[0]["city"].ToString();
                     obj1.invoicedate = fromdate.AddDays(1).ToString("dd/MM/yyyy");
@@ -15009,6 +15013,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             Report.Columns.Add("IGSTamount");
             Report.Columns.Add("totalamount");
             Report.Columns.Add("invoiceno");
+            Report.Columns.Add("TempInvoice");
             string DcNo = "";
             if (dtInvoice.Rows.Count > 0)
             {
@@ -15332,6 +15337,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                             //DcNo = dtbranchcode.Rows[0]["BranchCode"].ToString() + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
                             newrow["invoiceno"] = DcNo;
+                            newrow["TempInvoice"] = countdc;
+                            
                             Report.Rows.Add(newrow);
                         }
                     }
@@ -15353,6 +15360,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         getProducts.sgstamount = dr["sgstamount"].ToString();
                         getProducts.dctype = "Bill Of Supply";
                         getProducts.invoiceno = dr["invoiceno"].ToString();
+                        getProducts.TempInvoice = dr["TempInvoice"].ToString();
                         getProducts.cgst = dr["cgst"].ToString();
                         getProducts.cgstamount = dr["cgstamount"].ToString();
                         getProducts.igst = dr["igst"].ToString();
@@ -15600,6 +15608,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                             //DcNo = dtbrnchaddress.Rows[0]["BranchCode"].ToString() + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
                             newrow["invoiceno"] = DcNo;
+                            newrow["TempInvoice"] = countdc;
+
                             Report.Rows.Add(newrow);
                         }
                     }
@@ -15620,6 +15630,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         getProducts.sgstamount = dr["sgstamount"].ToString();
                         getProducts.dctype = "Tax Invoice";
                         getProducts.invoiceno = dr["invoiceno"].ToString();
+                        getProducts.TempInvoice = dr["TempInvoice"].ToString();
+
                         getProducts.cgst = dr["cgst"].ToString();
                         getProducts.cgstamount = dr["cgstamount"].ToString();
                         getProducts.igst = dr["igst"].ToString();
