@@ -22370,10 +22370,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             float Prevreturnqty = 0;
                             float Prevfreeqty = 0;
                             float Prevshortqty = 0;
-                            float.TryParse(o.PrevLeakQty, out Prevleak);
-                            float.TryParse(o.PrevFreeQty, out Prevfreeqty);
-                            float.TryParse(o.PrevReturnQty, out Prevreturnqty);
-                            float.TryParse(o.PrevShortQty, out Prevshortqty);
+                            float.TryParse(o.PLQty, out Prevleak);
+                            float.TryParse(o.PFQty, out Prevfreeqty);
+                            float.TryParse(o.PRQty, out Prevreturnqty);
+                            float.TryParse(o.PSQty, out Prevshortqty);
 
                             float tot = 0;
                             tot = leak + freeqty + returnqt + shortqt;
@@ -22443,7 +22443,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     float.TryParse(o.LeakQty, out leak);
                     float.TryParse(o.FreeQty, out freeqty);
                     float.TryParse(o.ReturnQty, out returnqt);
-                    float.TryParse(o.Puffleaks, out puffleaks);
+                    float.TryParse(o.Puff_L, out puffleaks);
 
 
                     float Prevleak = 0;
@@ -22451,11 +22451,11 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     float Prevfreeqty = 0;
                     float Prevshortqty = 0;
                     float Prevpuffqty = 0;
-                    float.TryParse(o.PrevLeakQty, out Prevleak);
-                    float.TryParse(o.PrevFreeQty, out Prevfreeqty);
-                    float.TryParse(o.PrevReturnQty, out Prevreturnqty);
-                    float.TryParse(o.PrevShortQty, out Prevshortqty);
-                    float.TryParse(o.PrevPuffleaks, out Prevpuffqty);
+                    float.TryParse(o.PLQty, out Prevleak);
+                    float.TryParse(o.PFQty, out Prevfreeqty);
+                    float.TryParse(o.PRQty, out Prevreturnqty);
+                    float.TryParse(o.PSQty, out Prevshortqty);
+                    float.TryParse(o.PPufLQty, out Prevpuffqty);
 
                     //if (tabletype == "BranchLeaks")
                     //{
@@ -22468,7 +22468,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
                         cmd.Parameters.AddWithValue("@DOE", ServerDateCurrentdate);
                         cmd.Parameters.AddWithValue("@BranchID", soid);
-                        cmd.Parameters.AddWithValue("@LeakQty", o.Puffleaks);
+                        cmd.Parameters.AddWithValue("@LeakQty", o.Puff_L);
                         if (vdbmngr.Update(cmd) == 0)
                         {
                             cmd = new MySqlCommand("INSERT INTO branchleaktrans (EmpId,TripId,ProdId,DOE,BranchID,LeakQty) VALUES (@EmpId,@TripId,@ProdId,@DOE,@BranchID,@LeakQty)");
@@ -22477,7 +22477,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@ProdId", o.Productsno);
                             cmd.Parameters.AddWithValue("@DOE", ServerDateCurrentdate);
                             cmd.Parameters.AddWithValue("@BranchID", soid);
-                            cmd.Parameters.AddWithValue("@LeakQty", o.Puffleaks);
+                            cmd.Parameters.AddWithValue("@LeakQty", o.Puff_L);
                             vdbmngr.insert(cmd);
                         }
                     }
@@ -38487,12 +38487,12 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string offerqty { get; set; }
         public string Tabletype { get; set; }
 
-        public string Puffleaks { get; set; }
-        public string PrevLeakQty { get; set; }
-        public string PrevFreeQty { get; set; }
-        public string PrevReturnQty { get; set; }
-        public string PrevShortQty { get; set; }
-        public string PrevPuffleaks { get; set; }
+        public string Puff_L { get; set; }
+        public string PLQty { get; set; }
+        public string PFQty { get; set; }
+        public string PRQty { get; set; }
+        public string PSQty { get; set; }
+        public string PPufLQty { get; set; }
     }
 
     class offerorderdetails
