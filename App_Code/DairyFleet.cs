@@ -21217,6 +21217,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
     }
     class tripcollection
     {
+        public string Sno { get; set; }
         public string Branchid { get; set; }
         public string Branchname { get; set; }
         public string Tripid { get; set; }
@@ -30924,12 +30925,11 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             {
                 indtype = dtindenttype.Rows[0]["IndentType"].ToString();
             }
-            //cmd = new MySqlCommand("SELECT productsdata.ProductName, indents_subtable.Product_sno, indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, indents.IndentNo FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (indents.Branch_id = @BranchID) AND (indents.I_date BETWEEN @d1 AND @d2) AND (indents.IndentType = @indtype) group by productsdata.ProductName");
-            cmd = new MySqlCommand("SELECT productsdata.ProductName, indents_subtable.Product_sno, indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, indents.IndentNo FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (indents.Branch_id = @BranchID) AND (indents.I_date BETWEEN @d1 AND @d2) group by productsdata.ProductName");
+            cmd = new MySqlCommand("SELECT productsdata.ProductName, indents_subtable.Product_sno, indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, indents.IndentNo FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (indents.Branch_id = @BranchID) AND (indents.I_date BETWEEN @d1 AND @d2) AND (indents.IndentType = @indtype) group by productsdata.ProductName");
             cmd.Parameters.AddWithValue("@BranchID", BranchID);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(dtinddate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(dtinddate));
-            //cmd.Parameters.AddWithValue("@indtype", indtype);
+            cmd.Parameters.AddWithValue("@indtype", indtype);
             DataTable dtBranch = vdbmngr.SelectQuery(cmd).Tables[0];
             if (dtBranch.Rows.Count > 0)
             {
@@ -41898,6 +41898,62 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@Amount", TotRate);
                             cmd.Parameters.AddWithValue("@BranchId", BranchID);
                             vdbmngr.insert(cmd);
+                        }
+
+                        string opbal = "0";
+                        string clobal = "0";
+                        cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@agentid");
+                        cmd.Parameters.AddWithValue("@agentid", BranchID);
+                        DataTable dtagentbal = vdbmngr.SelectQuery(cmd).Tables[0];
+                        if (dtagentbal.Rows.Count > 0)
+                        {
+                            string sno = dtagentbal.Rows[0]["sno"].ToString();
+                            cmd = new MySqlCommand("SELECT  opp_balance, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                            cmd.Parameters.AddWithValue("@sno", sno);
+                            DataTable dtopbal = vdbmngr.SelectQuery(cmd).Tables[0];
+                            if (dtopbal.Rows.Count > 0)
+                            {
+                                opbal = dtopbal.Rows[0]["opp_balance"].ToString();
+                                clobal = dtopbal.Rows[0]["clo_balance"].ToString();
+                            }
+                            cmd = new MySqlCommand("UPDATE agent_bal_trans set salesvalue=salesvalue+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate=@inddate");
+                            cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@Amount", TotRate);
+                            cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                            if (vdbmngr.Update(cmd) == 0)
+                            {
+                                double clsval = Convert.ToDouble(clobal) + TotRate;
+                                cmd = new MySqlCommand("Insert Into agent_bal_trans(agentid, opp_balance, inddate, salesvalue,  clo_balance, createdate, entryby,Paidamount) values (@BranchId,@opp_balance,@inddate, @salesvalue, @clo_balance, @createdate, @entryby,@Paidamount)");
+                                cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                                cmd.Parameters.AddWithValue("@opp_balance", clobal);
+                                cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@salesvalue", TotRate);
+                                cmd.Parameters.AddWithValue("@Paidamount", 0);
+                                cmd.Parameters.AddWithValue("@clo_balance", clsval);
+                                cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@entryby", Username);
+                                vdbmngr.insert(cmd);
+                            }
+                        }
+                        else
+                        {
+                            cmd = new MySqlCommand("UPDATE agent_bal_trans set salesvalue=salesvalue+@Amount, clo_balance=clo_balance+@Amount  where agentid=@BranchId AND inddate=@inddate");
+                            cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                            cmd.Parameters.AddWithValue("@Amount", TotRate);
+                            cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                            if (vdbmngr.Update(cmd) == 0)
+                            {
+                                cmd = new MySqlCommand("Insert Into agent_bal_trans(agentid, opp_balance, inddate, salesvalue,  clo_balance, createdate, entryby,Paidamount) values (@BranchId,@opp_balance,@inddate, @salesvalue, @clo_balance, @createdate, @entryby,@Paidamount)");
+                                cmd.Parameters.AddWithValue("@BranchId", BranchID);
+                                cmd.Parameters.AddWithValue("@opp_balance", 0);
+                                cmd.Parameters.AddWithValue("@inddate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@salesvalue", TotRate);
+                                cmd.Parameters.AddWithValue("@Paidamount", 0);
+                                cmd.Parameters.AddWithValue("@clo_balance", TotRate);
+                                cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                                cmd.Parameters.AddWithValue("@entryby", Username);
+                                vdbmngr.insert(cmd);
+                            }
                         }
                     }
                 }

@@ -158,6 +158,7 @@ public partial class AgentWiseInventory : System.Web.UI.Page
                     todate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
                 }
             }
+            Session["filename"] = ddlAgentName.SelectedItem.Text + "-> INVENTORY TRANSACTION";
             lblAgent.Text = ddlAgentName.SelectedItem.Text; ;
             cmd = new MySqlCommand("SELECT inventory_monitor.Inv_Sno, inventory_monitor.BranchId, inventory_monitor.Qty, inventory_monitor.Sno, inventory_monitor.EmpId, inventory_monitor.lostQty FROM dispatch INNER JOIN dispatch_sub ON dispatch.sno = dispatch_sub.dispatch_sno INNER JOIN modifiedroutesubtable ON dispatch_sub.Route_id = modifiedroutesubtable.RefNo INNER JOIN inventory_monitor ON modifiedroutesubtable.BranchID = inventory_monitor.BranchId WHERE (inventory_monitor.BranchId = @BranchId) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (inventory_monitor.Qty>0)");
             cmd.Parameters.AddWithValue("@BranchId", ddlAgentName.SelectedValue);
