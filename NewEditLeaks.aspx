@@ -303,7 +303,7 @@
             var Indentdetails = new Array();
             $(rows).each(function (i, obj) {
                // if ($(this).find('#txtIndentNo').text() != "" && $(this).find('#hdnProductSno').text() != "") {
-                Indentdetails.push({ Tripid: $(this).find('#txtIndentNo').text(),  TableType: $(this).find('#hdntabletype').val(), Branch_id: $(this).find('#hdnbranchid').val(), Productsno: $(this).find('#hdnProductSno').val(), PuffLeaks: $(this).find('#txtpuffleak').val(), Prevpuffleaks: $(this).find('#hdnpuffleak').val(), LeakQty: $(this).find('#txtleak').val(), PrevLeakQty: $(this).find('#hdnleak').val(), ShortQty: $(this).find('#txtShortQty').val(), PrevShortQty: $(this).find('#hdnShortQty').val(), FreeQty: $(this).find('#txtfreeqty').val(), PrevFreeQty: $(this).find('#hdnfreeqty').val(), ReturnQty: $(this).find('#txtreturnqty').val(), PrevReturnQty: $(this).find('#hdnreturnqty').val() });
+                Indentdetails.push({ Tripid: $(this).find('#txtIndentNo').text(), TableType: $(this).find('#hdntabletype').val(), Branch_id: $(this).find('#hdnbranchid').val(), Productsno: $(this).find('#hdnProductSno').val(), Puff_L: $(this).find('#txtpuffleak').val(), PPufLQty: $(this).find('#hdnpuffleak').val(), LeakQty: $(this).find('#txtleak').val(), PLQty: $(this).find('#hdnleak').val(), ShortQty: $(this).find('#txtShortQty').val(), PSQty: $(this).find('#hdnShortQty').val(), FreeQty: $(this).find('#txtfreeqty').val(), PFQty: $(this).find('#hdnfreeqty').val(), ReturnQty: $(this).find('#txtreturnqty').val(), PRQty: $(this).find('#hdnreturnqty').val() });
                // }
             });
             var rows1 = $("#table_Returninventory_details tr:gt(0)");
