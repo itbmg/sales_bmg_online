@@ -9,7 +9,8 @@ using System.Web.UI.WebControls;
 using System.Drawing;
 using ClosedXML.Excel;
 using System.IO;
-public partial class Agent_Due_Details : System.Web.UI.Page
+
+public partial class SR_Agent_Due_Details : System.Web.UI.Page
 {
     MySqlCommand cmd;
     string UserName = "";
@@ -123,7 +124,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             lblDate.Text = fromdate.ToString("dd/MMM/yyyy");
             Session["filename"] = "AGENT WISE DUE REPORT";
             string BranchID = ddlSalesOffice.SelectedValue;
-            cmd = new MySqlCommand("SELECT  modifiedroutes.RouteName, modifiedroutes.sno as routeid,  modifiedroutesubtable.BranchID,  branchdata.SalesRepresentative,     branchdata.BranchName  FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) OR (modifiedroutes.BranchID = @BranchID)AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY modifiedroutes.RouteName");
+            cmd = new MySqlCommand("SELECT  modifiedroutes.RouteName, modifiedroutes.sno as routeid,  modifiedroutesubtable.BranchID,  branchdata.SalesRepresentative,     branchdata.BranchName  FROM    modifiedroutes        INNER JOIN    modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo        INNER JOIN    branchdata ON modifiedroutesubtable.BranchID = branchdata.sno  WHERE      (modifiedroutes.BranchID = @BranchID)         AND(modifiedroutesubtable.EDate IS NULL)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) OR (modifiedroutes.BranchID = @BranchID)AND(modifiedroutesubtable.EDate > @starttime)         AND(modifiedroutesubtable.CDate <= @starttime) AND (branchdata.flag=@flag) GROUP BY branchdata.BranchName  ORDER BY branchdata.SalesRepresentative");
             cmd.Parameters.AddWithValue("@branchid", BranchID);
             cmd.Parameters.AddWithValue("@flag", "1");
             cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate.AddDays(-1)));
@@ -144,8 +145,8 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             DataTable dtsalescollection = new DataTable();
             Report = new DataTable();
             Report.Columns.Add("Sno");
-            Report.Columns.Add("Route Name");
             Report.Columns.Add("SR Name");
+            Report.Columns.Add("Route Name");
             Report.Columns.Add("Agent Code");
             Report.Columns.Add("Agent Name");
             Report.Columns.Add("Oppening Balance");
@@ -155,7 +156,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             Report.Columns.Add("JV/Incentive").DataType = typeof(Double);
             Report.Columns.Add("Closing Balance").DataType = typeof(Double);
             int Totalcount = 1;
-            string RouteName = "";
+            string SRName = "";
             int i = 1;
             DataView view = new DataView(dtble);
             string routeid = "";
@@ -174,17 +175,17 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             double grand_totalpaidamount = 0;
             double grand_totalbankTransfer = 0;
             double grand_totaljv = 0;
-            
+
             foreach (DataRow branch in distincttable.Rows)
             {
                 DataRow newrow = Report.NewRow();
                 newrow["SNo"] = i;
                 finalrouteid = branch["routeid"].ToString();
-                if (RouteName != branch["RouteName"].ToString())
+                if (SRName != branch["SalesRepresentative"].ToString())
                 {
                     if (Totalcount == 1)
                     {
-                        newrow["Route Name"] = branch["RouteName"].ToString();
+                        newrow["SR Name"] = branch["SalesRepresentative"].ToString();
                         Totalcount++;
                     }
                     else
@@ -216,7 +217,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                         ftotaljv += jvvalue;
                                         grand_totaljv += jvvalue;
                                     }
-                                    
+
                                 }
                                 foreach (DataRow drtrans in dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'"))
                                 {
@@ -254,7 +255,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                         ftotalbankTransfer = 0;
                         ftotalClosingbal = 0;
                         ftotaljv = 0;
-                        newrow["Route Name"] = branch["RouteName"].ToString();
+                        newrow["SR Name"] = branch["SalesRepresentative"].ToString();
                         Totalcount++;
                         DataRow space = Report.NewRow();
                         space["Agent Name"] = "";
@@ -264,11 +265,11 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                 }
                 else
                 {
-                    newrow["Route Name"] = "";
+                    newrow["SR Name"] = "";
                     routeid = branch["routeid"].ToString();
                 }
-                RouteName = branch["RouteName"].ToString();
-                newrow["SR Name"] = branch["SalesRepresentative"].ToString();
+                SRName = branch["SalesRepresentative"].ToString();
+                newrow["Route Name"] = branch["RouteName"].ToString();
                 newrow["Agent Code"] = branch["BranchID"].ToString();
                 newrow["Agent Name"] = branch["BranchName"].ToString();
                 foreach (DataRow dr in dtble.Rows)
@@ -276,7 +277,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                     if (branch["BranchName"].ToString() == dr["BranchName"].ToString())
                     {
                         DataRow[] dragenttrans = dtagenttrans.Select("agentid='" + dr["BranchID"].ToString() + "'");
-                        if (dragenttrans.Length <= 0) 
+                        if (dragenttrans.Length <= 0)
                         {
                             cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND (inddate < @d1)");
                             cmd.Parameters.AddWithValue("@Branchid", dr["BranchID"].ToString());
@@ -348,7 +349,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             }
                             if (PaymentType == "Journal Voucher" || PaymentType == "Incentive")
                             {
-                                
+
                                 double.TryParse(drcollections["AmountPaid"].ToString(), out jvvalue);
                                 newrow["JV/Incentive"] = jvvalue;
                                 ftotaljv += jvvalue;
@@ -361,7 +362,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                             double.TryParse(drtrans["opp_balance"].ToString(), out oppvalue);
                             ftotaloppbal += oppvalue;
                             grand_totaloppbal += oppvalue;
-                            newrow["Oppening Balance"] = Math.Round(oppvalue, 2); 
+                            newrow["Oppening Balance"] = Math.Round(oppvalue, 2);
                             double salesvalue = 0;
                             double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
                             newrow["Sale Value"] = salesvalue;
@@ -374,7 +375,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
                                 double otheramount = banktransfervalue + jvvalue;
                                 paidamount = paidamount - otheramount;
                             }
-                            if(banktransfervalue == 0)
+                            if (banktransfervalue == 0)
                             {
                                 newrow["Bank Transfer"] = banktransfervalue;
                             }
@@ -417,7 +418,7 @@ public partial class Agent_Due_Details : System.Web.UI.Page
             grandtotal["Paid Amount"] = Math.Round(grand_totalpaidamount, 2);
             grandtotal["Bank Transfer"] = Math.Round(grand_totalbankTransfer, 2);
             grandtotal["JV/Incentive"] = Math.Round(grand_totaljv, 2);
-            grandtotal["Closing Balance"] = Math.Round(grand_totalClosingbal,2);
+            grandtotal["Closing Balance"] = Math.Round(grand_totalClosingbal, 2);
             Report.Rows.Add(grandtotal);
             grdReports.DataSource = Report;
             grdReports.DataBind();

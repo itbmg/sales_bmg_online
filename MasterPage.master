@@ -758,6 +758,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                     <div class="drop3">
                                         <ul id="ul16">
                                             <li id="libranchduedetails"><a href="Agent_Due_Details.aspx">AgentWise Due Report</a></li>
+                                            <li id="liSR_Agent_Due_Details"><a href="SR_Agent_Due_Details.aspx">SRWise Agent Due Report</a></li>
                                             <li id="libranchdueconsolidatedetails"><a href="Periodic_Due_Report.aspx">AgentWise Periodic Due</a></li>
                                             <li id="libranchdueSummary"><a href="Branchwise_due_summary.aspx">Branch Wise Due Summary</a></li>
                                             <li id="li70"><a href="BranchWiseIndent.aspx">AgentWise Indent Comparison</a></li>
