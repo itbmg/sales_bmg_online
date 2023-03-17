@@ -42,8 +42,8 @@ public partial class BranchWiseIndent : System.Web.UI.Page
             {
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-                cmd.Parameters.AddWithValue("@SalesType", "21");
-                cmd.Parameters.AddWithValue("@SalesType1", "26");
+                cmd.Parameters.AddWithValue("@SalesType", "4");
+                cmd.Parameters.AddWithValue("@SalesType1", "6");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
                 ddlSalesOffice.DataSource = dtRoutedata;
                 ddlSalesOffice.DataTextField = "BranchName";

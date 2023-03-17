@@ -47,7 +47,7 @@ public partial class TallyInward : System.Web.UI.Page
             dtBranch.Columns.Add("sno");
             cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
             cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-            cmd.Parameters.AddWithValue("@SalesType", "21");
+            cmd.Parameters.AddWithValue("@SalesType", "4");
             cmd.Parameters.AddWithValue("@SalesType1", "26");
             DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
             foreach (DataRow dr in dtRoutedata.Rows)
@@ -69,7 +69,7 @@ public partial class TallyInward : System.Web.UI.Page
             }
             cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType)  ");
             cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-            cmd.Parameters.AddWithValue("@SalesType", "23");
+            cmd.Parameters.AddWithValue("@SalesType", "6");
             DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
             foreach (DataRow dr in dtNewPlant.Rows)
             {

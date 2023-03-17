@@ -33,7 +33,7 @@ public partial class LeaksConsolidatedReport : System.Web.UI.Page
             {
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag=@flag) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) and (branchdata.flag=@flag)");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-                cmd.Parameters.AddWithValue("@SalesType", "21");
+                cmd.Parameters.AddWithValue("@SalesType", "4");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 cmd.Parameters.AddWithValue("@flag", "1");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];

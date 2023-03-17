@@ -52,7 +52,7 @@ public partial class NewAgentReport : System.Web.UI.Page
                 //PBranch.Visible = true;
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-                cmd.Parameters.AddWithValue("@SalesType", "21");
+                cmd.Parameters.AddWithValue("@SalesType", "4");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
                 ddlSalesOffice.DataSource = dtRoutedata;
