@@ -41,12 +41,43 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
             if (Session["salestype"].ToString() == "Plant")
             {
                 PBranch.Visible = true;
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
+                DataTable dtBranch = new DataTable();
+                dtBranch.Columns.Add("BranchName");
+                dtBranch.Columns.Add("sno");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
-                ddlSalesOffice.DataSource = dtRoutedata;
+                foreach (DataRow dr in dtRoutedata.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and branchdata.flag<>0");
+                cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
+                DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType and branchdata.flag<>0)");
+                cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
+                cmd.Parameters.AddWithValue("@SalesType", "23");
+                DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtNewPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                ddlSalesOffice.DataSource = dtBranch;
                 ddlSalesOffice.DataTextField = "BranchName";
                 ddlSalesOffice.DataValueField = "sno";
                 ddlSalesOffice.DataBind();
@@ -54,7 +85,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
             else
             {
                 PBranch.Visible = true;
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno WHERE (branchdata_1.SalesOfficeID = @SOID) OR (branchdata.sno = @BranchID)");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno WHERE (branchdata_1.SalesOfficeID = @SOID) and (branchdata_1.flag<>0) OR (branchdata.sno = @BranchID) and (branchdata.flag<>0)");
                 cmd.Parameters.AddWithValue("@SOID", Session["branch"]);
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
@@ -136,7 +167,7 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
             string BranchID = ddlSalesOffice.SelectedValue;
             if (BranchID == "572")
             {
-                BranchID = "158";
+                BranchID = "7";
             }
             string Status = ddlStatus.SelectedValue;
             DataTable dtroutecollection = new DataTable();
@@ -169,6 +200,17 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
 
             }
+            if (Status == "PhonePay")
+            {
+                cmd = new MySqlCommand("SELECT 'PhonePay' as collectiotype,branchdata.BranchName, branchdata.sno, collections.AmountPaid, collections.PaidDate, collections.PaymentType, collections.CheckStatus, collections.PayTime,collections.ChequeNo,collections.Remarks, collections.tripId, collections.ReceiptNo, dispatch.DispName FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN collections ON branchdata.sno = collections.Branchid WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.tripId IS NULL) AND (dispatch.Branch_Id = @brnchid) AND (collections.TransactionType IS NULL) AND (collections.PaymentType = @pt) GROUP BY collections.PaidDate");
+                cmd.Parameters.AddWithValue("@brnchid", BranchID);
+                cmd.Parameters.AddWithValue("@pt", "PhonePay");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(Todate));
+                dtroutecollection = vdm.SelectQuery(cmd).Tables[0];
+
+            }
+
             if (Status == "Cheque")
             {
                 cmd = new MySqlCommand("SELECT 'Cheque' as collectiotype,branchdata.BranchName, branchdata.sno, collections.AmountPaid, collections.PaidDate, collections.PaymentType, collections.CheckStatus, collections.PayTime,collections.ChequeNo,collections.Remarks, collections.tripId, collections.ReceiptNo, dispatch.DispName FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN collections ON branchdata.sno = collections.Branchid WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.tripId IS NULL) AND (dispatch.Branch_Id = @brnchid) AND (collections.TransactionType IS NULL) AND (collections.PaymentType = @pt) GROUP BY collections.PaidDate");
@@ -291,6 +333,11 @@ public partial class SalesOfficeCollection : System.Web.UI.Page
                 }
             }
             Report.Rows.Add(TotRow);
+
+
+
+
+
             grdReports.DataSource = Report;
             grdReports.DataBind();
 

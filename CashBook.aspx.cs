@@ -44,7 +44,7 @@ public partial class CashBook : System.Web.UI.Page
             if (Session["salestype"].ToString() == "Group")
             {
                 PPlant.Visible = true;
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) ");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
                 ddlPlant.DataSource = dtRoutedata;
@@ -58,7 +58,7 @@ public partial class CashBook : System.Web.UI.Page
                 DataTable dtBranch = new DataTable();
                 dtBranch.Columns.Add("BranchName");
                 dtBranch.Columns.Add("sno");
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType)  ");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
@@ -70,7 +70,7 @@ public partial class CashBook : System.Web.UI.Page
                     newrow["sno"] = dr["sno"].ToString();
                     dtBranch.Rows.Add(newrow);
                 }
-                cmd=new MySqlCommand ("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID)");
+                cmd=new MySqlCommand ("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and (flag<>0)");
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
                 DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
                 foreach (DataRow dr in dtPlant.Rows)
@@ -80,7 +80,7 @@ public partial class CashBook : System.Web.UI.Page
                     newrow["sno"] = dr["sno"].ToString();
                     dtBranch.Rows.Add(newrow);
                 }
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType)  ");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "23");
                 DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
@@ -98,7 +98,7 @@ public partial class CashBook : System.Web.UI.Page
             }
             else
             {
-                cmd = new MySqlCommand("SELECT BranchName, sno FROM branchdata WHERE (sno = @BranchID)");
+                cmd = new MySqlCommand("SELECT BranchName, sno FROM branchdata WHERE (sno = @BranchID) and (flag<>0)");
                 cmd.Parameters.AddWithValue("@SOID", Session["branch"]);
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
@@ -118,7 +118,7 @@ public partial class CashBook : System.Web.UI.Page
         DataTable dtBranch = new DataTable();
         dtBranch.Columns.Add("BranchName");
         dtBranch.Columns.Add("sno");
-        cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType)  ");
+        cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
         cmd.Parameters.AddWithValue("@SuperBranch", ddlPlant.SelectedValue);
         cmd.Parameters.AddWithValue("@SalesType", "21");
         cmd.Parameters.AddWithValue("@SalesType1", "26");
@@ -130,7 +130,7 @@ public partial class CashBook : System.Web.UI.Page
             newrow["sno"] = dr["sno"].ToString();
             dtBranch.Rows.Add(newrow);
         }
-        cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID)");
+        cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and (flag<>0)");
         cmd.Parameters.AddWithValue("@BranchID", ddlPlant.SelectedValue);
         DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
         foreach (DataRow dr in dtPlant.Rows)
@@ -219,7 +219,7 @@ public partial class CashBook : System.Web.UI.Page
             RouteReport.Columns.Add("DispName");
             RouteReport.Columns.Add("Reciept No");
             RouteReport.Columns.Add("Received Amount").DataType = typeof(Double);
-            if (BranchID == "172" || BranchID == "158")
+            if (BranchID == "172" || BranchID == "7")
             {
             }
             else
@@ -312,7 +312,7 @@ public partial class CashBook : System.Web.UI.Page
             {
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, collections.AmountPaid, collections.ReceiptNo FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN empmanage ON collections.EmpID = empmanage.Sno WHERE (collections.tripId IS NULL) AND (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata.SalesType <> 21) AND (branchdata.SalesType <> 21) AND  (empmanage.Branch = @BranchID)");
             }
-            else if (BranchID == "158")
+            else if (BranchID == "7")
             {
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, cashreceipts.AmountPaid,cashreceipts.PaymentStatus, cashreceipts.Receipt AS ReceiptNo FROM branchdata INNER JOIN cashreceipts ON branchdata.sno = cashreceipts.AgentID WHERE (branchdata.SalesType <> 21) AND (branchdata.SalesType <> 21) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.BranchId = @BranchID)  order by ReceiptNo");
             }
@@ -338,7 +338,7 @@ public partial class CashBook : System.Web.UI.Page
                     newrow["DispName"] = dr["BranchName"].ToString();
                     newrow["Reciept No"] = dr["ReceiptNo"].ToString();
                     string Amount = dr["AmountPaid"].ToString();
-                    if (BranchID == "158")
+                    if (BranchID == "7")
                     {
                         string PaymentStatus = dr["PaymentStatus"].ToString();
 
@@ -595,65 +595,65 @@ public partial class CashBook : System.Web.UI.Page
             Session["IOUReport"] = IOUReport;
 
             double TotNetAmount = 0;
-            if (BranchID == "158")
+            if (BranchID == "7")
             {
-                DiffPanel.Visible = false;
-                hidePanel.Visible = false;
+                //DiffPanel.Visible = false;
+                //hidePanel.Visible = false;
 
-                cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, amount,  remarks FROM  zerocashpaybles WHERE (branchid = @BranchID)  AND (doe BETWEEN @d1 AND @d2) AND (paymenttype is NULL)  ORDER BY DOE");
-                cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
-                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                DataTable dtZeroOpp = vdm.SelectQuery(cmd).Tables[0];
-                double TotalZeroOpp = 0;
-                double ZeroOpp = 0;
-                if (dtZeroOpp.Rows.Count > 0)
-                {
-                    string OppAmount = dtZeroOpp.Rows[0]["amount"].ToString();
-                    double.TryParse(OppAmount, out ZeroOpp);
-                }
-                TotalZeroOpp = OppBal + ZeroOpp;
-                TotalZeroOpp = Math.Round(TotalZeroOpp, 0);
-                lblZeroOppBal.Text = TotalZeroOpp.ToString();
-                cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, Sum(amount) as amount,  remarks,Name FROM  zerocashpaybles WHERE (branchid = @BranchID) AND (paymenttype = @Type) AND (doe BETWEEN @d1 AND @d2) Group By DATE(doe) ORDER BY DOE");
-                cmd.Parameters.AddWithValue("@Type", "Receipt");
-                cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
-                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
-                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
-                DataTable dtReceipt = vdm.SelectQuery(cmd).Tables[0];
-                double TotalReceipt = 0;
-                double ZeroReceipt = 0;
-                if (dtReceipt.Rows.Count > 0)
-                {
-                    string ReceiptAmount = dtReceipt.Rows[0]["amount"].ToString();
-                    double.TryParse(ReceiptAmount, out ZeroReceipt);
-                }
-                TotalReceipt = val + ZeroReceipt;
-                TotalReceipt = Math.Round(TotalReceipt, 0);
-                lblZeroReceipts.Text = TotalReceipt.ToString();
+                //cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, amount,  remarks FROM  zerocashpaybles WHERE (branchid = @BranchID)  AND (doe BETWEEN @d1 AND @d2) AND (paymenttype is NULL)  ORDER BY DOE");
+                //cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
+                //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                //cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                //DataTable dtZeroOpp = vdm.SelectQuery(cmd).Tables[0];
+                //double TotalZeroOpp = 0;
+                //double ZeroOpp = 0;
+                //if (dtZeroOpp.Rows.Count > 0)
+                //{
+                //    string OppAmount = dtZeroOpp.Rows[0]["amount"].ToString();
+                //    double.TryParse(OppAmount, out ZeroOpp);
+                //}
+                //TotalZeroOpp = OppBal + ZeroOpp;
+                //TotalZeroOpp = Math.Round(TotalZeroOpp, 0);
+                //lblZeroOppBal.Text = TotalZeroOpp.ToString();
+                //cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, Sum(amount) as amount,  remarks,Name FROM  zerocashpaybles WHERE (branchid = @BranchID) AND (paymenttype = @Type) AND (doe BETWEEN @d1 AND @d2) Group By DATE(doe) ORDER BY DOE");
+                //cmd.Parameters.AddWithValue("@Type", "Receipt");
+                //cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
+                //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                //cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
+                //DataTable dtReceipt = vdm.SelectQuery(cmd).Tables[0];
+                //double TotalReceipt = 0;
+                //double ZeroReceipt = 0;
+                //if (dtReceipt.Rows.Count > 0)
+                //{
+                //    string ReceiptAmount = dtReceipt.Rows[0]["amount"].ToString();
+                //    double.TryParse(ReceiptAmount, out ZeroReceipt);
+                //}
+                //TotalReceipt = val + ZeroReceipt;
+                //TotalReceipt = Math.Round(TotalReceipt, 0);
+                //lblZeroReceipts.Text = TotalReceipt.ToString();
 
-                cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, Sum(amount) as amount,  remarks,Name FROM  zerocashpaybles WHERE (branchid = @BranchID) AND (paymenttype = @Type) AND (doe BETWEEN @d1 AND @d2) Group By DATE(doe) ORDER BY DOE");
-                cmd.Parameters.AddWithValue("@Type", "Payment");
-                cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
-                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
-                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
-                DataTable dtPayment = vdm.SelectQuery(cmd).Tables[0];
-                double TotalPayMent = 0;
-                double ZeroPayMent = 0;
-                if (dtPayment.Rows.Count > 0)
-                {
-                    string PayMentAmount = dtPayment.Rows[0]["amount"].ToString();
-                    double.TryParse(PayMentAmount, out ZeroPayMent);
-                }
-                TotalPayMent = valnewCash + ZeroPayMent;
-                TotalPayMent = Math.Round(TotalPayMent, 0);
-                lblZeroPayments.Text = TotalPayMent.ToString();
-                double TotAmount = 0;
-                TotAmount = TotalZeroOpp + TotalReceipt;
-                double TotCashAmount = 0;
-                TotCashAmount = TotAmount - TotalPayMent;
+                //cmd = new MySqlCommand("  SELECT  sno,DATE_FORMAT(doe, '%d %b %y') AS EntryDate, paymenttype, receiptno, voucherid, branchid, Sum(amount) as amount,  remarks,Name FROM  zerocashpaybles WHERE (branchid = @BranchID) AND (paymenttype = @Type) AND (doe BETWEEN @d1 AND @d2) Group By DATE(doe) ORDER BY DOE");
+                //cmd.Parameters.AddWithValue("@Type", "Payment");
+                //cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
+                //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                //cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
+                //DataTable dtPayment = vdm.SelectQuery(cmd).Tables[0];
+                //double TotalPayMent = 0;
+                //double ZeroPayMent = 0;
+                //if (dtPayment.Rows.Count > 0)
+                //{
+                //    string PayMentAmount = dtPayment.Rows[0]["amount"].ToString();
+                //    double.TryParse(PayMentAmount, out ZeroPayMent);
+                //}
+                //TotalPayMent = valnewCash + ZeroPayMent;
+                //TotalPayMent = Math.Round(TotalPayMent, 0);
+                //lblZeroPayments.Text = TotalPayMent.ToString();
+                //double TotAmount = 0;
+                //TotAmount = TotalZeroOpp + TotalReceipt;
+                //double TotCashAmount = 0;
+                //TotCashAmount = TotAmount - TotalPayMent;
 
-                TotNetAmount = TotCashAmount - valIOUCash;
+                //TotNetAmount = TotCashAmount - valIOUCash;
             }
             //cmd = new MySqlCommand("SELECT Branchid, AmountPaid,Denominations,EmpID FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2)");
             cmd = new MySqlCommand("SELECT collections.Branchid, collections.AmountPaid, collections.Denominations, collections.VEmpID, collections.EmpID, empmanage.EmpName FROM collections INNER JOIN empmanage ON collections.EmpID = empmanage.Sno WHERE (collections.Branchid = @BranchID) AND (collections.PaidDate BETWEEN @d1 AND @d2)");
@@ -863,7 +863,7 @@ public partial class CashBook : System.Web.UI.Page
                             WebClient client = new WebClient();
                             string strdate = fromdate.ToString("dd/MMM");
                             string message = "";
-                            if (Session["TitleName"].ToString() == "BMG Milk Dairy Farm")
+                            if (Session["TitleName"].ToString() == "Sri Vyshnavi Dairy Specialities (P) Ltd")
                             {
                                 string baseurl = "http://roundsms.com/api/sendhttp.php?authkey=Y2U3NGE2MGFkM2V&mobiles=" + phonenumber + "&message=%20" + ddlSalesOffice.SelectedItem.Text + "%20CashBook%20Cash In Hand%20Amount%20for%20The%20Date%20Of%20%20" + strdate + "%20Amount%20is =" + denominationtotal + "&sender=VYSNVI&type=1&route=2"; 
                                // string baseurl = "http://www.smsstriker.com/API/sms.php?username=vaishnavidairy&password=vyshnavi@123&from=VSALES&to=" + phonenumber + "&msg=%20" + ddlSalesOffice.SelectedItem.Text + "%20CashBook%20Cash In Hand%20Amount%20for%20The%20Date%20Of%20%20" + strdate + "%20Amount%20is =" + denominationtotal + "&type=1";

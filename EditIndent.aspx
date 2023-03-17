@@ -1,6 +1,5 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true"
     CodeFile="EditIndent.aspx.cs" Inherits="EditIndent" %>
-
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
     <script src="js/jquery-1.4.4.js" type="text/javascript"></script>
     <script src="Js/JTemplate.js?v=3000" type="text/javascript"></script>
@@ -42,7 +41,8 @@
         $(function () {
             //FillRoutes();
             FillSalesOffice();
-            $("#datepicker").datepicker({ dateFormat: 'yy-mm-dd', numberOfMonths: 1, showButtonPanel: false, maxDate: '+13M +0D',
+            $("#datepicker").datepicker({
+                dateFormat: 'yy-mm-dd', numberOfMonths: 1, showButtonPanel: false, maxDate: '+13M +0D',
                 onSelect: function (selectedDate) {
                     GetEditIndentValues();
                 }
@@ -409,12 +409,19 @@
                 alert("Please Select Agent Name");
                 return false;
             }
+            var soid = document.getElementById('ddlSalesOffice').value;
+            if (BranchName == "select" || BranchName == "") {
+                alert("Please Select Sales Office");
+                return false;
+            }
+            
             var txtDate = document.getElementById('datepicker').value;
             if (txtDate == "") {
                 alert("Please Select Date");
                 return false;
             }
-            var data = { 'operation': 'GetEditIndentValuesClick', 'RouteID': ddlRouteName, 'BranchID': BranchName, 'IndDate': txtDate };
+            var data = {
+                'operation': 'GetEditIndentValuesClick', 'RouteID': ddlRouteName, 'BranchID': BranchName, 'IndDate': txtDate, 'soid': soid};
             var s = function (msg) {
                 if (msg) {
                     $('#divFillScreen').removeTemplate();

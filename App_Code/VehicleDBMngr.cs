@@ -15,7 +15,7 @@ public class VehicleDBMgr
       object obj_lock = new object();
       public VehicleDBMgr()
       {
-          conn.ConnectionString = @"SERVER=120.138.9.118;DATABASE=vyshnavi_sales_bmg_dairy;UID=vyshnavi_root;PASSWORD=Vyshnavi@123;";
+          conn.ConnectionString = @"SERVER=182.18.162.51;DATABASE=vyshnavi_sales_2022;UID=admin;PASSWORD=CK!uM$Btz2#4c$; convert zero datetime=True";
       }
     public  bool insert(MySqlCommand _cmd)
     {

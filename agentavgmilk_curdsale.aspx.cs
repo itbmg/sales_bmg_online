@@ -40,19 +40,50 @@ public partial class agentavgmilk_curdsale : System.Web.UI.Page
             vdm = new VehicleDBMgr();
             if (Session["salestype"].ToString() == "Plant")
             {
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
+                DataTable dtBranch = new DataTable();
+                dtBranch.Columns.Add("BranchName");
+                dtBranch.Columns.Add("sno");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
-                ddlSalesOffice.DataSource = dtRoutedata;
+                foreach (DataRow dr in dtRoutedata.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and branchdata.flag<>0");
+                cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
+                DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType and branchdata.flag<>0)");
+                cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
+                cmd.Parameters.AddWithValue("@SalesType", "23");
+                DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtNewPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                ddlSalesOffice.DataSource = dtBranch;
                 ddlSalesOffice.DataTextField = "BranchName";
                 ddlSalesOffice.DataValueField = "sno";
                 ddlSalesOffice.DataBind();
             }
             else
             {
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno WHERE (branchdata_1.SalesOfficeID = @SOID) OR (branchdata.sno = @BranchID)");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM  branchdata INNER JOIN branchdata branchdata_1 ON branchdata.sno = branchdata_1.sno WHERE (branchdata_1.SalesOfficeID = @SOID) and (branchdata_1.flag<>0) OR (branchdata.sno = @BranchID) and (branchdata.flag<>0)");
                 cmd.Parameters.AddWithValue("@SOID", Session["branch"]);
                 cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
@@ -134,7 +165,7 @@ public partial class agentavgmilk_curdsale : System.Web.UI.Page
             TimeSpan dateSpan = todate.Subtract(fromdate);
             int NoOfdays = dateSpan.Days;
             NoOfdays = NoOfdays + 1;
-            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, modifiedroutes.Sno AS routeid, ROUND(SUM(indents_subtable.DeliveryQty), 2) AS DeliveryQty, SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS salevalue, indent.IndentType, productsdata.ProductName, branchdata.sno AS BSno, branchdata.BranchName, productsdata.Units, productsdata.sno, products_category.Categoryname FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, Status, I_date, IndentType FROM indents WHERE (I_date BETWEEN @starttime AND @endtime) AND (Status <> 'D')) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @endtime) AND (modifiedroutes.BranchID = @TripID) OR (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND (modifiedroutes.BranchID = @TripID) GROUP BY branchdata.BranchName, productsdata.sno, products_category.Categoryname ORDER BY modifiedroutes.RouteName");
+            cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, modifiedroutes.Sno AS routeid, ROUND(SUM(indents_subtable.DeliveryQty), 2) AS DeliveryQty, SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS salevalue, indent.IndentType, productsdata.ProductName, productsdata.Qty as uomqty,branchdata.sno AS BSno, branchdata.BranchName, productsdata.Units, productsdata.sno, products_category.Categoryname FROM modifiedroutes INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, Status, I_date, IndentType FROM indents WHERE (I_date BETWEEN @starttime AND @endtime) AND (Status <> 'D')) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @endtime) AND (modifiedroutes.BranchID = @TripID) OR (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND (modifiedroutes.BranchID = @TripID) GROUP BY branchdata.BranchName, productsdata.sno, products_category.Categoryname ORDER BY modifiedroutes.RouteName");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@TripID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate.AddDays(-1)));
@@ -193,6 +224,7 @@ public partial class agentavgmilk_curdsale : System.Web.UI.Page
                                 double d_qty = 0;
                                 double DeliveryQty = 0;
                                 double UnitCost = 0;
+                                double uom = 0;
                                 DataRow[] drincentive = dtble.Select("RouteID='" + route + "' and ProductName='" + dr["ProductName"].ToString() + "'");
                                 foreach (DataRow drc in drincentive)
                                 {
@@ -210,12 +242,16 @@ public partial class agentavgmilk_curdsale : System.Web.UI.Page
                                 if (dr["Categoryname"].ToString() == "MILK")
                                 {
                                     double.TryParse(dr["DeliveryQty"].ToString(), out DeliveryQty);
-                                    ftotalmilkSale += DeliveryQty;
+                                    double.TryParse(dr["uomqty"].ToString(), out uom);
+                                    double milkqty = DeliveryQty * uom / 1000;
+                                    ftotalmilkSale += milkqty;
                                 }
-                                if (dr["Categoryname"].ToString() == "CURD")
+                                if (dr["Categoryname"].ToString() == "CURD" || dr["Categoryname"].ToString() == "Curd Buckets" || dr["Categoryname"].ToString() == "Curd Cups" || dr["Categoryname"].ToString() == "ButterMilk")
                                 {
                                     double.TryParse(dr["DeliveryQty"].ToString(), out DeliveryQty);
-                                    ftotalcurdSale += DeliveryQty;
+                                    double.TryParse(dr["uomqty"].ToString(), out uom);
+                                    double curdqty = DeliveryQty * uom / 1000;
+                                    ftotalcurdSale += curdqty;
                                 }
                             }
                             newvar["Total Milk Sale"] = Math.Round(ftotalmilkSale, 2);

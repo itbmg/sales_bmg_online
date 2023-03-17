@@ -47,13 +47,43 @@ public partial class dcvssale : System.Web.UI.Page
             if (Session["salestype"].ToString() == "Plant")
             {
                 PBranch.Visible = true;
-                string bn = Session["branch"].ToString();
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchdata.flag = 1) AND  (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
+                DataTable dtBranch = new DataTable();
+                dtBranch.Columns.Add("BranchName");
+                dtBranch.Columns.Add("sno");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
-                ddlSalesOffice.DataSource = dtRoutedata;
+                foreach (DataRow dr in dtRoutedata.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and branchdata.flag<>0");
+                cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
+                DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType and branchdata.flag<>0)");
+                cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
+                cmd.Parameters.AddWithValue("@SalesType", "23");
+                DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtNewPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                ddlSalesOffice.DataSource = dtBranch;
                 ddlSalesOffice.DataTextField = "BranchName";
                 ddlSalesOffice.DataValueField = "sno";
                 ddlSalesOffice.DataBind();
@@ -149,7 +179,7 @@ public partial class dcvssale : System.Web.UI.Page
             lbl_fromDate.Text = txtdate.Text;
             lbl_selttodate.Text = txtTodate.Text;
             DataTable tempbranchindentsale = new DataTable();
-            cmd = new MySqlCommand("SELECT TripInfo.Sno, ROUND(SUM(ProductInfo.Qty), 2) AS dispatchqty, TripInfo.BranchName, TripInfo.Branch_Id, TripInfo.DispName, TripInfo.BranchID, DATE_FORMAT(TripInfo.I_Date, '%d %b %y') AS I_Date  FROM    (SELECT        tripdata.Sno, tripdata.AssignDate, tripdata.I_Date, branchdata_1.BranchName, dispatch.BranchID, dispatch.Branch_Id, dispatch.GroupId, dispatch.CompanyId, dispatch.DispName   FROM            branchdata INNER JOIN  dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN  tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN branchdata branchdata_1 ON dispatch.Branch_Id = branchdata_1.sno   WHERE        (dispatch.Branch_Id = @BranchID) AND (tripdata.AssignDate BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @SUBBRANCH)) TripInfo INNER JOIN (SELECT        Sno, Qty FROM            (SELECT        tripdata_1.Sno, tripsubdata.Qty   FROM            tripdata tripdata_1 INNER JOIN tripsubdata ON tripdata_1.Sno = tripsubdata.Tripdata_sno  WHERE        (tripdata_1.AssignDate BETWEEN @d1 AND @d2)) TripSubInfo) ProductInfo ON TripInfo.Sno = ProductInfo.Sno  GROUP BY TripInfo.DispName, TripInfo.BranchID, TripInfo.I_Date  ORDER BY TripInfo.AssignDate");
+            cmd = new MySqlCommand("SELECT TripInfo.Sno, ROUND(SUM(ProductInfo.Qty), 2) AS dispatchqty, TripInfo.BranchName, TripInfo.Branch_Id, TripInfo.DispName, TripInfo.BranchID, DATE_FORMAT(TripInfo.I_Date, '%d %b %y') AS I_Date  FROM    (SELECT        tripdata.Sno, tripdata.AssignDate, tripdata.I_Date, branchdata_1.BranchName, dispatch.BranchID, dispatch.Branch_Id, dispatch.GroupId, dispatch.CompanyId, dispatch.DispName   FROM            branchdata INNER JOIN  dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN  tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN branchdata branchdata_1 ON dispatch.Branch_Id = branchdata_1.sno   WHERE        (dispatch.Branch_Id = @BranchID) AND (tripdata.AssignDate BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @SUBBRANCH)) TripInfo INNER JOIN (SELECT  Sno,Qty,Categoryname, ProductName, Sno, Qty,uomqty FROM  (SELECT tripdata_1.Sno, tripsubdata.Qty,products_category.Categoryname, productsdata.ProductName,productsdata.Qty as uomqty   FROM            tripdata tripdata_1 INNER JOIN tripsubdata ON tripdata_1.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno  WHERE        (tripdata_1.AssignDate BETWEEN @d1 AND @d2)) TripSubInfo) ProductInfo ON TripInfo.Sno = ProductInfo.Sno  GROUP BY TripInfo.DispName, TripInfo.BranchID, TripInfo.I_Date  ORDER BY TripInfo.AssignDate");
             cmd.Parameters.AddWithValue("@BranchID", Session["branch"].ToString());
             cmd.Parameters.AddWithValue("@SUBBRANCH", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
@@ -209,7 +239,7 @@ public partial class dcvssale : System.Web.UI.Page
             }
 
             dtShortAndFree.Merge(DtTripId);
-            cmd = new MySqlCommand("SELECT branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as inddate, branchleaktrans.LeakQty as puffleaks,branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID)");
+            cmd = new MySqlCommand("SELECT branchleaktrans.BranchID as Branch_Id,DATE_FORMAT(tripdata.I_date,'%d %b %y') as inddate, branchleaktrans.ShortQty,branchleaktrans.FreeQty as FreeMilk  FROM branchleaktrans INNER JOIN tripdata ON branchleaktrans.TripId = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchleaktrans.BranchID = @BranchID)");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
@@ -243,10 +273,8 @@ public partial class dcvssale : System.Web.UI.Page
                 string BRANCHID = ddlSalesOffice.SelectedValue;
                 foreach (DataRow branch in distincttable.Rows)
                 {
-                    double totalleak = 0;
-                    double totalreturn = 0;
-                    double totalshort = 0;
-                    double totalfree = 0;
+                    double totalleakreturn = 0;
+                    double totalshortfree = 0;
                     DataRow newrow = Report.NewRow();
                     double shortqty = 0;
                     double freeqty = 0;
@@ -290,20 +318,17 @@ public partial class dcvssale : System.Web.UI.Page
                         double.TryParse(drleaks["returnqty"].ToString(), out returnqty);
                         newrow["Lekages"] = Math.Round(leakqty, 2); //drleaks["Leaks"].ToString();
                         newrow["Returns"] = Math.Round(returnqty, 2); //drleaks["Return"].ToString();
-                        totalleak += leakqty;
-                        totalreturn += returnqty;
+                        totalleakreturn += leakqty;
+                        totalleakreturn += returnqty;
                     }
                     foreach (DataRow drfree in dtShortAndFree.Select("inddate='" + branch["I_date"].ToString() + "'"))
                     {
                         double.TryParse(drfree["ShortQty"].ToString(), out shortqty);
                         double.TryParse(drfree["FreeMilk"].ToString(), out freeqty);
-                        double.TryParse(drfree["puffleaks"].ToString(), out leakqty);
                         //newrow["Free"] = Math.Round(freeqty, 0); //drfree["ShortQty"].ToString();
                         //newrow["Short"] = Math.Round(shortqty, 0);// drfree["qty"].ToString();
-                        totalleak += leakqty;
-                        newrow["Lekages"] = Math.Round(totalleak, 2);
-                        totalfree += freeqty;
-                        totalshort += shortqty;
+                        totalshortfree += freeqty;
+                        totalshortfree += shortqty;
                         tfree += freeqty;
                         tshort += shortqty;
                     }

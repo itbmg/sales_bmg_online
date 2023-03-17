@@ -46,13 +46,43 @@ public partial class SalesOfficeWiseActivity : System.Web.UI.Page
             if (Session["salestype"].ToString() == "Plant")
             {
                 PBranch.Visible = true;
-                string bn = Session["branch"].ToString();
-                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) ");
+                DataTable dtBranch = new DataTable();
+                dtBranch.Columns.Add("BranchName");
+                dtBranch.Columns.Add("sno");
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) ");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
                 cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
-                ddlSalesOffice.DataSource = dtRoutedata;
+                foreach (DataRow dr in dtRoutedata.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT BranchName, sno FROM  branchdata WHERE (sno = @BranchID) and branchdata.flag<>0");
+                cmd.Parameters.AddWithValue("@BranchID", Session["branch"]);
+                DataTable dtPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType and branchdata.flag<>0)");
+                cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
+                cmd.Parameters.AddWithValue("@SalesType", "23");
+                DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtNewPlant.Rows)
+                {
+                    DataRow newrow = dtBranch.NewRow();
+                    newrow["BranchName"] = dr["BranchName"].ToString();
+                    newrow["sno"] = dr["sno"].ToString();
+                    dtBranch.Rows.Add(newrow);
+                }
+                ddlSalesOffice.DataSource = dtBranch;
                 ddlSalesOffice.DataTextField = "BranchName";
                 ddlSalesOffice.DataValueField = "sno";
                 ddlSalesOffice.DataBind();
@@ -142,7 +172,7 @@ public partial class SalesOfficeWiseActivity : System.Web.UI.Page
             string BranchID = ddlSalesOffice.SelectedValue;
             if (BranchID == "572")
             {
-                BranchID = "158";
+                BranchID = "7";
             }
             cmd = new MySqlCommand("SELECT ROUND(SUM(indents_subtable.DeliveryQty), 2) AS DeliveryQty, ROUND(SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost), 2) AS salevalue, products_category.Categoryname, productsdata.ProductName, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN branchmappingtable ON indents.Branch_id = branchmappingtable.SubBranch WHERE (indents.I_date BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @brnchid) GROUP BY productsdata.ProductName, products_category.Categoryname, IndentDate ORDER BY indents.I_date");
             cmd.Parameters.AddWithValue("@brnchid", BranchID);

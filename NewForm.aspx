@@ -255,7 +255,7 @@
                 if (!confirm("Do you want to save this transaction")) {
                     return false;
                 }
-                if (paymenttype == "Cash") {
+                if (paymenttype == "Cash" || paymenttype == "PhonePay") {
                     var txt_Total = document.getElementById("txtCTotAmount").innerHTML;
                     var rowsdenominations = $("#tableCollectionDetails tr:gt(0)");
                     var DenominationString = "";
@@ -277,7 +277,7 @@
                     }
                 }
 //                var data = { 'operation': 'BtnCashAmountClick', 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString,  'AgentID': AgentID, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype,  'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
-                var data = { 'operation': 'BtnCashAmountClick1', 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'ddlfreezertype': ddlfreezertype, 'ddlfreezeramounttype': ddlfreezeramounttype, 'AgentID': AgentID, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype, 'ddlAmountType': ddlAmountType, 'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
+                var data = { 'operation': 'BtnCashAmountClick', 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'ddlfreezertype': ddlfreezertype, 'ddlfreezeramounttype': ddlfreezeramounttype, 'AgentID': AgentID, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype, 'ddlAmountType': ddlAmountType, 'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
                 var s = function (msg) {
                     if (msg) {
                         alert(msg);
@@ -388,7 +388,7 @@
                 }
 //                var data = { 'operation': 'BtnCashAmountClick', 'ledger_code': ledger_code, 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype,  'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
 
-                var data = { 'operation': 'BtnCashAmountClick1', 'ledger_code': ledger_code, 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'ddlfreezertype': ddlfreezertype, 'ddlfreezeramounttype': ddlfreezeramounttype, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype, 'ddlAmountType': ddlAmountType, 'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
+                var data = { 'operation': 'BtnCashAmountClick', 'ledger_code': ledger_code, 'ddlTransType': ddlTransType, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'ddlfreezertype': ddlfreezertype, 'ddlfreezeramounttype': ddlfreezeramounttype, 'Name': Name, 'paymenttype': paymenttype, 'collectiontype': collectiontype, 'ddlAmountType': ddlAmountType, 'ChequeNo': txtChequeNo, 'chequeDate': chequeDate, 'BankName': txtBankName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks };
                 var s = function (msg) {
                     if (msg) {
                         alert(msg);
@@ -478,7 +478,7 @@
                     HeadSno = Head.options[Head.selectedIndex].value;
                     var HeadOfAccount = Head.options[Head.selectedIndex].text;
                 }
-                if (paymenttype == "Cash") {
+                if (paymenttype == "Cash" || paymenttype == "PhonePay") {
                     var rowsdenominations = $("#tableCollectionDetails tr:gt(0)");
                     var DenominationString = "";
                     var ReturnDenominationString = "";
@@ -502,7 +502,7 @@
                         return false;
                     }
                 }
-                var data = { 'operation': 'BtnCashAmountClick1', 'collectiontype': collectiontype, 'HeadSno': HeadSno, 'BranchID': ddlAgentName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks, 'paymenttype': paymenttype, 'ChequeNo': txtChequeNo, 'PaidDate': PaidDate, 'chequeDate': chequeDate, 'BankName': txtBankName, 'ddltransactiontype': ddltransactiontype, 'soid': ddlSalesOffice, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'faaccuntno': faaccuntno };
+                var data = { 'operation': 'BtnCashAmountClick', 'collectiontype': collectiontype, 'HeadSno': HeadSno, 'BranchID': ddlAgentName, 'Amount': txtAmount, 'Remarks': txtCashierRemarks, 'paymenttype': paymenttype, 'ChequeNo': txtChequeNo, 'PaidDate': PaidDate, 'chequeDate': chequeDate, 'BankName': txtBankName, 'ddltransactiontype': ddltransactiontype, 'soid': ddlSalesOffice, 'DenominationString': DenominationString, 'ReturnDenominationString': ReturnDenominationString, 'faaccuntno': faaccuntno };
                 var s = function (msg) {
                     if (msg) {
                         alert(msg);
@@ -671,7 +671,7 @@
         var PaymentType = "";
         function ddlPaymentTypeChange(Payment) {
             PaymentType = Payment.options[Payment.selectedIndex].text;
-            if (PaymentType == "Cash") {
+            if (PaymentType == "Cash" || paymenttype == "PhonePay" ) {
                 $('.divChequeclass').css('display', 'none');
                 $('.divChequeDateclass').css('display', 'none');
                 $('.divBankclass').css('display', 'none');
@@ -1117,6 +1117,7 @@
                                         <select id="ddlPaymentType" class="form-control" onchange="ddlPaymentTypeChange(this);">
                                             <option>Select</option>
                                             <option>Cash</option>
+                                            <option>PhonePay</option>
                                             <option>Cheque</option>
                                             <option>DD</option>
                                             <option>Bank Transfer</option>

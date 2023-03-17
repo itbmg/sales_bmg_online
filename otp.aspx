@@ -159,7 +159,7 @@
         </div>
       </div>
       <div class="col-half_rig">
-        <h3>BMG Milk Dairy Farm specilities Private Limted</h3>
+        <h3>SRI VYSHNAVI DAIRY SPECIALITIES (P) LTD</h3>
          <div >
          <h4>OTP authentication</h4>
         </div>
@@ -254,7 +254,7 @@
                             </td>
                             <td width="85%">
                                 <asp:Label ID="lblTitle" runat="server" Font-Bold="true" Font-Size="22px" ForeColor="#ff1493"
-                                    Text="BMG Milk Dairy Farm SPECIALITIES PVT LIMITED"></asp:Label>
+                                    Text="VITA MILK DAIRY PRODUCTS SPECIALITIES PVT LIMITED"></asp:Label>
                                 <br />
                                 <span style="font-size: 20px; font-weight: bold; color: #0252aa; padding-left: 25%;">
                                     OTP Authentication</span>

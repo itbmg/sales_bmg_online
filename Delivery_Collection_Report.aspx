@@ -111,7 +111,7 @@
                                 <div align="center">
                                     <div style="width: 100%;">
                                         <div style="width: 11%; float: left;">
-                                            <img src="Images/Vyshnavilogo.png" alt=BMG width="120px" height="135px" />
+                                            <img src="Images/Vyshnavilogo.png" alt="Vyshnavi Dairy" width="95px" height="90px" />
                                         </div>
                                         <div style="left: 0%; text-align: center;">
                                             <asp:Label ID="lblTitle" runat="server" Font-Bold="true" Font-Size="26px" ForeColor="#0252aa"
@@ -137,7 +137,7 @@
                                     </div>
                                 </div>
                                 <asp:GridView ID="grdReports" runat="server" ForeColor="White" Width="100%"   CssClass="gridcls"
-                                    GridLines="Both" Font-Bold="true" Font-Size="Smaller" OnRowCreated="grdReports_RowCreated" OnRowDataBound="grdReports_RowDataBound">
+                                    GridLines="Both" Font-Bold="true" Font-Size="Smaller"  OnRowDataBound="grdReports_RowDataBound">
                                     <EditRowStyle BackColor="#999999" />
                                     <FooterStyle BackColor="Gray" Font-Bold="False" ForeColor="White" />
                                     <HeaderStyle BackColor="#f4f4f4" Font-Bold="False" ForeColor="Black" Font-Italic="False"

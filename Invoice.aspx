@@ -15,14 +15,7 @@
             position: absolute;
             z-index: 1;
         }
-        #bg-text
-        {
-            position: absolute;
-            opacity: 0.1;
-            color: lightgrey;
-            font-size: 120px; /*transform:rotate(300deg);
-        -webkit-transform:rotate(300deg);*/
-        }
+       
     </style>
     <script type="text/javascript">
         $(function () {
@@ -500,7 +493,7 @@ Ref No
                <div id="divPrint" style="display:none;font-family: initial;">
                 <div style="border: 2px solid gray;" class="col-md-12">
                     <div  style="width: 13%; float: left;">
-                        <img src="Images/Vyshnavilogo.png" alt=BMG width="60px" height="60px" />
+                        <img src="Images/Vyshnavilogo.png" alt="Vyshnavi Dairy" width="60px" height="60px" />
                         <br />
                     </div>
                    

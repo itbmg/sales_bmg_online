@@ -94,6 +94,7 @@
                                     <asp:DropDownList ID="ddlStatus" runat="server" CssClass="form-control">
                                         <asp:ListItem>ALL</asp:ListItem>
                                         <asp:ListItem>Cash</asp:ListItem>
+                                        <asp:ListItem>PhonePay</asp:ListItem>
                                         <asp:ListItem>Cheque</asp:ListItem>
                                         <asp:ListItem>DD</asp:ListItem>
                                         <asp:ListItem>Bank Transfer</asp:ListItem>
@@ -114,12 +115,12 @@
                             <div id="divPrint">
                                 <div style="width: 100%;">
                                     <div style="width: 11%; float: left;">
-                                        <img src="Images/Vyshnavilogo.png" alt=BMG width="120px" height="135px" />
+                                        <img src="Images/Vyshnavilogo.png" alt="Vyshnavi Dairy" width="95px" height="90px" />
                                     </div>
                                     <div style="left: 0%; text-align: center;">
                                         <asp:Label ID="lblTitle" runat="server" Font-Bold="true" Font-Size="26px" ForeColor="#0252aa"
                                             Text=""></asp:Label>
-                                        <%--<span style="font-size: 26px; font-weight: bold; color: #0252aa;">BMG Milk Dairy Farm
+                                        <%--<span style="font-size: 26px; font-weight: bold; color: #0252aa;">VITA MILK DAIRY PRODUCTS
                               </span>--%>
                                         <br />
                                     </div>

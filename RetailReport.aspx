@@ -191,12 +191,12 @@
               <div id="divPrint" style="display: none;">
                 <div style="height:1040px;">
                     <div style="width: 13%; float: right;">
-                        <img src="Images/Vyshnavilogo.png" alt=BMG width="100px" height="72px" />
+                        <img src="Images/Vyshnavilogo.png" alt="Vyshnavi Dairy" width="100px" height="72px" />
                         <br />
                     </div>
                     <div>
                         <div style="font-family: Arial; font-size: 14pt; font-weight: bold; color: Black;">
-                            <span>BMG Milk Dairy Farm </span>
+                            <span>SRI VYSHNAVI DAIRY SPECIALITIES (P) LTD </span>
                             <br />
                         </div>
                         <%--<div style="width:26%;">

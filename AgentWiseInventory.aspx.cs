@@ -434,6 +434,5 @@ public partial class AgentWiseInventory : System.Web.UI.Page
         ddlAgentName.DataTextField = "BranchName";
         ddlAgentName.DataValueField = "sno";
         ddlAgentName.DataBind();
-
     }
 }
