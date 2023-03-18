@@ -35707,18 +35707,18 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             vdbmngr = new VehicleDBMgr();
             List<initializedataclass> initializedatalist = new List<initializedataclass>();
             string FormType = context.Request["FormType"];
-            if (FormType == "NewProductMaster")
-            {
-                cmd = new MySqlCommand("select tempcatsno AS sno,description AS Categoryname from products_category where flag=@flag and userdata_sno=@username AND tempcatsno IS NOT NULL");
-                cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
-                cmd.Parameters.AddWithValue("@flag", "1");
-            }
-            else
-            {
+            //if (FormType == "NewProductMaster")
+            //{
+            //    cmd = new MySqlCommand("select tempcatsno AS sno,description AS Categoryname from products_category where flag=@flag and userdata_sno=@username AND tempcatsno IS NOT NULL");
+            //    cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
+            //    cmd.Parameters.AddWithValue("@flag", "1");
+            //}
+            //else
+            //{
                 cmd = new MySqlCommand("select sno,Categoryname from products_category where flag=@flag and userdata_sno=@username");
                 cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
                 cmd.Parameters.AddWithValue("@flag", "1");
-            }
+            //}
             foreach (DataRow dr in vdbmngr.SelectQuery(cmd).Tables[0].Rows)
             {
                 initializedataclass initializedata = new initializedataclass();
@@ -35726,16 +35726,16 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 initializedata.categoryname = dr["Categoryname"].ToString();
                 initializedatalist.Add(initializedata);
             }
-            if (FormType == "NewProductMaster")
-            {
-                cmd = new MySqlCommand("SELECT   productsdata.ifdflag, productsdata.description, productsdata.invqty, productsdata.pieces, productsdata.specification, productsdata.materialtype, productsdata.PerUnitPrice, products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno, productsdata.images, productsdata.hsncode, productsdata.igst, productsdata.sgst, productsdata.cgst, productsdata.gsttaxcategory, products_category.Categoryname,products_category.sno AS categorysno, productsdata.tproduct, productsdata.Itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units, productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno, productsdata.VatPercent, invmaster.InvName, productsdata.tempsubcatsno, products_category.tempcatsno,products_subcategory.tempsub_catsno, products_category.description AS Expr1, products_subcategory.description AS Expr2 FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.tempsubcatsno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
-                cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
-            }
-            else
-            {
+            //if (FormType == "NewProductMaster")
+            //{
+            //    cmd = new MySqlCommand("SELECT   productsdata.ifdflag, productsdata.description, productsdata.invqty, productsdata.pieces, productsdata.specification, productsdata.materialtype, productsdata.PerUnitPrice, products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno, productsdata.images, productsdata.hsncode, productsdata.igst, productsdata.sgst, productsdata.cgst, productsdata.gsttaxcategory, products_category.Categoryname,products_category.sno AS categorysno, productsdata.tproduct, productsdata.Itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units, productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno, productsdata.VatPercent, invmaster.InvName, productsdata.tempsubcatsno, products_category.tempcatsno,products_subcategory.tempsub_catsno, products_category.description AS Expr1, products_subcategory.description AS Expr2 FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.tempsubcatsno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
+            //    cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
+            //}
+            //else
+            //{
                 cmd = new MySqlCommand("SELECT products_category.Categoryname, products_subcategory.SubCatName,products_subcategory.category_sno,products_subcategory.sno, productsdata.*  FROM productsdata RIGHT OUTER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno RIGHT OUTER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (products_category.flag<>0) AND (products_subcategory.Flag<>0) AND products_category.userdata_sno=@username");
                 cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
-            }
+            //}
             DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
             context.Session["getcategorynames"] = dt;
             if (initializedatalist != null)
@@ -35789,20 +35789,20 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
 
             DataTable productdata = (DataTable)context.Session["getcategorynames"];
             DataTable categorys = new DataTable();
-            if (FormType == "NewProductMaster")
-            {
-                categorys = productdata.DefaultView.ToTable(true, "tempcatsno", "Expr2", "tempsub_catsno");
-                DataRow[] subcatgry = categorys.Select("tempcatsno=" + catgryname + "");
-                foreach (DataRow dr in subcatgry)
-                {
-                    initializedataclass initializedata = new initializedataclass();
-                    initializedata.subcategorynames = dr["Expr2"].ToString();
-                    initializedata.sno = dr["tempsub_catsno"].ToString();
-                    initializedatalist.Add(initializedata);
-                }
-            }
-            else
-            {
+            //if (FormType == "NewProductMaster")
+            //{
+            //    categorys = productdata.DefaultView.ToTable(true, "tempcatsno", "Expr2", "tempsub_catsno");
+            //    DataRow[] subcatgry = categorys.Select("tempcatsno=" + catgryname + "");
+            //    foreach (DataRow dr in subcatgry)
+            //    {
+            //        initializedataclass initializedata = new initializedataclass();
+            //        initializedata.subcategorynames = dr["Expr2"].ToString();
+            //        initializedata.sno = dr["tempsub_catsno"].ToString();
+            //        initializedatalist.Add(initializedata);
+            //    }
+            //}
+            //else
+            //{
                 categorys = productdata.DefaultView.ToTable(true, "category_sno", "SubCatName", "sno");
                 DataRow[] subcatgry = categorys.Select("category_sno=" + catgryname + "");
                 foreach (DataRow dr in subcatgry)
@@ -35812,7 +35812,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     initializedata.sno = dr["sno"].ToString();
                     initializedatalist.Add(initializedata);
                 }
-            }
+            //}
             if (initializedatalist != null)
             {
                 string response = GetJson(initializedatalist);
@@ -36122,24 +36122,24 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             string FormType = context.Request["FormType"];
             List<Producttype> Productlist = new List<Producttype>();
 
-            if (FormType == "NewProductMaster")
-            {
-                cmd = new MySqlCommand("SELECT  sno, Categoryname, flag, userdata_sno, tcategory, categorycode, rank, description, tempcatsno FROM products_category WHERE (userdata_sno = @username) AND (tempcatsno IS NOT NULL)");
-                cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"]);
-                DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
-                foreach (DataRow dr in dt.Rows)
-                {
-                    Producttype GetProducttype = new Producttype();
-                    GetProducttype.Categoryname = dr["description"].ToString();
-                    GetProducttype.tcategory = dr["tcategory"].ToString();
-                    GetProducttype.categorycode = dr["categorycode"].ToString();
-                    GetProducttype.flag = dr["flag"].ToString();
-                    GetProducttype.sno = dr["tempcatsno"].ToString();
-                    Productlist.Add(GetProducttype);
-                }
-            }
-            else
-            {
+            //if (FormType == "NewProductMaster")
+            //{
+            //    cmd = new MySqlCommand("SELECT  sno, Categoryname, flag, userdata_sno, tcategory, categorycode, rank, description, tempcatsno FROM products_category WHERE (userdata_sno = @username) AND (tempcatsno IS NOT NULL)");
+            //    cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"]);
+            //    DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
+            //    foreach (DataRow dr in dt.Rows)
+            //    {
+            //        Producttype GetProducttype = new Producttype();
+            //        GetProducttype.Categoryname = dr["description"].ToString();
+            //        GetProducttype.tcategory = dr["tcategory"].ToString();
+            //        GetProducttype.categorycode = dr["categorycode"].ToString();
+            //        GetProducttype.flag = dr["flag"].ToString();
+            //        GetProducttype.sno = dr["tempcatsno"].ToString();
+            //        Productlist.Add(GetProducttype);
+            //    }
+            //}
+            //else
+            //{
                 cmd = new MySqlCommand("select Categoryname,flag,sno,tcategory,categorycode From products_category Where userdata_sno= @username");
                 cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"]);
                 DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
@@ -36153,7 +36153,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     GetProducttype.sno = dr["sno"].ToString();
                     Productlist.Add(GetProducttype);
                 }
-            }
+            //}
             string response = GetJson(Productlist);
             context.Response.Write(response);
         }
@@ -36232,25 +36232,25 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             string username = context.Session["userdata_sno"].ToString();
             List<subcategytype> subcatlist = new List<subcategytype>();
             string FormType = context.Request["FormType"];
-            if (FormType == "NewProductMaster")
-            {
-                cmd = new MySqlCommand("SELECT   products_subcategory.SubCatName, products_category.Categoryname, products_subcategory.description, products_subcategory.Flag, products_subcategory.sno, products_category.tempcatsno,products_subcategory.tempsub_catsno, products_category.description AS Expr1 FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno WHERE (products_subcategory.userdata_sno = @username) AND (products_subcategory.tempsub_catsno IS NOT NULL)");
-                cmd.Parameters.AddWithValue("@username", username);
-                DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
-                foreach (DataRow dr in dt.Rows)
-                {
-                    subcategytype Getsubcattype = new subcategytype();
-                    Getsubcattype.subcatname = dr["description"].ToString();
-                    Getsubcattype.Categoryname = dr["Expr1"].ToString();
-                    Getsubcattype.flag = dr["Flag"].ToString();
-                    Getsubcattype.sno = dr["tempsub_catsno"].ToString();
-                    Getsubcattype.catgrysno = dr["tempcatsno"].ToString();
-                    Getsubcattype.description = dr["description"].ToString();
-                    subcatlist.Add(Getsubcattype);
-                }
-            }
-            else
-            {
+            //if (FormType == "NewProductMaster")
+            //{
+            //    cmd = new MySqlCommand("SELECT   products_subcategory.SubCatName, products_category.Categoryname, products_subcategory.description, products_subcategory.Flag, products_subcategory.sno, products_category.tempcatsno,products_subcategory.tempsub_catsno, products_category.description AS Expr1 FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno WHERE (products_subcategory.userdata_sno = @username) AND (products_subcategory.tempsub_catsno IS NOT NULL)");
+            //    cmd.Parameters.AddWithValue("@username", username);
+            //    DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
+            //    foreach (DataRow dr in dt.Rows)
+            //    {
+            //        subcategytype Getsubcattype = new subcategytype();
+            //        Getsubcattype.subcatname = dr["description"].ToString();
+            //        Getsubcattype.Categoryname = dr["Expr1"].ToString();
+            //        Getsubcattype.flag = dr["Flag"].ToString();
+            //        Getsubcattype.sno = dr["tempsub_catsno"].ToString();
+            //        Getsubcattype.catgrysno = dr["tempcatsno"].ToString();
+            //        Getsubcattype.description = dr["description"].ToString();
+            //        subcatlist.Add(Getsubcattype);
+            //    }
+            //}
+            //else
+            //{
                 cmd = new MySqlCommand("SELECT products_subcategory.SubCatName, products_category.Categoryname, products_subcategory.description,products_subcategory.Flag,products_subcategory.sno FROM  products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno WHERE products_subcategory.userdata_sno=@username");
                 cmd.Parameters.AddWithValue("@username", username);
                 DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
@@ -36265,7 +36265,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     Getsubcattype.description = dr["description"].ToString();
                     subcatlist.Add(Getsubcattype);
                 }
-            }
+            //}
             string response = GetJson(subcatlist);
             context.Response.Write(response);
         }
@@ -36455,93 +36455,51 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             string FormType = context.Request["FormType"];
             List<ProductUnits> ProductUnitlist = new List<ProductUnits>();
 
-            if (FormType == "NewProductMaster")
-            {
-                cmd = new MySqlCommand("SELECT   productsdata.ifdflag, productsdata.description, productsdata.invqty, productsdata.pieces, productsdata.specification, productsdata.materialtype, productsdata.PerUnitPrice, products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno, productsdata.images, productsdata.hsncode, productsdata.igst, productsdata.sgst, productsdata.cgst, productsdata.gsttaxcategory, products_category.Categoryname,products_category.sno AS categorysno, productsdata.tproduct, productsdata.Itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units, productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno, productsdata.VatPercent, invmaster.InvName, productsdata.tempsubcatsno, products_category.tempcatsno,products_subcategory.tempsub_catsno, products_category.description AS Expr1, products_subcategory.description AS Expr2 FROM  products_category INNER JOIN products_subcategory ON products_category.tempcatsno = products_subcategory.tempcatsno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.tempsubcatsno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
-                cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
-                DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
-                foreach (DataRow dr in dt.Rows)
-                {
 
-                    ProductUnits GetProductUnit = new ProductUnits();
-                    GetProductUnit.SubCatName = dr["Expr2"].ToString();
-                    GetProductUnit.Categoryname = dr["Expr1"].ToString();
-                    GetProductUnit.ProductName = dr["ProductName"].ToString();
-                    GetProductUnit.ProductCode = dr["itemcode"].ToString();
-                    GetProductUnit.TProductName = dr["tproduct"].ToString();
-                    GetProductUnit.InvName = dr["InvName"].ToString();
-                    GetProductUnit.sno = dr["sno"].ToString();
-                    GetProductUnit.Qty = dr["Qty"].ToString();
-                    GetProductUnit.ProductUnit = dr["Units"].ToString();
-                    GetProductUnit.UnitPrice = dr["UnitPrice"].ToString();
-                    GetProductUnit.subcatsno = dr["tempsub_catsno"].ToString();
-                    GetProductUnit.catgrysno = dr["tempcatsno"].ToString();
-                    GetProductUnit.flag = dr["Flag"].ToString();
-                    //GetProductUnit.VatPercent = dr["VatPercent"].ToString();
-                    GetProductUnit.categorysno = dr["tempcatsno"].ToString();
-                    GetProductUnit.SubCatsno = dr["tempsub_catsno"].ToString();
-                    GetProductUnit.specification = dr["specification"].ToString();
-                    GetProductUnit.materialtype = dr["materialtype"].ToString();
-                    GetProductUnit.perunitprice = dr["perunitprice"].ToString();
-                    GetProductUnit.hsncode = dr["hsncode"].ToString();
-                    GetProductUnit.igst = dr["igst"].ToString();
-                    GetProductUnit.cgst = dr["cgst"].ToString();
-                    GetProductUnit.sgst = dr["sgst"].ToString();
-                    GetProductUnit.gsttaxcategory = dr["gsttaxcategory"].ToString();
-                    GetProductUnit.pieces = dr["pieces"].ToString();
-                    GetProductUnit.images = dr["images"].ToString();
-                    GetProductUnit.invqty = dr["invqty"].ToString();
-                    GetProductUnit.description = dr["description"].ToString();
-                    GetProductUnit.ifdflag = dr["ifdflag"].ToString();
-                    GetProductUnit.ftplocation = "ftp://223.196.32.30:21/Sales/";
-                    ProductUnitlist.Add(GetProductUnit);
-                }
-            }
-            else
+
+
+            //cmd = new MySqlCommand("SELECT   productsdata.hsncode,productsdata.specification,productsdata.materialtype,productsdata.packtype,products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno ,productsdata.images, products_category.Categoryname,products_category.sno AS categorysno,productsdata.tproduct,productsdata.itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units,productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno,productsdata.VatPercent, invmaster.InvName FROM products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
+            cmd = new MySqlCommand("SELECT   productsdata.ifdflag,productsdata.description,productsdata.invqty,productsdata.pieces,productsdata.specification,productsdata.materialtype,productsdata.perunitprice,products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno ,productsdata.images,productsdata.hsncode,productsdata.igst,productsdata.sgst,productsdata.cgst, productsdata.gsttaxcategory, products_category.Categoryname,products_category.sno AS categorysno,productsdata.tproduct,productsdata.itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units,productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno,productsdata.VatPercent, invmaster.InvName FROM products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
+            cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
+            DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
+            //List<ProductUnits> ProductUnitlist = new List<ProductUnits>();
+            foreach (DataRow dr in dt.Rows)
             {
 
-                //cmd = new MySqlCommand("SELECT   productsdata.hsncode,productsdata.specification,productsdata.materialtype,productsdata.packtype,products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno ,productsdata.images, products_category.Categoryname,products_category.sno AS categorysno,productsdata.tproduct,productsdata.itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units,productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno,productsdata.VatPercent, invmaster.InvName FROM products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
-                cmd = new MySqlCommand("SELECT   productsdata.ifdflag,productsdata.description,productsdata.invqty,productsdata.pieces,productsdata.specification,productsdata.materialtype,productsdata.perunitprice,products_subcategory.SubCatName,products_subcategory.sno AS SubCatsno ,productsdata.images,productsdata.hsncode,productsdata.igst,productsdata.sgst,productsdata.cgst, productsdata.gsttaxcategory, products_category.Categoryname,products_category.sno AS categorysno,productsdata.tproduct,productsdata.itemcode, productsdata.ProductName, productsdata.sno, productsdata.Qty, productsdata.Units,productsdata.UnitPrice, productsdata.Flag, products_subcategory.category_sno, productsdata.SubCat_sno,productsdata.VatPercent, invmaster.InvName FROM products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno");
-                cmd.Parameters.AddWithValue("@username", context.Session["userdata_sno"].ToString());
-                DataTable dt = vdbmngr.SelectQuery(cmd).Tables[0];
-                //List<ProductUnits> ProductUnitlist = new List<ProductUnits>();
-                foreach (DataRow dr in dt.Rows)
-                {
-
-                    ProductUnits GetProductUnit = new ProductUnits();
-                    GetProductUnit.SubCatName = dr["SubCatName"].ToString();
-                    GetProductUnit.Categoryname = dr["Categoryname"].ToString();
-                    GetProductUnit.ProductName = dr["ProductName"].ToString();
-                    GetProductUnit.ProductCode = dr["itemcode"].ToString();
-                    GetProductUnit.TProductName = dr["tproduct"].ToString();
-                    GetProductUnit.InvName = dr["InvName"].ToString();
-                    GetProductUnit.sno = dr["sno"].ToString();
-                    GetProductUnit.Qty = dr["Qty"].ToString();
-                    GetProductUnit.ProductUnit = dr["Units"].ToString();
-                    GetProductUnit.UnitPrice = dr["UnitPrice"].ToString();
-                    GetProductUnit.subcatsno = dr["SubCat_sno"].ToString();
-                    GetProductUnit.catgrysno = dr["categoryname"].ToString();
-                    GetProductUnit.flag = dr["Flag"].ToString();
-                    //GetProductUnit.VatPercent = dr["VatPercent"].ToString();
-                    GetProductUnit.categorysno = dr["categorysno"].ToString();
-                    GetProductUnit.SubCatsno = dr["SubCatsno"].ToString();
-                    GetProductUnit.specification = dr["specification"].ToString();
-                    GetProductUnit.materialtype = dr["materialtype"].ToString();
-                    GetProductUnit.perunitprice = dr["perunitprice"].ToString();
-                    GetProductUnit.hsncode = dr["hsncode"].ToString();
-                    GetProductUnit.igst = dr["igst"].ToString();
-                    GetProductUnit.cgst = dr["cgst"].ToString();
-                    GetProductUnit.sgst = dr["sgst"].ToString();
-                    GetProductUnit.gsttaxcategory = dr["gsttaxcategory"].ToString();
-                    GetProductUnit.pieces = dr["pieces"].ToString();
-                    GetProductUnit.images = dr["images"].ToString();
-                    GetProductUnit.invqty = dr["invqty"].ToString();
-                    GetProductUnit.description = dr["description"].ToString();
-                    GetProductUnit.ifdflag = dr["ifdflag"].ToString();
-                    GetProductUnit.ftplocation = "ftp://223.196.32.30:21/Sales/";
-                    ProductUnitlist.Add(GetProductUnit);
-                }
+                ProductUnits GetProductUnit = new ProductUnits();
+                GetProductUnit.SubCatName = dr["SubCatName"].ToString();
+                GetProductUnit.Categoryname = dr["Categoryname"].ToString();
+                GetProductUnit.ProductName = dr["ProductName"].ToString();
+                GetProductUnit.ProductCode = dr["itemcode"].ToString();
+                GetProductUnit.TProductName = dr["tproduct"].ToString();
+                GetProductUnit.InvName = dr["InvName"].ToString();
+                GetProductUnit.sno = dr["sno"].ToString();
+                GetProductUnit.Qty = dr["Qty"].ToString();
+                GetProductUnit.ProductUnit = dr["Units"].ToString();
+                GetProductUnit.UnitPrice = dr["UnitPrice"].ToString();
+                GetProductUnit.subcatsno = dr["SubCat_sno"].ToString();
+                GetProductUnit.catgrysno = dr["categoryname"].ToString();
+                GetProductUnit.flag = dr["Flag"].ToString();
+                //GetProductUnit.VatPercent = dr["VatPercent"].ToString();
+                GetProductUnit.categorysno = dr["categorysno"].ToString();
+                GetProductUnit.SubCatsno = dr["SubCatsno"].ToString();
+                GetProductUnit.specification = dr["specification"].ToString();
+                GetProductUnit.materialtype = dr["materialtype"].ToString();
+                GetProductUnit.perunitprice = dr["perunitprice"].ToString();
+                GetProductUnit.hsncode = dr["hsncode"].ToString();
+                GetProductUnit.igst = dr["igst"].ToString();
+                GetProductUnit.cgst = dr["cgst"].ToString();
+                GetProductUnit.sgst = dr["sgst"].ToString();
+                GetProductUnit.gsttaxcategory = dr["gsttaxcategory"].ToString();
+                GetProductUnit.pieces = dr["pieces"].ToString();
+                GetProductUnit.images = dr["images"].ToString();
+                GetProductUnit.invqty = dr["invqty"].ToString();
+                GetProductUnit.description = dr["description"].ToString();
+                GetProductUnit.ifdflag = dr["ifdflag"].ToString();
+                GetProductUnit.ftplocation = "ftp://223.196.32.30:21/Sales/";
+                ProductUnitlist.Add(GetProductUnit);
             }
+
             string response = GetJson(ProductUnitlist);
             context.Response.Write(response);
         }
