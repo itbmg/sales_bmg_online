@@ -10368,7 +10368,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     dtmarch = DateTime.Parse(march);
                 }
             }
-            cmd = new MySqlCommand("SELECT indents_subtable.pkt_qty,indents_subtable.tub_qty,indents_subtable.IndentNo,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS Amount,IFNULL(branchproducts.VatPercent, 0) AS VatPercent,productsdata.units,productsdata.qty as uomqty, productsdata.ProductName,productsdata.invqty,productsdata.Qty as rawqty, SUM(indents_subtable.unitQty) AS DeliveryQty,SUM(indents_subtable.unitQty) AS IndentQty,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS indAmount, indents_subtable.UnitCost, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate,branchdata.stateid, productsdata.itemcode,productsdata.hsncode,productsdata.igst,productsdata.cgst,productsdata.sgst,productsdata.SubCat_sno as subcatid  FROM  productsdata INNER JOIN indents_subtable ON productsdata.sno = indents_subtable.Product_sno INNER JOIN indents ON indents_subtable.IndentNo = indents.IndentNo INNER JOIN  branchdata ON indents.Branch_id = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchproducts ON branchmappingtable.SuperBranch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno WHERE (indents.I_date BETWEEN @d1 AND @d2) AND (branchdata.sno = @BranchID) AND (indents_subtable.unitQty>0)  GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT indents_subtable.pkt_rate,indents_subtable.pkt_qty,indents_subtable.tub_qty,indents_subtable.IndentNo,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS Amount,IFNULL(branchproducts.VatPercent, 0) AS VatPercent,productsdata.units,productsdata.qty as uomqty, productsdata.ProductName,productsdata.invqty,productsdata.Qty as rawqty, SUM(indents_subtable.unitQty) AS DeliveryQty,SUM(indents_subtable.unitQty) AS IndentQty,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS indAmount, indents_subtable.UnitCost, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate,branchdata.stateid, productsdata.itemcode,productsdata.hsncode,productsdata.igst,productsdata.cgst,productsdata.sgst,productsdata.SubCat_sno as subcatid  FROM  productsdata INNER JOIN indents_subtable ON productsdata.sno = indents_subtable.Product_sno INNER JOIN indents ON indents_subtable.IndentNo = indents.IndentNo INNER JOIN  branchdata ON indents.Branch_id = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchproducts ON branchmappingtable.SuperBranch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno WHERE (indents.I_date BETWEEN @d1 AND @d2) AND (branchdata.sno = @BranchID) AND (indents_subtable.unitQty>0)  GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
             cmd.Parameters.Add("@BranchID", AgentId);
             cmd.Parameters.Add("@d1", GetLowDate(fromdate));
             cmd.Parameters.Add("@d2", GetHighDate(fromdate));
@@ -10641,7 +10641,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 ltr_qty = (qty * rawqty) / 1000;
 
                                 float prate = 0;
-                                float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                //float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                float.TryParse(dr["pkt_rate"].ToString(), out prate);//added pktrate 24/03/2023
                                 double rate = Math.Round(prate, 2);
                                 newrow["Discount"] = 0;
                                 double sgst = 0;
@@ -10703,13 +10704,14 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 float.TryParse(dr["rawqty"].ToString(), out rawqty);
                                 float pktval = (qty / rawqty) * 1000;
                                 float prate = 0;
-                                float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                //float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                float.TryParse(dr["pkt_rate"].ToString(), out prate);//added by pktrate
                                 double rate = Math.Round(prate, 2);
                                 //converted ltr qty
                                 float ltr_qty = 0;
                                 ltr_qty = (qty * rawqty) / 1000;
 
-                                newrow["Qty(pkts)"] = Math.Round(qty, 2);
+                                newrow["Qty(pkts)"] = Math.Round(pktqty, 2);
                                 newrow["Qty(tubs)"] = Math.Round(tubqty, 2);
 
                                 newrow["Qty"] = Math.Round(ltr_qty, 2);
@@ -10801,7 +10803,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         float ltr_qty = 0;
                                         ltr_qty = (qty * rawqty) / 1000;
                                         float prate = 0;
-                                        float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                        //float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                        float.TryParse(dr["pkt_rate"].ToString(), out prate);//added by pktrate
                                         double rate = Math.Round(prate, 2);
                                         newrow["Discount"] = 0;
                                         double sgst = 0;
@@ -10866,9 +10869,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         float ltr_qty = 0;
                                         ltr_qty = (qty * rawqty) / 1000;
                                         float prate = 0;
-                                        float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                        //float.TryParse(dr["Unitcost"].ToString(), out prate);
+                                        float.TryParse(dr["pkt_rate"].ToString(), out prate);//added by pktrate
                                         double rate = Math.Round(prate, 2);
-                                        newrow["Qty(pkts)"] = Math.Round(qty, 2);
+                                        newrow["Qty(pkts)"] = Math.Round(pktqty, 2);
                                         newrow["Qty(tubs)"] = Math.Round(tubqty, 2);
                                         //newrow["Qty"] = Math.Round(qty, 2);
                                         newrow["Qty"] = Math.Round(ltr_qty, 2);
@@ -11243,8 +11247,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     float qty = 0;
                                     float.TryParse(dr["DeliveryQty"].ToString(), out qty);
                                     float rate = 0;
-                                    float.TryParse(dr["Unitcost"].ToString(), out rate);
-
+                                    //float.TryParse(dr["Unitcost"].ToString(), out rate);
+                                    float.TryParse(dr["pkt_rate"].ToString(), out rate);//added by pktrate
                                     //added by akbar 21-Mar-2023
                                     float rawqty = 0;
                                     float.TryParse(dr["rawqty"].ToString(), out rawqty);
@@ -11320,7 +11324,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 float qty = 0;
                                 float.TryParse(dr["DeliveryQty"].ToString(), out qty);
                                 float rate = 0;
-                                float.TryParse(dr["Unitcost"].ToString(), out rate);
+                                //float.TryParse(dr["Unitcost"].ToString(), out rate);
+                                float.TryParse(dr["pkt_rate"].ToString(), out rate);//added by pktrate
 
                                 //added by akbar 21-Mar-2023
                                 float rawqty = 0;
@@ -11331,7 +11336,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 float.TryParse(dr["tub_qty"].ToString(), out tubqty);
                                 float ltr_qty = 0;
                                 ltr_qty = (qty * rawqty) / 1000;
-                                newrow["Qty(pkts)"] = Math.Round(qty, 2);
+                                newrow["Qty(pkts)"] = Math.Round(pakqty, 2);
                                 newrow["Qty(tubs)"] = Math.Round(tubqty, 2);
 
                                 newrow["Qty"] = Math.Round(ltr_qty, 2);
@@ -11564,7 +11569,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
 
             cmd = new MySqlCommand("select* from products_category inner join products_subcategory on products_category.sno = products_subcategory.category_sno where products_subcategory.category_sno = '47';");
-            cmd = new MySqlCommand("SELECT indents_subtable.IndentNo,sum(indents_subtable.DeliveryQty * indents_subtable.UnitCost )AS Amount,IFNULL(branchproducts.VatPercent, 0) AS VatPercent,productsdata.sno AS ProductSno,productsdata.units,productsdata.qty as uomqty, productsdata.ProductName,productsdata.description, SUM(indents_subtable.DeliveryQty) AS DeliveryQty,SUM(indents_subtable.unitQty) AS IndentQty,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS indAmount, indents_subtable.UnitCost, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate,branchdata.stateid, productsdata.itemcode,productsdata.hsncode,productsdata.igst,productsdata.cgst,productsdata.sgst,productsdata.SubCat_sno as subcatid FROM  productsdata INNER JOIN indents_subtable ON productsdata.sno = indents_subtable.Product_sno INNER JOIN indents ON indents_subtable.IndentNo = indents.IndentNo INNER JOIN  branchdata ON indents.Branch_id = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchproducts ON branchmappingtable.SuperBranch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno WHERE (indents.I_date BETWEEN @d1 AND @d2) AND (branchdata.sno = @BranchID) AND (indents_subtable.DeliveryQty>0)  GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT indents_subtable.pkt_rate,indents_subtable.pkt_qty,indents_subtable.IndentNo,sum(indents_subtable.DeliveryQty * indents_subtable.UnitCost )AS Amount,IFNULL(branchproducts.VatPercent, 0) AS VatPercent,productsdata.sno AS ProductSno,productsdata.units,productsdata.qty as uomqty, productsdata.ProductName,productsdata.description, SUM(indents_subtable.DeliveryQty) AS DeliveryQty,SUM(indents_subtable.unitQty) AS IndentQty,sum(indents_subtable.unitQty * indents_subtable.UnitCost )AS indAmount, indents_subtable.UnitCost, DATE_FORMAT(indents.I_date, '%d %b %y') AS IndentDate,branchdata.stateid, productsdata.itemcode,productsdata.hsncode,productsdata.igst,productsdata.cgst,productsdata.sgst,productsdata.SubCat_sno as subcatid FROM  productsdata INNER JOIN indents_subtable ON productsdata.sno = indents_subtable.Product_sno INNER JOIN indents ON indents_subtable.IndentNo = indents.IndentNo INNER JOIN  branchdata ON indents.Branch_id = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchproducts ON branchmappingtable.SuperBranch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno WHERE (indents.I_date BETWEEN @d1 AND @d2) AND (branchdata.sno = @BranchID) AND (indents_subtable.DeliveryQty>0)  GROUP BY productsdata.ProductName ORDER BY branchproducts.Rank");
             cmd.Parameters.AddWithValue("@BranchID", AgentId);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate).AddDays(-1));
@@ -11720,20 +11725,21 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             newrow["Uom"] = dr["Units"].ToString();
                             newrow["uomqty"] = dr["uomqty"].ToString();
                             float qty = 0; float rate = 0;
-                            if (AgentId == "7804" && dr["ProductSno"].ToString() == "240")
-                            {
-                                float tempqty = 0;
-                                float.TryParse(dr["DeliveryQty"].ToString(), out tempqty);
-                                float temprate = 0;
-                                float.TryParse(dr["Unitcost"].ToString(), out temprate);
-                                qty = tempqty / 6;
-                                rate = temprate * 6;
-                            }
-                            else
-                            {
+                            //commented by akbar 25-03-2023
+                            //if (AgentId == "7804" && dr["ProductSno"].ToString() == "240")
+                            //{
+                            //    float tempqty = 0;
+                            //    float.TryParse(dr["DeliveryQty"].ToString(), out tempqty);
+                            //    float temprate = 0;
+                            //    float.TryParse(dr["Unitcost"].ToString(), out temprate);
+                            //    qty = tempqty / 6;
+                            //    rate = temprate * 6;
+                            //}
+                            //else
+                            //{
                                 float.TryParse(dr["DeliveryQty"].ToString(), out qty);
                                 float.TryParse(dr["Unitcost"].ToString(), out rate);
-                            }
+                            //}
 
                             newrow["Qty"] = Math.Round(qty, 2);
                             newrow["Discount"] = 0;
