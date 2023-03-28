@@ -275,7 +275,7 @@ public partial class RouteSheet : System.Web.UI.Page
                             Totcost = UnitQty * UnitCost;
                             double uom = 0;
 
-                            if (dr["Categoryname"].ToString() == "MILK")
+                            if (dr["Categoryname"].ToString() == "Milk")
                             {
                                 double.TryParse(dr["unitQty"].ToString(), out qtyvalue);
                                 double.TryParse(dr["uomqty"].ToString(), out uom);
@@ -283,7 +283,7 @@ public partial class RouteSheet : System.Web.UI.Page
                                 milktotal += milkqty;
 
                             }
-                            if (dr["Categoryname"].ToString() == "CURD" || dr["Categoryname"].ToString() == "Curd Buckets"|| dr["Categoryname"].ToString() == "Curd Cups" || dr["Categoryname"].ToString() == "ButterMilk")
+                            if (dr["Categoryname"].ToString() == "Curd" || dr["Categoryname"].ToString() == "Curd Buckets"|| dr["Categoryname"].ToString() == "Curd Cups" || dr["Categoryname"].ToString() == "ButterMilk")
                             {
                                 double.TryParse(dr["unitQty"].ToString(), out qtyvalue);
                                 double.TryParse(dr["uomqty"].ToString(), out uom);

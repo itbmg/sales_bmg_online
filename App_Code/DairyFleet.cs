@@ -10661,7 +10661,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 double Vatrate = rate - totRate;
                                 Vatrate = Math.Round(Vatrate, 2);
                                 newrow["Rate"] = Vatrate.ToString();
-                                double PAmount = qty * Vatrate; //changed by akbar
+                                //added by akbar changed from Qty to pktqty
+                                double PAmount = pktqty * Vatrate;
+
+                                //double PAmount = qty * Vatrate; //changed by akbar
                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                 double tot_vatamount = (PAmount * Igst) / 100;
                                 if (fromstate == tostate)
@@ -10732,7 +10735,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 double Vatrate = rate - totRate;
                                 Vatrate = Math.Round(Vatrate, 2);
                                 newrow["Rate"] = Vatrate.ToString();
-                                double PAmount = qty * Vatrate; //changed by akbar
+                                //added by akbar changed from Qty to pktqty
+                                double PAmount = pktqty * Vatrate;
+                                //double PAmount = qty * Vatrate; //changed by akbar
                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                 double tot_vatamount = (PAmount * Igst) / 100;
                                 if (fromstate == tostate)
@@ -10823,7 +10828,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         double Vatrate = rate - totRate;
                                         Vatrate = Math.Round(Vatrate, 2);
                                         newrow["Rate"] = Vatrate.ToString();
-                                        double PAmount = qty * Vatrate; //changed by akbar
+                                        //added by akbar changed from Qty to pktqty
+                                        double PAmount = pktqty * Vatrate;
+                                        //double PAmount = qty * Vatrate; //changed by akbar
                                         newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                         double tot_vatamount = (PAmount * Igst) / 100;
                                         if (fromstate == tostate)
@@ -10892,7 +10899,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         double Vatrate = rate - totRate;
                                         Vatrate = Math.Round(Vatrate, 2);
                                         newrow["Rate"] = Vatrate.ToString();
-                                        double PAmount = qty * Vatrate; //changed by akbar
+                                        //added by akbar changed from Qty to pktqty
+                                        double PAmount = pktqty * Vatrate;
+                                        //double PAmount = qty * Vatrate; //changed by akbar
                                         newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                         double tot_vatamount = (PAmount * Igst) / 100;
                                         if (fromstate == tostate)
@@ -11130,7 +11139,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     }
                     if (DcNo == "")
                     {
-                        if (ServerDateCurrentdate.ToString("dd/MM/yyyy") == fromdate.ToString("dd/MM/yyyy"))
+                        if (fromdate.ToString("dd/MM/yyyy") == fromdate.ToString("dd/MM/yyyy"))
                         {
                             cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agenttaxdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
                             cmd.Parameters.Add("@BranchId", SOID);
@@ -11278,7 +11287,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     double Vatrate = rate - totRate;
                                     Vatrate = Math.Round(Vatrate, 2);
                                     newrow["Rate"] = Vatrate.ToString();
-                                    double PAmount = qty * Vatrate;
+                                    //added by akbar changed from Qty to pktqty
+                                    double PAmount = pakqty * Vatrate;
+                                    //double PAmount = qty * Vatrate;
                                     newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                     double tot_vatamount = (PAmount * Igst) / 100;
                                     if (fromstate == tostate)
@@ -11356,7 +11367,9 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 double Vatrate = rate - totRate;
                                 Vatrate = Math.Round(Vatrate, 2);
                                 newrow["Rate"] = Vatrate.ToString();
-                                double PAmount = qty * Vatrate;
+                                //added by akbar changed from Qty to pktqty
+                                double PAmount = pakqty * Vatrate;
+                                //double PAmount = qty * Vatrate;
                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                 double tot_vatamount = (PAmount * Igst) / 100;
                                 if (fromstate == tostate)
