@@ -14460,6 +14460,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             dtTotQty.Columns.Add("Uomqty");
             dtTotQty.Columns.Add("Qty(tubs)");
             dtTotQty.Columns.Add("Qty").DataType = typeof(Double);
+            dtTotQty.Columns.Add("pkt_qty").DataType = typeof(Double);
             dtTotQty.Columns.Add("Rate");
             dtTotQty.Columns.Add("Discount");
             dtTotQty.Columns.Add("Taxable Value").DataType = typeof(Double);
@@ -14524,15 +14525,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 TotalMilk += qty;
                                             }
                                             string UnitCost = dr["Price"].ToString();
-                                            float rate = 0;
+                                            double rate = 0;
                                             if (DispMode == "Free")
                                             {
                                                 rate = 0;
-                                                float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                                double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                             }
                                             else
                                             {
-                                                float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                                double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                             }
                                             if (DispMode == "AGENT")
                                             {
@@ -14541,7 +14542,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 {
                                                     unitprice = drprdt["BUnitPrice"].ToString();
                                                 }
-                                                float.TryParse(unitprice, out rate);
+                                                double.TryParse(unitprice, out rate);
                                             }
                                             if (DispMode == "Others")
                                             {
@@ -14550,7 +14551,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 {
                                                     unitprice = drprdt["BUnitPrice"].ToString();
                                                 }
-                                                float.TryParse(unitprice, out rate);
+                                                double.TryParse(unitprice, out rate);
                                             }
                                             if (UnitCost == "")
                                             {
@@ -14559,6 +14560,24 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             {
                                                 rate = Price;
                                             }
+                                            double ltrqty = 0, ltr_rate = 0, pkt_qty = 0, pkt_rate = 0;
+                                            EInvoice obj = new EInvoice();
+                                            pkt_qty = obj.ConvertingPackets(dr["Qty"].ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            ltr_rate = obj.Converting_Ltr_rate(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            ltrqty = obj.ConvertingLtrs(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            pkt_rate = obj.Converting_Packet_rate(ltrqty.ToString(), dr["Uomqty"].ToString(), ltr_rate.ToString());
+
+                                            rate = pkt_rate;
+                                            //double UomQty = 0;
+                                            //double.TryParse(dr["Uomqty"].ToString(), out UomQty);
+                                            //double perltrCost = 0;
+                                            //perltrCost = (1000 / UomQty) * rate;
+                                            //perltrCost = Math.Round(perltrCost, 2);
+                                            //rate = perltrCost;
+                                            newrow["pkt_qty"]= pkt_qty;
                                             newrow["Discount"] = 0;
                                             double PAmount = 0;
                                             double tot_vatamount = 0;
@@ -14579,7 +14598,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                     double Vatrate = rate - totRate;
                                                     Vatrate = Math.Round(Vatrate, 2);
                                                     newrow["Rate"] = Vatrate.ToString();
-                                                    PAmount = qty * Vatrate;
+                                                    PAmount = pkt_qty * Vatrate;
+                                                    //PAmount = qty * Vatrate;
                                                     newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                     tot_vatamount = (PAmount * Igst) / 100;
                                                     sgstamount = (tot_vatamount / 2);
@@ -14608,7 +14628,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                     double Vatrate = rate - totRate;
                                                     Vatrate = Math.Round(Vatrate, 2);
                                                     newrow["Rate"] = Vatrate.ToString();
-                                                    PAmount = qty * Vatrate;
+                                                    //PAmount = qty * Vatrate;
+                                                    PAmount = pkt_qty * Vatrate;
                                                     newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                     tot_vatamount = (PAmount * Igst) / 100;
                                                     sgstamount = (tot_vatamount / 2);
@@ -14636,7 +14657,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 double Vatrate = rate - totRate;
                                                 Vatrate = Math.Round(Vatrate, 2);
                                                 newrow["Rate"] = Vatrate.ToString();
-                                                PAmount = qty * Vatrate;
+                                                //PAmount = qty * Vatrate;
+                                                PAmount = pkt_qty * Vatrate;
                                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                 tot_vatamount = (PAmount * Igst) / 100;
                                                 newrow["sgst"] = 0;
@@ -14676,15 +14698,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             TotalMilk += qty;
                                         }
                                         string UnitCost = dr["Price"].ToString();
-                                        float rate = 0;
+                                        double rate = 0;
                                         if (DispMode == "Free")
                                         {
                                             rate = 0;
-                                            float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                            double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                         }
                                         else
                                         {
-                                            float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                            double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                         }
                                         if (DispMode == "AGENT")
                                         {
@@ -14693,7 +14715,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             {
                                                 unitprice = drprdt["BUnitPrice"].ToString();
                                             }
-                                            float.TryParse(unitprice, out rate);
+                                            double.TryParse(unitprice, out rate);
                                         }
                                         if (DispMode == "Others")
                                         {
@@ -14702,7 +14724,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             {
                                                 unitprice = drprdt["BUnitPrice"].ToString();
                                             }
-                                            float.TryParse(unitprice, out rate);
+                                            double.TryParse(unitprice, out rate);
                                         }
                                         if (UnitCost == "")
                                         {
@@ -14711,6 +14733,26 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         {
                                             rate = Price;
                                         }
+                                        //added by akbar ltrcost
+
+                                        double ltrqty = 0, ltr_rate = 0, pkt_qty = 0, pkt_rate = 0;
+                                        EInvoice obj = new EInvoice();
+                                        pkt_qty = obj.ConvertingPackets(dr["Qty"].ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                        ltr_rate = obj.Converting_Ltr_rate(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                        ltrqty = obj.ConvertingLtrs(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                        pkt_rate = obj.Converting_Packet_rate(ltrqty.ToString(), dr["Uomqty"].ToString(), ltr_rate.ToString());
+                                        rate = pkt_rate;
+
+                                        //double UomQty = 0;
+                                        //double.TryParse(dr["Uomqty"].ToString(), out UomQty);
+                                        //double perltrCost = 0;
+                                        //perltrCost = (1000 / UomQty) * rate;
+                                        //perltrCost = Math.Round(perltrCost, 2);
+                                        //rate = perltrCost;
+                                        newrow["pkt_qty"] = pkt_qty;
                                         newrow["Discount"] = 0;
                                         double PAmount = 0;
                                         double tot_vatamount = 0;
@@ -14731,7 +14773,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 double Vatrate = rate - totRate;
                                                 Vatrate = Math.Round(Vatrate, 2);
                                                 newrow["Rate"] = Vatrate.ToString();
-                                                PAmount = qty * Vatrate;
+                                                //PAmount = qty * Vatrate;
+                                                PAmount = pkt_qty * Vatrate;
                                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                 tot_vatamount = (PAmount * Igst) / 100;
                                                 sgstamount = (tot_vatamount / 2);
@@ -14760,7 +14803,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 double Vatrate = rate - totRate;
                                                 Vatrate = Math.Round(Vatrate, 2);
                                                 newrow["Rate"] = Vatrate.ToString();
-                                                PAmount = qty * Vatrate;
+                                                //PAmount = qty * Vatrate;
+                                                PAmount = pkt_qty * Vatrate;
                                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                 tot_vatamount = (PAmount * Igst) / 100;
                                                 sgstamount = (tot_vatamount / 2);
@@ -14788,7 +14832,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             double Vatrate = rate - totRate;
                                             Vatrate = Math.Round(Vatrate, 2);
                                             newrow["Rate"] = Vatrate.ToString();
-                                            PAmount = qty * Vatrate;
+                                            //PAmount = qty * Vatrate;
+                                            PAmount = pkt_qty * Vatrate;
                                             newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                             tot_vatamount = (PAmount * Igst) / 100;
                                             newrow["sgst"] = 0;
@@ -14816,6 +14861,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         getProducts.itemcode = dr["itemcode"].ToString();
                         getProducts.ProductName = dr["Product Name"].ToString();
                         getProducts.qty = dr["Qty"].ToString();
+                        getProducts.pkt_qty = dr["pkt_qty"].ToString();
                         getProducts.hsncode = dr["HSN Code"].ToString();
                         getProducts.uom = dr["Uom"].ToString();
                         getProducts.uomqty = dr["Uomqty"].ToString();
@@ -14884,15 +14930,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         TotalMilk += qty;
                                     }
                                     string UnitCost = dr["Price"].ToString();
-                                    float rate = 0;
+                                    double rate = 0;
                                     if (DispMode == "Free")
                                     {
                                         rate = 0;
-                                        float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                        double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                     }
                                     else
                                     {
-                                        float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                        double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                     }
                                     if (DispMode == "AGENT")
                                     {
@@ -14901,7 +14947,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         {
                                             unitprice = drprdt["BUnitPrice"].ToString();
                                         }
-                                        float.TryParse(unitprice, out rate);
+                                        double.TryParse(unitprice, out rate);
                                     }
                                     if (DispMode == "Others")
                                     {
@@ -14910,7 +14956,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         {
                                             unitprice = drprdt["BUnitPrice"].ToString();
                                         }
-                                        float.TryParse(unitprice, out rate);
+                                        double.TryParse(unitprice, out rate);
                                     }
                                     if (UnitCost == "")
                                     {
@@ -14919,6 +14965,26 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                     {
                                         rate = Price;
                                     }
+
+                                    double ltrqty = 0, ltr_rate = 0, pkt_qty = 0, pkt_rate = 0;
+                                    EInvoice obj = new EInvoice();
+                                    pkt_qty = obj.ConvertingPackets(dr["Qty"].ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                    ltr_rate = obj.Converting_Ltr_rate(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                    ltrqty = obj.ConvertingLtrs(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                    pkt_rate = obj.Converting_Packet_rate(ltrqty.ToString(), dr["Uomqty"].ToString(), ltr_rate.ToString());
+
+                                    rate = pkt_rate;
+                                    ////added by akbar ltrcost
+                                    //double UomQty = 0;
+                                    //double.TryParse(dr["Uomqty"].ToString(), out UomQty);
+                                    //double perltrCost = 0;
+                                    //perltrCost = (1000 / UomQty) * rate;
+                                    //perltrCost = Math.Round(perltrCost, 2);
+                                    //rate = perltrCost;
+                                    newrow["pkt_qty"] = pkt_qty;
                                     newrow["Discount"] = 0;
                                     double PAmount = 0;
                                     double tot_vatamount = 0;
@@ -14939,7 +15005,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             double Vatrate = rate - totRate;
                                             Vatrate = Math.Round(Vatrate, 2);
                                             newrow["Rate"] = Vatrate.ToString();
-                                            PAmount = qty * Vatrate;
+                                            //PAmount = qty * Vatrate;
+                                            PAmount = pkt_qty * Vatrate;
                                             newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                             tot_vatamount = (PAmount * Igst) / 100;
                                             sgstamount = (tot_vatamount / 2);
@@ -14956,7 +15023,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         else
                                         {
                                             newrow["Rate"] = rate.ToString();
-                                            PAmount = qty * rate;
+                                            PAmount = pkt_qty * rate;
+                                            //PAmount = qty * rate;
                                             newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                             newrow["sgst"] = 0;
                                             newrow["sgstamount"] = 0;
@@ -14979,7 +15047,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                         double Vatrate = rate - totRate;
                                         Vatrate = Math.Round(Vatrate, 2);
                                         newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
+                                        //PAmount = qty * Vatrate;
+                                        PAmount = pkt_qty * Vatrate;
                                         newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                         tot_vatamount = (PAmount * Igst) / 100;
                                         newrow["sgst"] = 0;
@@ -15028,15 +15097,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 TotalMilk += qty;
                                             }
                                             string UnitCost = dr["Price"].ToString();
-                                            float rate = 0;
+                                            double rate = 0;
                                             if (DispMode == "Free")
                                             {
                                                 rate = 0;
-                                                float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                                double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                             }
                                             else
                                             {
-                                                float.TryParse(drprdt["unitprice"].ToString(), out rate);
+                                                double.TryParse(drprdt["unitprice"].ToString(), out rate);
                                             }
                                             if (DispMode == "AGENT")
                                             {
@@ -15045,7 +15114,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 {
                                                     unitprice = drprdt["BUnitPrice"].ToString();
                                                 }
-                                                float.TryParse(unitprice, out rate);
+                                                double.TryParse(unitprice, out rate);
                                             }
                                             if (DispMode == "Others")
                                             {
@@ -15054,7 +15123,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 {
                                                     unitprice = drprdt["BUnitPrice"].ToString();
                                                 }
-                                                float.TryParse(unitprice, out rate);
+                                                double.TryParse(unitprice, out rate);
                                             }
                                             if (UnitCost == "")
                                             {
@@ -15063,6 +15132,26 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                             {
                                                 rate = Price;
                                             }
+
+                                            double ltrqty = 0, ltr_rate = 0, pkt_qty = 0, pkt_rate = 0;
+                                            EInvoice obj = new EInvoice();
+                                            pkt_qty = obj.ConvertingPackets(dr["Qty"].ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            ltr_rate = obj.Converting_Ltr_rate(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            ltrqty = obj.ConvertingLtrs(pkt_qty.ToString(), dr["Uomqty"].ToString(), rate.ToString());
+
+                                            pkt_rate = obj.Converting_Packet_rate(ltrqty.ToString(), dr["Uomqty"].ToString(), ltr_rate.ToString());
+
+                                            rate = pkt_rate;
+                                            ////added by akbar ltrcost
+                                            //double UomQty = 0;
+                                            //double.TryParse(dr["Uomqty"].ToString(), out UomQty);
+                                            //double perltrCost = 0;
+                                            //perltrCost = (1000 / UomQty) * rate;
+                                            //perltrCost = Math.Round(perltrCost, 2);
+                                            //rate = perltrCost;
+                                            newrow["pkt_qty"] = pkt_qty;
                                             newrow["Discount"] = 0;
                                             double PAmount = 0;
                                             double tot_vatamount = 0;
@@ -15083,7 +15172,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                     double Vatrate = rate - totRate;
                                                     Vatrate = Math.Round(Vatrate, 2);
                                                     newrow["Rate"] = Vatrate.ToString();
-                                                    PAmount = qty * Vatrate;
+                                                    //PAmount = qty * Vatrate;
+                                                    PAmount = pkt_qty * Vatrate;
                                                     newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                     tot_vatamount = (PAmount * Igst) / 100;
                                                     sgstamount = (tot_vatamount / 2);
@@ -15100,7 +15190,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 else
                                                 {
                                                     newrow["Rate"] = rate.ToString();
-                                                    PAmount = qty * rate;
+                                                    //PAmount = qty * rate;
+                                                    PAmount = pkt_qty * rate;
                                                     newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                     newrow["sgst"] = 0;
                                                     newrow["sgstamount"] = 0;
@@ -15123,7 +15214,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                                 double Vatrate = rate - totRate;
                                                 Vatrate = Math.Round(Vatrate, 2);
                                                 newrow["Rate"] = Vatrate.ToString();
-                                                PAmount = qty * Vatrate;
+                                                //PAmount = qty * Vatrate;
+                                                PAmount = pkt_qty * Vatrate;
                                                 newrow["Taxable Value"] = Math.Round(PAmount, 2);
                                                 tot_vatamount = (PAmount * Igst) / 100;
                                                 newrow["sgst"] = 0;
@@ -15153,6 +15245,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         getProducts.ProductName = dr["Product Name"].ToString();
                         getProducts.qty = dr["Qty"].ToString();
                         getProducts.hsncode = dr["HSN Code"].ToString();
+                        getProducts.pkt_qty = dr["pkt_qty"].ToString();
+
                         getProducts.uom = dr["Uom"].ToString();
                         getProducts.uomqty = dr["Uomqty"].ToString();
                         getProducts.rate = dr["Rate"].ToString();
@@ -15218,6 +15312,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string igstamount { get; set; }
         public string itemcode { get; set; }
         public string totalamount { get; set; }
+        public string pkt_qty { get; set; }
     }
     private void get_DeliveryChallan_click(HttpContext context)
     {
