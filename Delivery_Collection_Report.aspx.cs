@@ -3991,6 +3991,10 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                                 grnd_tot_amount += totLeakAmount;
                                 Report.Rows.Add(newLeakages);
                             }
+
+                            
+
+
                             DataRow newVLeakages = Report.NewRow();
                             newVLeakages["Route Name"] = "VLeakages" + " " + Disp;
                             float totVLeakQty = 0;
@@ -4018,6 +4022,20 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                                 newVLeakages["Total Qty"] = Math.Round(totVLeakQty, 2);
                                 //newVLeakages["Total Amount"] = Math.Round(totVLeakAmount, 2);
                                 Report.Rows.Add(newVLeakages);
+                            }
+                        }
+                    }
+
+                    //added by akbar
+                    foreach (DataRow drdelivery in dtalldelivery.Rows)
+                    {
+                        foreach (DataRow drleaks in dtAllLeaks.Rows)
+                        {
+                            if (drdelivery["sno"].ToString() == drleaks["ProductID"].ToString())
+                            {
+                                float leakQty = 0;
+                                float.TryParse(drleaks["LeakQty"].ToString(), out leakQty);
+                                drdelivery["leakQty"] = Math.Round(leakQty, 2);
                             }
                         }
                     }
@@ -4524,25 +4542,25 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                     cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                     DataTable dttotsaleleak = vdm.SelectQuery(cmd).Tables[0];
-                    foreach (DataRow drsaleleak in dttotsaleleak.Rows)
-                    {
-                        foreach (DataRow drdelivery in dtalldelivery.Rows)
-                        {
+                    //foreach (DataRow drsaleleak in dttotsaleleak.Rows)
+                    //{
+                    //    foreach (DataRow drdelivery in dtalldelivery.Rows)
+                    //    {
 
-                            if (drsaleleak["ProductID"].ToString() == drdelivery["sno"].ToString())
-                            {
-                                float leakqty = 0;
-                                float.TryParse(drdelivery["leakQty"].ToString(), out leakqty);
-                                float leakcpy = 0;
-                                float.TryParse(drsaleleak["totleak"].ToString(), out leakcpy);
-                                float totalleakqty = leakqty + leakcpy;
-                                drdelivery["leakQty"] = totalleakqty;
-                            }
-                            else
-                            {
-                            }
-                        }
-                    }
+                    //        if (drsaleleak["ProductID"].ToString() == drdelivery["sno"].ToString())
+                    //        {
+                    //            float leakqty = 0;
+                    //            float.TryParse(drdelivery["leakQty"].ToString(), out leakqty);
+                    //            float leakcpy = 0;
+                    //            float.TryParse(drsaleleak["totleak"].ToString(), out leakcpy);
+                    //            float totalleakqty = leakqty + leakcpy;
+                    //            drdelivery["leakQty"] = totalleakqty;
+                    //        }
+                    //        else
+                    //        {
+                    //        }
+                    //    }
+                    //}
 
                     foreach (var column in Report.Columns.Cast<DataColumn>().ToArray())
                     {
