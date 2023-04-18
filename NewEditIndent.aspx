@@ -412,7 +412,8 @@
             var RQty = 0;
             var Ltr_rate;
             var tubQty = 0;
-            DeliverTable.push({ ProductName: ProductName, Product_sno: ProductSno, IndentNo: DIndentNo, ltr_UnitQty: ltr_UnitQty, ltr_Qty: ltr_Qty, Ltr_rate: ltr_rate, pkt_dqty: pkt_dqty, pkt_qty: pkt_qty, pkt_rate: pkt_rate, tubQty: tubQty });
+            
+            DeliverTable.push({ ProductName: ProductName, Product_sno: ProductSno, IndentNo: DIndentNo, ltr_UnitQty: ltr_UnitQty, ltr_Qty: ltr_Qty, Ltr_rate: ltr_rate, pkt_dqty: pkt_dqty, pkt_qty: pkt_qty, pkt_rate: pkt_rate, tubQty: tubQty, Unitqty: Unitqty, invqty: invqty });
             $('#divFillScreen').setTemplateURL('NewIndentEdit1.htm');
             $('#divFillScreen').processTemplate(DeliverTable);
             calcTot();
