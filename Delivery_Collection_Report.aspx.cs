@@ -229,7 +229,10 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
 
         }
     }
+    //protected void chkReport_CheckedChanged(object sender, EventArgs e)
+    //{
 
+    //}
     protected void btnGenerate_Click(object sender, EventArgs e)
     {
         vdm = new VehicleDBMgr();
@@ -248,66 +251,27 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 fromdate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
             }
         }
-        if (Session["salestype"].ToString() == "Plant")
-        {
-            var salesoffice = ddlSalesOffice.SelectedItem.Text;
-            var salesoff = ddlSalesOffice.SelectedValue;
-            if (salesoff == "8097" ||   salesoff == "174" || salesoff == "1801" || salesoff == "527" || salesoff == "306" || salesoff == "538" || salesoff == "2909" || salesoff == "2749" || salesoff == "3781" || salesoff == "3928" || salesoff == "4607")
-            {
-                GetReport();
-            }
-            else
-            {
-                if (salesoff == "1")
-                {
-                    //GetReport();
-                    getHYDReport();
-                }
-                if ( salesoff == "2" || salesoff == "3" || salesoff == "4" || salesoff == "5" || salesoff == "6" || salesoff == "7")
-                {
-                    status = "Nellore";
 
-                    getnelloreReport();
-                }
-            }
-            cmd = new MySqlCommand("SELECT clotrans.Sno, clotrans.BranchId, clotrans.EmpId, clotrans.IndDate, empmanage.EmpName FROM clotrans INNER JOIN empmanage ON clotrans.EmpId = empmanage.Sno WHERE (clotrans.BranchId = @branch) AND (clotrans.IndDate BETWEEN @d1 AND @d2)");
-            cmd.Parameters.Add("@branch", salesoff);
-            cmd.Parameters.Add("@d1", GetLowDate(fromdate.AddDays(-1)));
-            cmd.Parameters.Add("@d2", GetHighDate(fromdate.AddDays(-1)));
-            DataTable dtemp = vdm.SelectQuery(cmd).Tables[0];
-            if (dtemp.Rows.Count > 0)
-            {
-                lblpreparedby.Text = dtemp.Rows[0]["EmpName"].ToString();
-            }
+        if (chkReport.Checked)
+        {
+            GetReport();
+
         }
         else
         {
-            var salesoff = Session["branch"].ToString();
-            if (salesoff == "8097" ||  salesoff == "174" || salesoff == "527" || salesoff == "306" || salesoff == "4607" || salesoff == "538" || salesoff == "2909" || salesoff == "2749" || salesoff == "3781" || salesoff == "3928")
-            {
-                GetReport();
-            }
-            else
-            {
-                if (salesoff == "1")
-                {
-                    getHYDReport();
-                }
-                if (salesoff == "2" || salesoff == "3" || salesoff == "4" || salesoff == "5" || salesoff == "6" || salesoff == "7" )
-                {
-                    status = "Nellore";
-                    getnelloreReport();
-                }
-            }//new
-            cmd = new MySqlCommand("SELECT clotrans.Sno, clotrans.BranchId, clotrans.EmpId, clotrans.IndDate, empmanage.EmpName FROM clotrans INNER JOIN empmanage ON clotrans.EmpId = empmanage.Sno WHERE (clotrans.BranchId = @branch) AND (clotrans.IndDate BETWEEN @d1 AND @d2)");
-            cmd.Parameters.Add("@branch", salesoff);
-            cmd.Parameters.Add("@d1", GetLowDate(fromdate.AddDays(-1)));
-            cmd.Parameters.Add("@d2", GetHighDate(fromdate.AddDays(-1)));
-            DataTable dtemp = vdm.SelectQuery(cmd).Tables[0];
-            if (dtemp.Rows.Count > 0)
-            {
-                lblpreparedby.Text = dtemp.Rows[0]["EmpName"].ToString();
-            }
+            getnelloreReport();
+        }
+        var salesoffice = ddlSalesOffice.SelectedItem.Text;
+        var salesoff = ddlSalesOffice.SelectedValue;
+
+        cmd = new MySqlCommand("SELECT clotrans.Sno, clotrans.BranchId, clotrans.EmpId, clotrans.IndDate, empmanage.EmpName FROM clotrans INNER JOIN empmanage ON clotrans.EmpId = empmanage.Sno WHERE (clotrans.BranchId = @branch) AND (clotrans.IndDate BETWEEN @d1 AND @d2)");
+        cmd.Parameters.Add("@branch", salesoff);
+        cmd.Parameters.Add("@d1", GetLowDate(fromdate.AddDays(-1)));
+        cmd.Parameters.Add("@d2", GetHighDate(fromdate.AddDays(-1)));
+        DataTable dtemp = vdm.SelectQuery(cmd).Tables[0];
+        if (dtemp.Rows.Count > 0)
+        {
+            lblpreparedby.Text = dtemp.Rows[0]["EmpName"].ToString();
         }
     }
     private DateTime GetLowDate(DateTime dt)
@@ -391,7 +355,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             DataTable dttable = vdm.SelectQuery(cmd).Tables[0];
 
-            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno,products_subcategory.tempsub_catsno AS SubCatSno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.SubCat_sno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM  products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.tempsub_catsno = productsdata.SubCat_sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (branchproducts.branch_sno = @BranchID) ORDER BY products_subcategory.tempsub_catsno, branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno,products_subcategory.sno AS SubCatSno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.SubCat_sno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE (branchproducts.branch_sno = @BranchID) ORDER BY  branchproducts.Rank");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             produtstbl1 = vdm.SelectQuery(cmd).Tables[0];
 
@@ -1170,8 +1134,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                         }
                         newLeakages["Total Qty"] = Math.Round(totLeakQty, 2);
                         grnd_tot_qty += totLeakQty;
-                        newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
-                        grnd_tot_amount += totLeakAmount;
+                        //newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
+                        //grnd_tot_amount += totLeakAmount;
                         if (totLeakQty > 0)
                         {
                             Report.Rows.Add(newLeakages);
@@ -1208,6 +1172,20 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                         if (totVLeakQty > 0)
                         {
                             Report.Rows.Add(newVLeakages);
+                        }
+
+                        //akbar
+                        foreach (DataRow drdelivery in dtalldelivery.Rows)
+                        {
+                            foreach (DataRow drleaks in dtAllLeaks.Rows)
+                            {
+                                if (drdelivery["sno"].ToString() == drleaks["ProductID"].ToString())
+                                {
+                                    float leakQty = 0;
+                                    float.TryParse(drleaks["LeakQty"].ToString(), out leakQty);
+                                    drdelivery["leakQty"] = Math.Round(leakQty, 2);
+                                }
+                            }
                         }
                     }
                     cmd = new MySqlCommand("SELECT tripdata.EmpId,DispatcherID FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (dispatch.sno =@dispatchSno) AND (tripdata.I_Date BETWEEN @d1 AND @d2)");
@@ -1286,8 +1264,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 }
                 totalschememilk["Total Qty"] = Math.Round(totOfferFreeQty, 2);
                 grnd_tot_qty += totOfferFreeQty;
-                totalschememilk["Total Amount"] = Math.Round(totOfferFreeAmount, 2);
-                grnd_tot_amount += totOfferFreeAmount;
+                //totalschememilk["Total Amount"] = Math.Round(totOfferFreeAmount, 2);
+                //grnd_tot_amount += totOfferFreeAmount;
                 Report.Rows.Add(totalschememilk);
 
                 DataRow totalfreemilk = Report.NewRow();
@@ -1319,8 +1297,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 }
                 totalfreemilk["Total Qty"] = Math.Round(totFreeQty, 2);
                 grnd_tot_qty += totFreeQty;
-                totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
-                grnd_tot_amount += totFreeAmount;
+                //totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
+                //grnd_tot_amount += totFreeAmount;
                 Report.Rows.Add(totalfreemilk);
                 foreach (DataRow drdelivery in dtalldelivery.Rows)
                 {
@@ -1413,8 +1391,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 }
                 totalshortmilk["Total Qty"] = Math.Round(totshortQty, 2);
                 grnd_tot_qty += totshortQty;
-                totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
-                grnd_tot_amount += totshortAmount;
+                //totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
+                //grnd_tot_amount += totshortAmount;
                 Report.Rows.Add(totalshortmilk);
                 foreach (DataRow drdelivery in dtalldelivery.Rows)
                 {
@@ -1459,8 +1437,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 }
                 totalreturnmilk["Total Qty"] = Math.Round(totreturnQty, 2);
                 grnd_tot_qty += totreturnQty;
-                totalreturnmilk["Total Amount"] = Math.Round(totreturnAmount, 2);
-                grnd_tot_amount += totreturnAmount;
+                //totalreturnmilk["Total Amount"] = Math.Round(totreturnAmount, 2);
+                //grnd_tot_amount += totreturnAmount;
                 Report.Rows.Add(totalreturnmilk);
                 DataRow newVReturns = Report.NewRow();
                 newVReturns["Route Name"] = "VReturns";
@@ -1650,25 +1628,25 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                 DataTable dttotsaleleak = vdm.SelectQuery(cmd).Tables[0];
-                foreach (DataRow drsaleleak in dttotsaleleak.Rows)
-                {
-                    foreach (DataRow drdelivery in dtalldelivery.Rows)
-                    {
+                ////foreach (DataRow drsaleleak in dttotsaleleak.Rows)
+                ////{
+                ////    foreach (DataRow drdelivery in dtalldelivery.Rows)
+                ////    {
 
-                        if (drsaleleak["ProductID"].ToString() == drdelivery["sno"].ToString())
-                        {
-                            float leakqty = 0;
-                            float.TryParse(drdelivery["leakQty"].ToString(), out leakqty);
-                            float leakcpy = 0;
-                            float.TryParse(drsaleleak["totleak"].ToString(), out leakcpy);
-                            float totalleakqty = leakqty + leakcpy;
-                            drdelivery["leakQty"] = totalleakqty;
-                        }
-                        else
-                        {
-                        }
-                    }
-                }
+                ////        if (drsaleleak["ProductID"].ToString() == drdelivery["sno"].ToString())
+                ////        {
+                ////            float leakqty = 0;
+                ////            float.TryParse(drdelivery["leakQty"].ToString(), out leakqty);
+                ////            float leakcpy = 0;
+                ////            float.TryParse(drsaleleak["totleak"].ToString(), out leakcpy);
+                ////            float totalleakqty = leakqty + leakcpy;
+                ////            drdelivery["leakQty"] = totalleakqty;
+                ////        }
+                ////        else
+                ////        {
+                ////        }
+                ////    }
+                ////}
                 foreach (var column in Report.Columns.Cast<DataColumn>().ToArray())
                 {
                     if (Report.AsEnumerable().All(dr => dr.IsNull(column)))
@@ -1773,8 +1751,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     {
                         for (int rowcnt = 2; rowcnt < dgvr.Cells.Count; rowcnt++)
                         {
-                            int diff = 0;
-                            int.TryParse(dgvr.Cells[rowcnt].Text, out diff);
+                            double diff = 0;
+                            double.TryParse(dgvr.Cells[rowcnt].Text, out diff);
                             if (diff > 0 || diff < 0)
                             {
                                 dgvr.Cells[rowcnt].BackColor = Color.SandyBrown;
@@ -1842,7 +1820,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
 
 
 
-            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno,products_subcategory.tempsub_catsno AS SubCatSno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.SubCat_sno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM  products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (branchproducts.branch_sno = @BranchId) ORDER BY products_subcategory.tempsub_catsno, branchproducts.Rank");
+            cmd = new MySqlCommand("SELECT    branchproducts.unitprice,branchproducts.branch_sno, products_category.description AS Categoryname, branchproducts.product_sno AS sno, productsdata.ProductName,productsdata.SubCat_sno, branchproducts.Rank,products_subcategory.description AS SubCategoryName FROM  products_category INNER JOIN products_subcategory ON products_category.sno = products_subcategory.category_sno INNER JOIN productsdata ON products_subcategory.sno = productsdata.SubCat_sno INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno WHERE (branchproducts.branch_sno = @BranchId) ORDER BY products_subcategory.tempsub_catsno, branchproducts.Rank");
             cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
             produtstbl1 = vdm.SelectQuery(cmd).Tables[0];
 
@@ -2721,7 +2699,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                             }
                         }
                         newLeakages["Total Qty"] = Math.Round(totLeakQty, 2);
-                        newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
+                        //newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
                         if (totLeakQty > 0)
                         {
                             Report.Rows.Add(newLeakages);
@@ -2832,7 +2810,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     }
                 }
                 totalschememilk["Total Qty"] = Math.Round(totOfferFreeQty, 2);
-                totalschememilk["Total Amount"] = Math.Round(totOfferFreeAmount, 2);
+                //totalschememilk["Total Amount"] = Math.Round(totOfferFreeAmount, 2);
                 if (totOfferFreeQty > 0)
                 {
                     Report.Rows.Add(totalschememilk);
@@ -2866,7 +2844,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     }
                 }
                 totalfreemilk["Total Qty"] = Math.Round(totFreeQty, 2);
-                totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
+                //totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
                 if (totFreeQty > 0)
                 {
                     Report.Rows.Add(totalfreemilk);
@@ -2959,7 +2937,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     }
                 }
                 totalshortmilk["Total Qty"] = Math.Round(totshortQty, 2);
-                totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
+                //totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
                 if (totshortQty > 0)
                 {
                     Report.Rows.Add(totalshortmilk);
@@ -3006,7 +2984,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     }
                 }
                 totalreturnmilk["Total Qty"] = Math.Round(totreturnQty, 2);
-                totalreturnmilk["Total Amount"] = Math.Round(totreturnAmount, 2);
+                //totalreturnmilk["Total Amount"] = Math.Round(totreturnAmount, 2);
                 if (totreturnQty > 0)
                 {
                     Report.Rows.Add(totalreturnmilk);
@@ -3987,8 +3965,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                             {
                                 newLeakages["Total Qty"] = Math.Round(totLeakQty, 2);
                                 grnd_tot_qty += totLeakQty;
-                                newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
-                                grnd_tot_amount += totLeakAmount;
+                                //newLeakages["Total Amount"] = Math.Round(totLeakAmount, 2);
+                                //grnd_tot_amount += totLeakAmount;
                                 Report.Rows.Add(newLeakages);
                             }
 
@@ -4198,8 +4176,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     {
                         totalfreemilk["Total Qty"] = Math.Round(totFreeQty, 2);
                         grnd_tot_qty += totFreeQty;
-                        totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
-                        grnd_tot_amount += totFreeAmount;
+                        //totalfreemilk["Total Amount"] = Math.Round(totFreeAmount, 2);
+                        //grnd_tot_amount += totFreeAmount;
                         Report.Rows.Add(totalfreemilk);
                     }
                     foreach (DataRow drdelivery in dtalldelivery.Rows)
@@ -4285,8 +4263,8 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     {
                         totalshortmilk["Total Qty"] = Math.Round(totshortQty, 2);
                         grnd_tot_qty += totshortQty;
-                        totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
-                        grnd_tot_amount += totshortAmount;
+                        //totalshortmilk["Total Amount"] = Math.Round(totshortAmount, 2);
+                        //grnd_tot_amount += totshortAmount;
                         Report.Rows.Add(totalshortmilk);
                     }
                     foreach (DataRow drdelivery in dtalldelivery.Rows)
@@ -4369,7 +4347,7 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
                     if (totVReturnQty != 0.0)
                     {
                         newVReturns["Total Qty"] = Math.Round(totVReturnQty, 2);
-                        newVReturns["Total Amount"] = Math.Round(totVReturnAmount, 2);
+                        //newVReturns["Total Amount"] = Math.Round(totVReturnAmount, 2);
                         Report.Rows.Add(newVReturns);
                     }
                     foreach (DataRow drdelivery in dtalldelivery.Rows)

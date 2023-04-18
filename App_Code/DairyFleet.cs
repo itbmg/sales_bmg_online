@@ -25034,7 +25034,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@PaymentStatus", 'A');
                             cmd.Parameters.AddWithValue("@IndentType", indtype);
                             long IndNo = vdbmngr.insertScalar(cmd);
-                            cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId)");
+                            cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId,pkt_qty,pkt_dqty,pkt_rate,tub_qty)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId,@pkt_qty,@pkt_dqty,@pkt_rate,@tub_qty)");
                             cmd.Parameters.AddWithValue("@IndentNo", IndNo);
                             cmd.Parameters.AddWithValue("@Product_sno", o.Productsno);
                             double UtCost = 0;
@@ -25049,13 +25049,17 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@DTripId", tripid);
                             cmd.Parameters.AddWithValue("@D_date", dtdeltime);
                             cmd.Parameters.AddWithValue("@DelTime", dtdeltime);
+                            cmd.Parameters.AddWithValue("@pkt_qty", o.pkt_qty);
+                            cmd.Parameters.AddWithValue("@pkt_dqty", o.pkt_dqty);
+                            cmd.Parameters.AddWithValue("@pkt_rate", o.pkt_rate);
+                            cmd.Parameters.AddWithValue("@tub_qty", o.tub_qty);
                             vdbmngr.insert(cmd);
 
                         }
                         if (dtIndent.Rows.Count > 0)
                         {
                             string indentnumber = dtIndent.Rows[0]["IndentNo"].ToString();
-                            cmd = new MySqlCommand("Update indents_subtable set unitQty=@unitQty,OTripId=@OTripId,UnitCost=@UnitCost,DeliveryQty=@DeliveryQty,Status=@Status,D_date=@D_date,DelTime=@DelTime,DTripId=@DTripId where IndentNo=@IndentNo and Product_sno=@Product_sno");
+                            cmd = new MySqlCommand("Update indents_subtable set unitQty=@unitQty,OTripId=@OTripId,UnitCost=@UnitCost,DeliveryQty=@DeliveryQty,Status=@Status,D_date=@D_date,DelTime=@DelTime,DTripId=@DTripId,pkt_qty=@pkt_qty,pkt_dqty=@pkt_dqty,pkt_rate=@pkt_rate,tub_qty=@tub_qty where IndentNo=@IndentNo and Product_sno=@Product_sno");
                             cmd.Parameters.AddWithValue("@IndentNo", indentnumber);
                             cmd.Parameters.AddWithValue("@Product_sno", o.Productsno);
                             double UtCost = 0;
@@ -25070,9 +25074,13 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             cmd.Parameters.AddWithValue("@DTripId", tripid);
                             cmd.Parameters.AddWithValue("@D_date", dtdeltime);
                             cmd.Parameters.AddWithValue("@DelTime", dtdeltime);
+                            cmd.Parameters.AddWithValue("@pkt_qty", o.pkt_qty);
+                            cmd.Parameters.AddWithValue("@pkt_dqty", o.pkt_dqty);
+                            cmd.Parameters.AddWithValue("@pkt_rate", o.pkt_rate);
+                            cmd.Parameters.AddWithValue("@tub_qty", o.tub_qty);
                             if (vdbmngr.Update(cmd) == 0)
                             {
-                                cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId)");
+                                cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId,pkt_qty,pkt_dqty,pkt_rate,tub_qty)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId,@pkt_qty,@pkt_dqty,@pkt_rate,@tub_qty)");
                                 cmd.Parameters.AddWithValue("@IndentNo", indentnumber);
                                 cmd.Parameters.AddWithValue("@Product_sno", o.Productsno);
                                 cmd.Parameters.AddWithValue("@UnitCost", UtCost);
@@ -25083,6 +25091,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                                 cmd.Parameters.AddWithValue("@DTripId", tripid);
                                 cmd.Parameters.AddWithValue("@D_date", dtdeltime);
                                 cmd.Parameters.AddWithValue("@DelTime", dtdeltime);
+                                cmd.Parameters.AddWithValue("@pkt_qty", o.pkt_qty);
+                                cmd.Parameters.AddWithValue("@pkt_dqty", o.pkt_dqty);
+                                cmd.Parameters.AddWithValue("@pkt_rate", o.pkt_rate);
+                                cmd.Parameters.AddWithValue("@tub_qty", o.tub_qty);
                                 vdbmngr.insert(cmd);
                             }
                         }
@@ -25150,7 +25162,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     {
                         PreviousAmount = 0;
                     }
-                    cmd = new MySqlCommand("UPDATE  indents_subtable set DeliveryQty=@DeliveryQty,D_date=@D_date,Status=@Status,UnitCost=@UnitCost,DelTime=@DelTime,DTripId=@dtripid where Product_sno=@Product_sno and IndentNo=@IndentNo");
+                    cmd = new MySqlCommand("UPDATE  indents_subtable set DeliveryQty=@DeliveryQty,D_date=@D_date,Status=@Status,UnitCost=@UnitCost,DelTime=@DelTime,DTripId=@dtripid,pkt_dqty=@pkt_dqty,pkt_rate=@pkt_rate,tub_qty=@tub_qty where Product_sno=@Product_sno and IndentNo=@IndentNo");
                     double DQty = 0;
                     double.TryParse(DelQty, out DQty);
                     DQty = Math.Round(DQty, 2);
@@ -25165,9 +25177,12 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     cmd.Parameters.AddWithValue("@IndentNo", IndentNo);
                     cmd.Parameters.AddWithValue("@dtripid", tripid);
                     cmd.Parameters.AddWithValue("@Product_sno", ProductSno);
+                    cmd.Parameters.AddWithValue("@pkt_dqty", o.pkt_dqty);
+                    cmd.Parameters.AddWithValue("@pkt_rate", o.pkt_rate);
+                    cmd.Parameters.AddWithValue("@tub_qty", o.tub_qty);
                     if (vdbmngr.Update(cmd) == 0)
                     {
-                        cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId)");
+                        cmd = new MySqlCommand("insert into indents_subtable (IndentNo,Product_sno,Status,unitQty,DeliveryQty,UnitCost,OTripId,D_date,DelTime,DTripId,pkt_qty,pkt_dqty,pkt_rate,tub_qty)values(@IndentNo,@Product_sno,@Status,@unitQty,@DeliveryQty,@UnitCost,@OTripId,@D_date,@DelTime,@DTripId,@pkt_qty,@pkt_dqty,@pkt_rate,@tub_qty)");
                         cmd.Parameters.AddWithValue("@IndentNo", IndentNo);
                         cmd.Parameters.AddWithValue("@Product_sno", ProductSno);
                         cmd.Parameters.AddWithValue("@UnitCost", Rate);
@@ -25179,6 +25194,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         cmd.Parameters.AddWithValue("@DTripId", tripid);
                         cmd.Parameters.AddWithValue("@D_date", dtdeltime);
                         cmd.Parameters.AddWithValue("@DelTime", dtdeltime);
+                        cmd.Parameters.AddWithValue("@pkt_qty", unitQty);
+                        cmd.Parameters.AddWithValue("@pkt_dqty", o.pkt_dqty);
+                        cmd.Parameters.AddWithValue("@pkt_rate", o.pkt_rate);
+                        cmd.Parameters.AddWithValue("@tub_qty", o.tub_qty);
                         vdbmngr.insert(cmd);
                     }
                     double PresentAmount = Rate * DQty;
@@ -25326,7 +25345,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             string response = GetJson(msg);
             context.Response.Write(response);
         }
-    }
+    } 
     private void btnNewEditIndentSaveClick(HttpContext context)
     {
         try
@@ -25919,13 +25938,15 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
     }
     private void GetProductNamechange(HttpContext context)
     {
+
         try
         {
             vdbmngr = new VehicleDBMgr();
+
             string Sno = context.Request["ProductSno"];
             string BranchID = context.Request["BranchID"];
             List<ProductUnit> ProductList = new List<ProductUnit>();
-            cmd = new MySqlCommand("SELECT branchproducts.unitprice, branchproducts.product_sno, productsdata.Qty, productsdata.Units FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno WHERE (branchproducts.branch_sno = @BranchID) and (branchproducts.product_sno=@sno) ");
+            cmd = new MySqlCommand("SELECT branchproducts.unitprice, branchproducts.product_sno, productsdata.Qty,  productsdata.invqty, productsdata.Units FROM branchproducts INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno WHERE (branchproducts.branch_sno = @BranchID) and (branchproducts.product_sno=@sno) ");
             cmd.Parameters.AddWithValue("@sno", Sno);
             cmd.Parameters.AddWithValue("@BranchID", BranchID);
             DataTable dtBranchProduct = vdbmngr.SelectQuery(cmd).Tables[0];
@@ -25936,16 +25957,18 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             }
             if (AunitPrice == "0")
             {
-                cmd = new MySqlCommand("SELECT productsdata.UnitPrice,productsdata.Qty, productsdata.Units, branchproducts.product_sno, branchproducts.unitprice AS Bunitprice , productsdata.ProductName FROM productsdata INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno INNER JOIN branchmappingtable ON branchproducts.branch_sno = branchmappingtable.SuperBranch WHERE (branchmappingtable.SubBranch = @BranchID) AND (branchproducts.product_sno = @Sno)");
+                cmd = new MySqlCommand("SELECT productsdata.UnitPrice,productsdata.Qty, productsdata.invqty,  productsdata.Units, branchproducts.product_sno, branchproducts.unitprice AS Bunitprice , productsdata.ProductName FROM productsdata INNER JOIN branchproducts ON productsdata.sno = branchproducts.product_sno INNER JOIN branchmappingtable ON branchproducts.branch_sno = branchmappingtable.SuperBranch WHERE (branchmappingtable.SubBranch = @BranchID) AND (branchproducts.product_sno = @Sno)");
                 cmd.Parameters.AddWithValue("@sno", Sno);
                 cmd.Parameters.AddWithValue("@BranchID", BranchID);
                 DataTable dtProduct = vdbmngr.SelectQuery(cmd).Tables[0];
                 ProductUnit GetProduct = new ProductUnit();
-                GetProduct.UnitPrice = dtProduct.Rows[0]["UnitPrice"].ToString();
+                GetProduct.orderunitRate = (float)dtProduct.Rows[0]["UnitPrice"];
                 GetProduct.Unitqty = dtProduct.Rows[0]["Qty"].ToString();
                 GetProduct.Units = dtProduct.Rows[0]["Units"].ToString();
+                //GetProduct.invqty = dtProduct.Rows[0]["invqty"].ToString();
                 string BranchUnitPrice = dtProduct.Rows[0]["BUnitPrice"].ToString();
-                float Rate = 0;
+                double Rate = 0;
+                double perltrCost = 0;
                 if (BranchUnitPrice != "0")
                 {
                     Rate = (float)dtProduct.Rows[0]["BUnitPrice"];
@@ -25954,20 +25977,27 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 {
                     Rate = (float)dtProduct.Rows[0]["UnitPrice"];
                 }
-                //float Rate = (float)dtProduct.Rows[0]["UnitPrice"];
+
                 float Unitqty = (float)dtProduct.Rows[0]["Qty"];
-                float TotalRate = 0;
+                double TotalRate = 0;
                 TotalRate = Rate;
+
                 if (dtProduct.Rows[0]["Units"].ToString() == "ml" || dtProduct.Rows[0]["Units"].ToString() == "ltr")
                 {
                     GetProduct.Desciption = "Ltrs";
                 }
                 else
                 {
-                    GetProduct.Desciption = "Kgs";
+                    if (dtProduct.Rows[0]["Units"].ToString() == "Nos")
+                    {
+                        GetProduct.Desciption = "Nos";
+                    }
+                    else
+                    {
+                        GetProduct.Desciption = "Kgs";
+                    }
                 }
-                //getOrderValue.Rate = (float)Rate;
-                GetProduct.orderunitRate = (float)TotalRate;
+                GetProduct.UnitPrice = TotalRate.ToString();
                 ProductList.Add(GetProduct);
                 string response = GetJson(ProductList);
                 context.Response.Write(response);
@@ -25975,12 +26005,27 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             else
             {
                 ProductUnit GetProduct = new ProductUnit();
-                GetProduct.UnitPrice = dtBranchProduct.Rows[0]["UnitPrice"].ToString();
+                GetProduct.orderunitRate = (float)dtBranchProduct.Rows[0]["UnitPrice"];
                 GetProduct.Unitqty = dtBranchProduct.Rows[0]["Qty"].ToString();
                 GetProduct.Units = dtBranchProduct.Rows[0]["Units"].ToString();
-                float Rate = (float)dtBranchProduct.Rows[0]["UnitPrice"];
+
+                //added by akbar converting pktrate to ltrcost 27-03-2023
+                double perltrCost = 0;
+                double Rate = 0;
+
+                double unitprice = 0;
+                double.TryParse(dtBranchProduct.Rows[0]["UnitPrice"].ToString(), out unitprice);
+                double UOMQty = 0;
+                double.TryParse(dtBranchProduct.Rows[0]["Qty"].ToString(), out UOMQty);
+                perltrCost = (1000 / UOMQty) * unitprice;
+                perltrCost = Math.Round(perltrCost, 2);
+                Rate = perltrCost;
+                //Rate = (float)dtProduct.Rows[0]["UnitPrice"];
+
+                //float Rate = (float)dtBranchProduct.Rows[0]["UnitPrice"];
                 float Unitqty = (float)dtBranchProduct.Rows[0]["Qty"];
-                float TotalRate = 0;
+                GetProduct.invqty = dtBranchProduct.Rows[0]["invqty"].ToString();
+                double TotalRate = 0;
                 TotalRate = Rate;
                 if (dtBranchProduct.Rows[0]["Units"].ToString() == "ml" || dtBranchProduct.Rows[0]["Units"].ToString() == "ltr")
                 {
@@ -25988,10 +26033,17 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 }
                 else
                 {
-                    GetProduct.Desciption = "Kgs";
+                    if (dtBranchProduct.Rows[0]["Units"].ToString() == "Nos")
+                    {
+                        GetProduct.Desciption = "Nos";
+                    }
+                    else
+                    {
+                        GetProduct.Desciption = "Kgs";
+                    }
                 }
                 //getOrderValue.Rate = (float)Rate;
-                GetProduct.orderunitRate = (float)TotalRate;
+                GetProduct.UnitPrice = TotalRate.ToString();
                 ProductList.Add(GetProduct);
                 string response = GetJson(ProductList);
                 context.Response.Write(response);
@@ -26008,7 +26060,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string Units { get; set; }
         public float orderunitRate { get; set; }
         public string Desciption { get; set; }
-
+        public string invqty { get; set; }
+        
     }
     private void GetEditInventoryValues(HttpContext context)
     {
@@ -26136,70 +26189,78 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             {
                 indtype = dtindenttype.Rows[0]["IndentType"].ToString();
             }
-            cmd = new MySqlCommand("SELECT productsdata.ProductName, indents_subtable.Product_sno, indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, indents.IndentNo FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (indents.Branch_id = @BranchID) AND (indents.I_date BETWEEN @d1 AND @d2) AND (indents.IndentType = @indtype) group by productsdata.ProductName");
+            cmd = new MySqlCommand("SELECT indents_subtable.tub_qty,productsdata.Qty,productsdata.invqty,productsdata.ProductName,indents_subtable.UnitCost,indents_subtable.pkt_dqty,sum(indents_subtable.pkt_dqty*indents_subtable.pkt_rate) as Total,indents_subtable.pkt_qty,indents_subtable.pkt_rate, indents_subtable.Product_sno, indents_subtable.DeliveryQty, indents_subtable.unitQty, indents_subtable.UnitCost, indents.IndentNo FROM indents INNER JOIN indents_subtable ON indents.IndentNo = indents_subtable.IndentNo INNER JOIN productsdata ON indents_subtable.Product_sno = productsdata.sno WHERE (indents.Branch_id = @BranchID) AND (indents.I_date BETWEEN @d1 AND @d2) AND (indents.IndentType = @indtype) group by productsdata.ProductName");
             cmd.Parameters.AddWithValue("@BranchID", BranchID);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(dtinddate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(dtinddate));
             cmd.Parameters.AddWithValue("@indtype", indtype);
             DataTable dtBranch = vdbmngr.SelectQuery(cmd).Tables[0];
-            if (soid != "7")
+            //if (soid != "7")
+            //{
+            if (dtBranch.Rows.Count > 0)
             {
-                if (dtBranch.Rows.Count > 0)
+                foreach (DataRow dr in dtBranch.Rows)
                 {
-                    foreach (DataRow dr in dtBranch.Rows)
+                    IndClass GetRoutes = new IndClass();
+                    GetRoutes.ProductName = dr["ProductName"].ToString();
+                    GetRoutes.Product_sno = dr["Product_sno"].ToString();
+                    string DeliveryQty = dr["DeliveryQty"].ToString();
+                    if (DeliveryQty == "")
                     {
-                        IndClass GetRoutes = new IndClass();
-                        GetRoutes.ProductName = dr["ProductName"].ToString();
-                        GetRoutes.Product_sno = dr["Product_sno"].ToString();
-                        string DeliveryQty = dr["DeliveryQty"].ToString();
-                        if (DeliveryQty == "")
-                        {
-                            GetRoutes.DeliveryQty = dr["unitQty"].ToString();
-                        }
-                        else
-                        {
-                            GetRoutes.DeliveryQty = dr["DeliveryQty"].ToString();
-                        }
-                        GetRoutes.UnitCost = dr["UnitCost"].ToString();
-                        GetRoutes.IndentNo = dr["IndentNo"].ToString();
-                        GetRoutes.unitQty = dr["unitQty"].ToString();
-                        IndentList.Add(GetRoutes);
+                        GetRoutes.ltr_UnitQty = dr["unitQty"].ToString();
                     }
-                }
-                else
-                {
-                    cmd = new MySqlCommand("SELECT productsdata.UnitPrice,branchproducts.Rank, productsdata.ProductName, productsdata.Units, productsdata.Qty, branchproducts.unitprice AS BUnitPrice, branchproducts_1.unitprice AS Aunitprice, productsdata.sno FROM branchproducts INNER JOIN branchmappingtable ON branchproducts.branch_sno = branchmappingtable.SuperBranch INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN branchproducts branchproducts_1 ON branchmappingtable.SubBranch = branchproducts_1.branch_sno AND  productsdata.sno = branchproducts_1.product_sno WHERE (branchproducts_1.branch_sno = @bsno) AND (branchproducts_1.flag = @flag)GROUP BY branchproducts_1.branch_sno, branchproducts_1.unitprice, productsdata.sno, branchproducts_1.flag ORDER BY branchproducts.Rank");
-                    cmd.Parameters.AddWithValue("@flag", 1);
-                    cmd.Parameters.AddWithValue("@bsno", context.Request["BranchID"].ToString());
-                    dtBranch = vdbmngr.SelectQuery(cmd).Tables[0];
-                    foreach (DataRow dr in dtBranch.Rows)
+                    else
                     {
-                        IndClass GetRoutes = new IndClass();
-                        GetRoutes.ProductName = dr["ProductName"].ToString();
-                        GetRoutes.Product_sno = dr["sno"].ToString();
-                        GetRoutes.DeliveryQty = "0";
-                        string AgentUnitPrice = dr["Aunitprice"].ToString();
-                        string BranchUnitPrice = dr["BUnitPrice"].ToString();
-                        float Rate = 0;
-                        if (AgentUnitPrice != "0")
-                        {
-                            Rate = (float)dr["Aunitprice"];
-                        }
-                        if (Rate == 0)
-                        {
-                            Rate = (float)dr["BUnitPrice"];
-                        }
-                        if (Rate == 0)
-                        {
-                            Rate = (float)dr["unitprice"];
-                        }
-                        GetRoutes.UnitCost = Rate.ToString();
-                        GetRoutes.IndentNo = "0";
-                        GetRoutes.unitQty = "0";
-                        IndentList.Add(GetRoutes);
+                        GetRoutes.ltr_Qty = dr["DeliveryQty"].ToString();
                     }
+                    GetRoutes.Ltr_rate = dr["UnitCost"].ToString();
+                    GetRoutes.IndentNo = dr["IndentNo"].ToString();
+                    GetRoutes.Unitqty = dr["Qty"].ToString();
+                    GetRoutes.Units = dr["Qty"].ToString();
+                    GetRoutes.pkt_qty = dr["pkt_qty"].ToString();
+                    GetRoutes.pkt_dqty = dr["pkt_dqty"].ToString();
+                    GetRoutes.unitQty = dr["unitQty"].ToString();
+                    GetRoutes.pkt_rate = dr["pkt_rate"].ToString();
+                    GetRoutes.invqty = dr["invqty"].ToString();
+                    GetRoutes.tubQty = dr["tub_qty"].ToString();
+                    GetRoutes.Total = dr["Total"].ToString();
+                    IndentList.Add(GetRoutes);
                 }
             }
+            else
+            {
+                cmd = new MySqlCommand("SELECT productsdata.UnitPrice,branchproducts.Rank, productsdata.ProductName, productsdata.Units, productsdata.Qty, branchproducts.unitprice AS BUnitPrice, branchproducts_1.unitprice AS Aunitprice, productsdata.sno FROM branchproducts INNER JOIN branchmappingtable ON branchproducts.branch_sno = branchmappingtable.SuperBranch INNER JOIN productsdata ON branchproducts.product_sno = productsdata.sno INNER JOIN branchproducts branchproducts_1 ON branchmappingtable.SubBranch = branchproducts_1.branch_sno AND  productsdata.sno = branchproducts_1.product_sno WHERE (branchproducts_1.branch_sno = @bsno) AND (branchproducts_1.flag = @flag)GROUP BY branchproducts_1.branch_sno, branchproducts_1.unitprice, productsdata.sno, branchproducts_1.flag ORDER BY branchproducts.Rank");
+                cmd.Parameters.AddWithValue("@flag", 1);
+                cmd.Parameters.AddWithValue("@bsno", context.Request["BranchID"].ToString());
+                dtBranch = vdbmngr.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in dtBranch.Rows)
+                {
+                    IndClass GetRoutes = new IndClass();
+                    GetRoutes.ProductName = dr["ProductName"].ToString();
+                    GetRoutes.Product_sno = dr["sno"].ToString();
+                    GetRoutes.DeliveryQty = "0";
+                    string AgentUnitPrice = dr["Aunitprice"].ToString();
+                    string BranchUnitPrice = dr["BUnitPrice"].ToString();
+                    float Rate = 0;
+                    if (AgentUnitPrice != "0")
+                    {
+                        Rate = (float)dr["Aunitprice"];
+                    }
+                    if (Rate == 0)
+                    {
+                        Rate = (float)dr["BUnitPrice"];
+                    }
+                    if (Rate == 0)
+                    {
+                        Rate = (float)dr["unitprice"];
+                    }
+                    GetRoutes.UnitCost = Rate.ToString();
+                    GetRoutes.IndentNo = "0";
+                    GetRoutes.unitQty = "0";
+                    IndentList.Add(GetRoutes);
+                }
+            }
+            ////}
             string response = GetJson(IndentList);
             context.Response.Write(response);
         }
@@ -26366,6 +26427,20 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string UnitCost { get; set; }
         public string IndentNo { get; set; }
         public string unitQty { get; set; }
+        public string pkt_dqty { get; set; }
+        public string pkt_qty { get; set; }
+        public string Unitqty { get; set; }
+        public string Units { get; set; }
+        public string tubQty { get; set; }
+        public string pkt_rate { get; set; }
+        public string Ltr_rate { get; set; }
+        
+        public string Total { get; set; }
+        
+        public string ltr_UnitQty { get; set; }
+        public string ltr_Qty { get; set; }
+        public string Qty { get; set; }
+        public string invqty { get; set; }
         public string routesno { get; set; }
         public string routename { get; set; }
         public string agentname { get; set; }
@@ -31550,6 +31625,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string PSQty { get; set; }
         public string PPufLQty { get; set; }
         public string UomQty { get; set; }
+        public string pkt_qty { get; set; }
+        public string pkt_dqty { get; set; }
+        public string pkt_rate { get; set; }
+        public string tub_qty { get; set; }
     }
     
     class offerorderdetails

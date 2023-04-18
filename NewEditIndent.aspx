@@ -150,7 +150,7 @@
                 if (msg) {
                     BindBranchName(msg);
                     $('#divFillScreen').removeTemplate();
-                    $('#divFillScreen').setTemplateURL('NewIndentEdit.htm');
+                    $('#divFillScreen').setTemplateURL('NewIndentEdit1.htm');
                     $('#divFillScreen').processTemplate();
                 }
                 else {
@@ -321,9 +321,11 @@
             }
             AddRowDelivers();
         }
-        var UnitPrice;
+        var pkt_rate;
+        var ltr_rate;
         var Units;
         var UnitQty;
+        var invqty;
         var QtyUnit;
         var orderunitRate;
         var Description;
@@ -334,8 +336,10 @@
             var data = { 'operation': 'GetProductNamechange', 'ProductSno': ProductSno, 'BranchID': BranchID };
             var s = function (msg) {
                 if (msg) {
-                    UnitPrice = msg[0].orderunitRate;
-
+                    pkt_rate = msg[0].orderunitRate;
+                    ltr_rate = msg[0].UnitPrice;
+                    Unitqty = msg[0].Unitqty;
+                    invqty = msg[0].invqty;
                 }
                 else {
                 }
@@ -353,6 +357,9 @@
             var txtqty = "";
             var txtIndentNo = 0;
             var ddlDelivered = "";
+            var pkt_dqty = 0;
+            var pkt_qty = 0;
+            var pkt_rate = 0;
             var DIndentNo = 0;
             var txtCost = 0;
             var HdnIndentSno = 0;
@@ -382,26 +389,33 @@
                         DIndentNo = txtIndentNo;
                         indentcount++;
                     }
-                    txtqty = $(this).find('#txtunitQty').text();
-                    ddlDelivered = $(this).find('#txtDeliveryQty').val();
-                    txtCost = $(this).find('#txtUnitCost').val();
-                    DeliverTable.push({ ProductName: txtProductName, Product_sno: txtProductSno, IndentNo: txtIndentNo, unitQty: txtqty, DeliveryQty: ddlDelivered, UnitCost: txtCost });
+                    txtqty = $(this).find('#hdnltr_Unitqty').val();
+                    ddlDelivered = $(this).find('#txtLtrQty').text();
+                    txtCost = $(this).find('#txtLtr_rate').text();
+                    pkt_dqty = $(this).find('#txtPkts_Dqty').val();
+                    pkt_qty = $(this).find('#hdnPkt_UnitQty').val();
+                    pkt_rate = $(this).find('#txtPkt_rate').text();
+                    tubQty = $(this).find('#txtTubQty').val();
+                    Total = $(this).find('#txtTotal_Value').text();
+                    DeliverTable.push({ ProductName: txtProductName, Product_sno: txtProductSno, IndentNo: txtIndentNo, ltr_UnitQty: txtqty, ltr_Qty: ddlDelivered, Ltr_rate: txtCost, pkt_dqty: pkt_dqty, pkt_qty: pkt_qty, pkt_rate: pkt_rate, tubQty: tubQty, Total: Total });
                 }
             });
             var hdnISno = 0;
             var Delivered = "";
-            var Qty = 0;
+            var ltr_UnitQty = 0;
             var hdnISno = 0;
             var Cost = 0;
-
+            var pkt_dqty = 0;
+            var pkt_qty = 0;
             var leak = 0;
-            var DQty = 0;
+            var ltr_Qty = 0;
             var RQty = 0;
-            DeliverTable.push({ ProductName: ProductName, Product_sno: ProductSno, IndentNo: DIndentNo, unitQty: Qty, DeliveryQty: DQty, UnitCost: UnitPrice });
-            $('#divFillScreen').setTemplateURL('NewIndentEdit.htm');
+            var Ltr_rate;
+            var tubQty = 0;
+            DeliverTable.push({ ProductName: ProductName, Product_sno: ProductSno, IndentNo: DIndentNo, ltr_UnitQty: ltr_UnitQty, ltr_Qty: ltr_Qty, Ltr_rate: ltr_rate, pkt_dqty: pkt_dqty, pkt_qty: pkt_qty, pkt_rate: pkt_rate, tubQty: tubQty });
+            $('#divFillScreen').setTemplateURL('NewIndentEdit1.htm');
             $('#divFillScreen').processTemplate(DeliverTable);
-
-
+            calcTot();
         }
         function GetEditIndentValues() {
             var ddlRouteName = document.getElementById('ddlRouteName').value;
@@ -426,8 +440,9 @@
                     //BindCollectionInventory();
                     BindDeliverInventory();
                     $('#divFillScreen').removeTemplate();
-                    $('#divFillScreen').setTemplateURL('NewIndentEdit.htm');
+                    $('#divFillScreen').setTemplateURL('NewIndentEdit1.htm');
                     $('#divFillScreen').processTemplate(msg);
+                    calcTot();
                 }
                 else {
                 }
@@ -449,7 +464,7 @@
             var Indentdetails = new Array();
             $(rows).each(function (i, obj) {
                 if ($(this).find('#txtProductName').text() != "") {
-                    Indentdetails.push({ Productsno: $(this).find('#hdnProductSno').val(), Product: $(this).find('#txtProductName').text(), DelQty: $(this).find('#txtDeliveryQty').val(), Rate: $(this).find('#txtUnitCost').val(), IndentNo: $(this).find('#txtIndentNo').text() });
+                    Indentdetails.push({ Productsno: $(this).find('#hdnProductSno').val(), Product: $(this).find('#txtProductName').text(), DelQty: $(this).find('#txtLtrQty').val(), Rate: $(this).find('#txtLtr_rate').text(), pkt_dqty: $(this).find('#txtPkts_Dqty').val(), pkt_qty: $(this).find('#hdnPkt_UnitQty').val(), pkt_rate : $(this).find('#txtPkt_rate').text(), IndentNo: $(this).find('#txtIndentNo').text() });
                 }
             });
             //added by akbar 20-May-2022
@@ -483,7 +498,189 @@
             $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
             CallHandlerUsingJson(data, s, e);
         }
+        function OrderTubQtyChange(TubQty) {
+            if (TubQty.value == "") {
 
+            }
+            else {
+                var invQty = $(TubQty).closest("tr").find("#hdninvQty").val();
+                var unitQty = $(TubQty).closest("tr").find("#hdnUnitQty").val();
+                var tubval = TubQty.value;
+                var totalpkts = parseFloat(tubval * invQty);
+                var totltr = parseFloat(totalpkts * unitQty);
+                var totltrvalue = parseFloat(totltr / 1000);
+
+                //$(TubQty).closest("tr").find("#txtUnitQty").val(parseFloat(totltrvalue).toFixed(2));
+               // $(TubQty).closest("tr").find("#txtQtypkts").val(parseFloat(totltrvalue).toFixed(2));
+
+                $(TubQty).closest("tr").find("#txtLtrQty").text(parseFloat(totltrvalue).toFixed(2))
+                $(TubQty).closest("tr").find("#txtPkts_Dqty").val(parseFloat(totalpkts).toFixed(2));
+                var val = parseFloat(totltrvalue).toFixed(2);
+                OrderUnitChange(TubQty);
+                calcTot();
+            }
+        }
+        function OrderPktQtyChange(PktQty) {
+            if (PktQty.value == "") {
+
+            }
+            else {
+                var invQty = $(PktQty).closest("tr").find("#hdninvQty").val();
+                var unitQty = $(PktQty).closest("tr").find("#hdnUnitQty").val();
+                var pktval = PktQty.value;
+                var totltr = parseFloat(pktval * unitQty);
+                var totltrvalue = parseFloat(totltr / 1000);
+                var totaltub = parseFloat(pktval / invQty);
+
+                //$(PktQty).closest("tr").find("#txtUnitQty").val(parseFloat(totltrvalue).toFixed(2));
+                //$(PktQty).closest("tr").find("#txtQtypkts").val(parseFloat(totltrvalue).toFixed(2));
+
+                $(PktQty).closest("tr").find("#txtLtrQty").text(parseFloat(totltrvalue).toFixed(2))
+                $(PktQty).closest("tr").find("#txtTubQty").val(parseFloat(totaltub).toFixed(2));
+                var val = parseFloat(totltrvalue).toFixed(2);
+                OrderUnitChange(PktQty);
+                calcTot();
+            }
+        }
+        function OrderUnitChange(UnitQty) {
+            var totalqty;
+            var qty = 0.0;
+            var Rate = 0;
+            var rate = 0;
+            var total = 0;
+            var totalltr = 0;
+            var totallpkts = 0;
+            var TotalRate = 0;
+            var cnt = 0;
+            if (UnitQty.value == "") {
+                $(UnitQty).closest("tr").find("#txtOrderTotal").text(parseFloat(total).toFixed(2));
+                $('.Unitqtyclass').each(function (i, obj) {
+                    // var qtyclass = $(this).val();
+                    //var qtyclass = $(this).closest('tr').find('#txtUnitQty').val();
+                    var qtyclass = $(this).closest('tr').find('#txtPkts_Dqty').val();
+
+                    if (qtyclass == "" || qtyclass == "0") {
+                    }
+                    else {
+                        totallpkts += parseFloat(qtyclass);
+                        cnt++;
+                    }
+                });
+                //                var FloatQty = qty.toFixed(2)
+                //                alert(cnt);
+                document.getElementById('txt_totqty').innerHTML = parseFloat(totallpkts).toFixed(2);
+                $('.rateclass').each(function (i, obj) {
+                    rate += parseFloat($(this).text());
+                });
+                var Floatrate = rate.toFixed(2)
+                document.getElementById('txt_totRate').innerHTML = parseFloat(Floatrate).toFixed(2);
+                $('.totalclass').each(function (i, obj) {
+                    total += parseFloat($(this).text());
+                });
+                document.getElementById('txt_total').innerHTML = parseFloat(total).toFixed(2);
+                return false;
+            }
+            var Qty = $(UnitQty).closest("tr").find("#hdnUnitQty").val();
+            var Units = $(UnitQty).closest("tr").find("#hdnUnits").val();
+            Rate = $(UnitQty).closest("tr").find("#txtPkt_rate").text();
+            var Units = $(UnitQty).closest("tr").find("#hdnUnits").val();
+            //var unitqty = $(UnitQty).closest("tr").find("#txtUnitQty").val();
+            var unitqty = $(UnitQty).closest("tr").find("#txtPkts_Dqty").val();
+            if (Units == "ml") {
+
+                totalqty = parseFloat(unitqty);
+            }
+            if (Units == "ltr") {
+                totalqty = parseInt(unitqty);
+            }
+            if (Units == "gms") {
+                totalqty = parseFloat(unitqty);
+            }
+            if (Units == "kgs") {
+                totalqty = parseInt(unitqty);
+            }
+            if (Units == "Pkts") {
+                totalqty = parseInt(unitqty);
+            }
+            $(UnitQty).closest("tr").find("#hdnQty").val(totalqty)
+            var FinalRate = 0;
+            FinalRate = unitqty * Rate;
+            $(UnitQty).closest("tr").find("#txtTotal_Value").text(parseFloat(FinalRate).toFixed(2));
+            cnt = 0;
+            $('.Unitqtyclass').each(function (i, obj) {
+                // var qtyclass = $(this).val();
+                //var qtyclass = $(this).closest('tr').find('#txtUnitQty').val();
+                var qtyclass = $(this).closest('tr').find('#txtPkts_Dqty').val();
+
+                if (qtyclass == "" || qtyclass == "0") {
+                }
+                else {
+                    totallpkts += parseInt(qtyclass);
+
+                    cnt++;
+                }
+            });
+            //            alert(cnt);
+            //            var FloatQty = qty.toFixed(2)
+            document.getElementById('txt_TotalPkts').innerHTML = parseFloat(totallpkts).toFixed(2);
+            rate = 0;
+            //$('.rateclass').each(function (i, obj) {
+            //    rate += parseFloat($(this).text());
+            //});
+            //document.getElementById('txt_totRate').innerHTML = parseFloat(rate).toFixed(2);
+            //total = 0;
+            //$('.totalclass').each(function (i, obj) {
+            //    total += parseFloat($(this).text());
+            //});
+            //document.getElementById('txt_total').innerHTML = parseFloat(total).toFixed(2);
+        }
+        var FinalAmount;
+        function calcTot() {
+            var qty = 0.0;
+            var rate = 0;
+            var total = 0;
+            var totallpkts = 0;
+            var totallAmount = 0;
+            var totalltr = 0;
+            var cnt = 0;
+            $('.Unitqtyclass').each(function (i, obj) {
+                //var qtyclass = $(this).next.next.next.text();
+                var qtyclass = $(this).closest('tr').find('#txtPkts_Dqty').val();
+                if (qtyclass == "" || qtyclass == "0") {
+                }
+                else {
+                    totallpkts += parseFloat(qtyclass);
+                    cnt++;
+                }
+            });
+
+
+            $('.clsTotal').each(function (i, obj) {
+                //var qtyclass = $(this).next.next.next.text();
+                var totalclass = $(this).closest('tr').find('#txtTotal_Value').text();
+                if (totalclass == "" || totalclass == "0") {
+                }
+                else {
+                    totallAmount += parseFloat(totalclass);
+                    cnt++;
+                }
+            });
+
+            document.getElementById('txt_TotalAmount').innerHTML = parseFloat(totallAmount).toFixed(2);
+
+            
+            document.getElementById('txt_TotalPkts').innerHTML = parseFloat(totallpkts).toFixed(2);
+            //$('.rateclass').each(function (i, obj) {
+            //    rate += parseFloat($(this).text());
+            //});
+            //document.getElementById('txt_totRate').innerHTML = parseFloat(rate).toFixed(2);
+            //$('.totalclass').each(function (i, obj) {
+            //    total += parseFloat($(this).text());
+            //});
+            //document.getElementById('txt_total').innerHTML = parseFloat(total).toFixed(2);
+            FinalAmount = total;
+
+        }
         function CollectionInventrySaveClick() {
 
             var ddlRouteName = document.getElementById('ddlRouteName').value;
@@ -536,51 +733,7 @@
         }
 
 
-        //added by akbar 20-May-2022
-        //function btnbackclick() {
-        //    $('#divDelivers').css('display', 'block');
-        //    $('#tbldropdowns').css('display', 'none');
-        //    $('#divFillScreen').css('display', 'none');
-        //    $('#divInventory').css('display', 'none');
-        //    $('#divback').css('display', 'none');
-        //    $('#btnSave').css('display', 'none');
-
-        //}
-
-        //function divCollectionsclick() {
-        //    //var BranchName = document.getElementById('ddlBranchName').value;
-        //    //if (BranchName == "Select Agent" || BranchName == "") {
-        //    //    alert("Please Select Agent Name");
-        //    //    return false;
-        //    //}
-        //    DairyStatus = "Collections";
-        //    $('#divDelivers').css('display', 'none');
-        //    $('#divCollections').css('display', 'none');
-        //    $('#tbldropdowns').css('display', 'block');
-        //    $('#divFillScreen').css('display', 'block');
-        //    $('#divInventory').css('display', 'block');
-        //    $('#divback').css('display', 'block');
-        //    $('#btnSave').css('display', 'block');
-
-        //    //GetEditCollectionsValues();
-        //}
-        //function divDeliveryclick() {
-        //    //var BranchName = document.getElementById('ddlBranchName').value;
-        //    //if (BranchName == "Select Agent" || BranchName == "") {
-        //    //    alert("Please Select Agent Name");
-        //    //    return false;
-        //    //}
-        //    DairyStatus = "Delivers";
-        //    $('#divDelivers').css('display', 'none');
-        //    $('#tbldropdowns').css('display', 'block');
-        //    $('#divFillScreen').css('display', 'block');
-        //    $('#divInventory').css('display', 'block');
-        //    $('#btnSave').css('display', 'block');
-        //    $('#divcolInventory').css('display', 'block');
-
-        //    //GetEditIndentValues();
-        //    //BindDeliverInventory();
-        //}
+        
         function numberOnlyExample() {
             if ((event.keyCode < 48) || (event.keyCode > 57))
                 return false;
@@ -589,13 +742,6 @@
 
 
 
-        //function BindDeliversclick(data) {
-        //    $('#divFillScreen').processTemplate(data);
-        //    $('#divInventory').setTemplateURL('DeliverInventory6.htm');
-        //    $('#divInventory').processTemplate();
-        //    BindDeliverInventory();
-        //    BindCollectionInventory();
-        //}
         var InventoryTable;
         function AddInventoryRows() {
             InventoryTable = [];

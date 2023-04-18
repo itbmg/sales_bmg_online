@@ -72,6 +72,11 @@
                     <ContentTemplate>
                         <table>
                             <tr>
+                                <td style="width: 5px;">
+                                <asp:CheckBox ID="chkReport" runat="server" CssClass="form-control" AutoPostBack="True" Checked="true"></asp:CheckBox>
+                                         </td>
+                                 <td style="width: 5px;">
+                                </td>
                                 <td>
                                     <asp:Panel ID="PPlant" runat="server" Visible="false">
                                         <asp:DropDownList ID="ddlPlant" runat="server" CssClass="form-control" AutoPostBack="True"
