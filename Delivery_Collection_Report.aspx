@@ -72,9 +72,12 @@
                     <ContentTemplate>
                         <table>
                             <tr>
-                                <td style="width: 5px;">
-                                <asp:CheckBox ID="chkReport" runat="server" CssClass="form-control" AutoPostBack="True" Checked="true"></asp:CheckBox>
-                                         </td>
+                                 <td>
+                                    <asp:Label ID="labeltype" runat="server">AgentWise</asp:Label>
+                                     </td>
+                                <td>
+                                <asp:CheckBox ID="chkReport" runat="server" CssClass="form-control" AutoPostBack="True"></asp:CheckBox>
+                                </td>
                                  <td style="width: 5px;">
                                 </td>
                                 <td>

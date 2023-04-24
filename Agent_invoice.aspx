@@ -413,6 +413,7 @@
                         </td>
                         <td>
                             <select id="ddltype" class="form-control">
+                                <option value="All">All</option>
                                 <option value="NonTax">NonTax</option>
                                 <option value="Tax">Tax</option>
                             </select>

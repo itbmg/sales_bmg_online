@@ -254,12 +254,11 @@ public partial class Delivery_Collection_Report : System.Web.UI.Page
 
         if (chkReport.Checked)
         {
-            GetReport();
-
+            getnelloreReport();
         }
         else
         {
-            getnelloreReport();
+            GetReport();
         }
         var salesoffice = ddlSalesOffice.SelectedItem.Text;
         var salesoff = ddlSalesOffice.SelectedValue;
