@@ -28,6 +28,7 @@
     <script type="text/javascript">
         $(function () {
             window.history.forward(1);
+
         });
     </script>
 </asp:Content>
@@ -141,7 +142,7 @@
                                     </div>
                                 </div>
                                 <asp:GridView ID="grdReports" runat="server" ForeColor="White" Width="100%" GridLines="Both"
-                                    Font-Size="Smaller">
+                                    Font-Size="Smaller" class="table table-bordered table-hover dataTable no-footer">
                                     <EditRowStyle BackColor="#999999" />
                                     <FooterStyle BackColor="Gray" Font-Bold="False" ForeColor="White" />
                                     <HeaderStyle BackColor="#f4f4f4" Font-Bold="False" ForeColor="Black" Font-Italic="False"
@@ -172,15 +173,17 @@
                             <br />
                             <asp:Button ID="btnPrint" CssClass="btn btn-primary" Text="Print" OnClientClick="javascript:CallPrint('divPrint');"
                                 runat="Server" />
+                             <asp:Button ID="Button1" CssClass="btn btn-primary" Text="Save" OnClick="btn_Save_Click"
+                                runat="Server" />
                             <asp:Label ID="lblmsg" runat="server" Text="" ForeColor="Red" Font-Size="20px"></asp:Label>
                         </asp:Panel>
                         <br />
                     </ContentTemplate>
                 </asp:UpdatePanel>
                 <br />
-                
+                <asp:Button ID="Button3" Text="Export To Excel" runat="server" CssClass="btn btn-primary"
+                    OnClick="btn_Export_Click" />
             </div>
         </div>
     </section>
 </asp:Content>
-
