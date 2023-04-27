@@ -374,7 +374,19 @@ public partial class NewAgentStatement : System.Web.UI.Page
                     Report.Rows.Add(newrow);    
 
                 }
-
+                DataRow newvartical = Report.NewRow();
+                newvartical["DeliverDate"] = "Total";
+                double val = 0.0;
+                foreach (DataColumn dc in Report.Columns)
+                {
+                    if (dc.DataType == typeof(Double))
+                    {
+                        val = 0.0;
+                        double.TryParse(Report.Compute("sum([" + dc.ToString() + "])", "[" + dc.ToString() + "]<>'0'").ToString(), out val);
+                        newvartical[dc.ToString()] = val;
+                    }
+                }
+                Report.Rows.Add(newvartical);
                 foreach (DataColumn col in Report.Columns)
                 {
                     string Pname = col.ToString();

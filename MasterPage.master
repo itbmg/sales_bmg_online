@@ -857,7 +857,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                                 <li id="li12"><a href="Routewisesaleqty.aspx">Route Wise Sale Qty</a></li>
                                                 <li id="lisalesofficecollection"><a href="SalesOfficeCollection.aspx">SalesOffice Collections</a></li>
                                                 <li id="liroutewisecollections"><a href="RouteWiseCollections.aspx">Route Wise Collections</a></li>
-                                                <li id="liAgentTransaction"><a href="AgentTransaction.aspx">Agent Statement</a></li>
+                                                <li id="liAgentTransaction"><a href="NewAgentStatement.aspx">Agent Statement</a></li>
                                               <%--  <li id="li47"><a href="TotalReport.aspx">Sangam Report</a></li>--%>
                                                 <li id="liRouteWiseActivity"><a href="RouteWiseActivity.aspx">Route Wise Activity</a></li>
                                                 <li id="liSalesOfficewiseActivity"><a href="SalesOfficeWiseActivity.aspx">SalesOffice
@@ -886,6 +886,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                                 <li id="liagentdelivery" ><a href="AgentDelivery.aspx">Agent Delivery</a></li>
                                                 <li id="liSalesOfficeWiseDue" ><a href="SalesOfficeWiseDue.aspx">SalesOfficeWiseDue</a></li>
                                                 <li id="liAgentWiseDueTransaction" ><a href="AgentWiseDueTransactionReport.aspx">AgentWiseDueTransaction</a></li>
+                                                <li id="liMilkBuyer" ><a href="MilkBuyerReport.aspx">MilkBuyerReport</a></li>
                                                 <li id="li66" style="display: none;"><a href="RouteVerification.aspx">Trip Sheet</a></li>
                                                 <li id="liagentack" style="display: none;"><a href="AgentAcknoledgement.aspx">Agent
                                                     Acknoledgement</a></li>
