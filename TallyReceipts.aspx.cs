@@ -504,7 +504,7 @@ public partial class TallyReceipts : System.Web.UI.Page
                             newreceipt = "" + countdc;
                         }
                         newrow["Voucher No"] = Receiptno + newreceipt;
-                        newrow["Voucher Type"] = "Cash Receipt Import";
+                        newrow["Voucher Type"] = "Bank Receipt Import";
                         newrow["Ledger (Dr)"] = ledger;
                         if (branch["Name"].ToString() == "")
                         {
