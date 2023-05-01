@@ -173,7 +173,7 @@ public partial class TallyReceipts : System.Web.UI.Page
                     ledger = dtledger.Rows[0]["ladger_dr"].ToString();
                 }
                 Session["filename"] = ddlSalesOffice.SelectedItem.Text + " Tally Receipts" + fromdate.ToString("dd/MM/yyyy");
-                DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
+                //DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
 
                 //  cmd = new MySqlCommand("SELECT branchdata.salestype,branchdata.tBranchName,collections.ReceiptNo,collections.Sno,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.AmountPaid > 0)");
                 // 01/09/2017
@@ -367,15 +367,17 @@ public partial class TallyReceipts : System.Web.UI.Page
                     string march = "3/31/" + (nextyear - 1);
                     dtmarch = DateTime.Parse(march);
                 }
-                cmd = new MySqlCommand("SELECT tbranchname, ladger_dr FROM branchdata WHERE (sno = @BranchID)");
-                cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
-                DataTable dtledger = vdm.SelectQuery(cmd).Tables[0];
-                if (dtledger.Rows.Count > 0)
-                {
-                    ledger = dtledger.Rows[0]["ladger_dr"].ToString();
-                }
+                //cmd = new MySqlCommand("SELECT tbranchname, ladger_dr FROM branchdata WHERE (sno = @BranchID)");
+                //cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
+                //DataTable dtledger = vdm.SelectQuery(cmd).Tables[0];
+                //if (dtledger.Rows.Count > 0)
+                //{
+                //    ledger = ";
+                //}
+                    ledger = "svds.p.Ltd punabaka plant";
+
                 Session["filename"] = ddlSalesOffice.SelectedItem.Text + " Tally Bank Receipts" + fromdate.ToString("dd/MM/yyyy");
-                DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
+                //DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
 
                 //  cmd = new MySqlCommand("SELECT branchdata.salestype,branchdata.tBranchName,collections.ReceiptNo,collections.Sno,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.AmountPaid > 0)");
                 // 01/09/2017
