@@ -75,6 +75,7 @@
                                 <td>
                                  <asp:DropDownList ID="ddlType" runat="server" CssClass="form-control" >
                                             <asp:ListItem>CashReceipts</asp:ListItem>
+                                            <asp:ListItem>JournelImport</asp:ListItem>
                                             <asp:ListItem>BankReceipts</asp:ListItem>
                                             </asp:DropDownList>
                                             </td>
