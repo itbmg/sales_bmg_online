@@ -642,8 +642,14 @@ public partial class MilkBuyerReport : System.Web.UI.Page
 
     protected void grdReports_RowDataBound(object sender, GridViewRowEventArgs e)
     {
+
+            
         if (e.Row.RowType == DataControlRowType.Header)
         {
+            e.Row.Cells[7].Visible = false;
+            e.Row.Cells[8].Visible = false;
+            e.Row.Cells[9].Visible = false;
+            e.Row.Cells[10].Visible = false;
             if (ddltype.SelectedValue == "With incentive")
             {
                 e.Row.Cells[12].Width = new Unit("850px");
@@ -656,6 +662,10 @@ public partial class MilkBuyerReport : System.Web.UI.Page
         }
         if (e.Row.RowType == DataControlRowType.DataRow)
         {
+            e.Row.Cells[7].Visible = false;
+            e.Row.Cells[8].Visible = false;
+            e.Row.Cells[9].Visible = false;
+            e.Row.Cells[10].Visible = false;
             if (e.Row.Cells[1].Text == "AGENTS")
             {
                 e.Row.BackColor = System.Drawing.Color.Aquamarine;
