@@ -50,7 +50,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                 dtBranch.Columns.Add("sno");
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0) or (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType1) and (branchdata.flag<>0)");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-                cmd.Parameters.AddWithValue("@SalesType", "4");
+                cmd.Parameters.AddWithValue("@SalesType", "21");
                 cmd.Parameters.AddWithValue("@SalesType1", "26");
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
                 foreach (DataRow dr in dtRoutedata.Rows)
@@ -72,7 +72,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                 }
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, branchdata.sno FROM branchdata INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch WHERE (branchmappingtable.SuperBranch = @SuperBranch) and (branchdata.SalesType=@SalesType) and (branchdata.flag<>0)");
                 cmd.Parameters.AddWithValue("@SuperBranch", Session["branch"]);
-                cmd.Parameters.AddWithValue("@SalesType", "6");
+                cmd.Parameters.AddWithValue("@SalesType", "23");
                 DataTable dtNewPlant = vdm.SelectQuery(cmd).Tables[0];
                 foreach (DataRow dr in dtNewPlant.Rows)
                 {
@@ -253,16 +253,11 @@ public partial class AgentTransaction : System.Web.UI.Page
             double.TryParse(dtAgent_presentopp.Rows[0]["Amount"].ToString(), out agentpresentopp);
             agentpresentopp = agentpresentopp - debitprice;
             //cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PaidDate, CheckStatus FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) AND (CheckStatus <> 'P' OR  CheckStatus IS NULL) GROUP BY PaidDate");
-            cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate, CheckStatus,PaymentType FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) AND (CheckStatus IS NULL) AND (PaymentType <> 'PhonePay') GROUP BY PDate");
+            cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate, CheckStatus,PaymentType FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) AND (CheckStatus IS NULL)  GROUP BY PDate");
             cmd.Parameters.AddWithValue("@BranchID", ddlAgentName.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
             DataTable dtAgentDayWiseCollection = vdm.SelectQuery(cmd).Tables[0];
-            cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate, CheckStatus,PaymentType FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) and (tripId is NULL) AND (PaymentType = 'PhonePay') GROUP BY PDate");
-            cmd.Parameters.AddWithValue("@BranchID", ddlAgentName.SelectedValue);
-            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
-            cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
-            DataTable dtAgentPhonePay = vdm.SelectQuery(cmd).Tables[0];
             cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) and (tripId is NULL) AND ((PaymentType = 'Incentive') OR (PaymentType = 'Journal Voucher')) GROUP BY PDate");
             cmd.Parameters.AddWithValue("@BranchID", ddlAgentName.SelectedValue);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
@@ -295,9 +290,8 @@ public partial class AgentTransaction : System.Web.UI.Page
                 Report.Columns.Add("Opp Bal").SetOrdinal(count + 5);
                 Report.Columns.Add("Total Amount").SetOrdinal(count + 6);
                 Report.Columns.Add("Paid Amount", typeof(Double)).SetOrdinal(count + 7);
-                Report.Columns.Add("Phone/Google Pay", typeof(Double)).SetOrdinal(count + 8);
-                Report.Columns.Add("Incentive/JV", typeof(Double)).SetOrdinal(count + 9);
-                Report.Columns.Add("Bal Amount").SetOrdinal(count + 10);
+                Report.Columns.Add("Incentive/JV", typeof(Double)).SetOrdinal(count + 8);
+                Report.Columns.Add("Bal Amount").SetOrdinal(count + 9);
                 DataTable distincttable = view.ToTable(true, "IndentDate");
                 int i = 1;
                 double oppcarry = 0;
@@ -328,8 +322,6 @@ public partial class AgentTransaction : System.Web.UI.Page
                     newrow["DeliverDate"] = ChangedTime1;
                     double amtpaid = 0;
                     double incentiveamtpaid = 0;
-                    double totphonepay = 0;
-                    double phonepay = 0;
                     double totamtpaid = 0;
                     double totincentiveamtpaid = 0;
                     double totchequeamtpaid = 0;
@@ -338,11 +330,6 @@ public partial class AgentTransaction : System.Web.UI.Page
                     {
                         double.TryParse(drdtclubtotal["AmountPaid"].ToString(), out totamtpaid);
                         amtpaid += totamtpaid;
-                    }
-                    foreach (DataRow drphone in dtAgentPhonePay.Select("PDate='" + ChangedTime1 + "'"))
-                    {
-                        double.TryParse(drphone["AmountPaid"].ToString(), out phonepay);
-                        totphonepay += phonepay;
                     }
                     foreach (DataRow drdtincentive in dtAgentIncentive.Select("PDate='" + ChangedTime1 + "'"))
                     {
@@ -437,8 +424,7 @@ public partial class AgentTransaction : System.Web.UI.Page
                     double totalamt = aopp + Amount + debitedamount;
                     newrow["Total Amount"] = Math.Round(totalamt);
                     //newrow["Paid Amount"] = amtpaid - incentiveamtpaid;
-                    newrow["Paid Amount"] = amtpaid - incentiveamtpaid - totphonepay;
-                    newrow["Phone/Google Pay"] = totphonepay;
+                    newrow["Paid Amount"] = amtpaid - incentiveamtpaid;
                     newrow["Incentive/JV"] = incentiveamtpaid;
                     newrow["Amount Debited"] = debitedamount;
                     double tot_amount = amtpaid;

@@ -219,7 +219,7 @@ public partial class CashBook : System.Web.UI.Page
             RouteReport.Columns.Add("DispName");
             RouteReport.Columns.Add("Reciept No");
             RouteReport.Columns.Add("Received Amount").DataType = typeof(Double);
-            if (BranchID == "172" || BranchID == "7")
+            if (BranchID == "1" || BranchID == "7")
             {
             }
             else
