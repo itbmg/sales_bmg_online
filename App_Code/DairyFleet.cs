@@ -19896,7 +19896,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 }
                 #endregion
                 #region
-                if (collectiontype == "SalesOfficeCollection")
+                if (collectiontype == "SalesOfficeCollection" || collectiontype == "Journal Voucher")
                 {
 
                     double PaidAmount = 0;
@@ -20195,7 +20195,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             {
 
                             }
-                            if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay")
+                            if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay" || paymenttype == "Journal Voucher")
                             {
                                 cmd = new MySqlCommand("Update branchaccounts set Amount=Amount-@PaidAmount where BranchId=@BranchId");
                                 cmd.Parameters.AddWithValue("@PaidAmount", PaidAmount);
@@ -20276,7 +20276,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                         }
                     }
-                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay")
+                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay" || paymenttype == "Journal Voucher")
                     {
                         DateTime pdate = Convert.ToDateTime(PaidDate);
 
@@ -20387,7 +20387,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         cmd.Parameters.AddWithValue("@Receipt", CashReceiptNo);
                         vdbmngr.insert(cmd);
                     }
-                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay")
+                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay" || paymenttype == "Journal Voucher")
                     {
                         cmd = new MySqlCommand("insert into cashcollections (BranchID,Name,Amount,Remarks,DOE,Receiptno,PaymentType,CollectionType,CollectionFrom,freezertype,freezeramounttype,TransType,ledger_code) values(@BranchID,@Name,@Amount,@Remarks,@DOE,@Receiptno,@PaymentType,@CollectionType,@CollectionFrom,@freezertype,@freezeramounttype,@TransType,@ledger_code)");
                     }
@@ -20797,7 +20797,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 }
                 #endregion
                 #region
-                if (collectiontype == "SalesOfficeCollection")
+                if (collectiontype == "SalesOfficeCollection" || collectiontype == "Journal Voucher")
                 {
 
                     double PaidAmount = 0;
@@ -21085,7 +21085,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             {
 
                             }
-                            if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay")
+                            if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay" || paymenttype == "Journal Voucher")
                             {
                                 cmd = new MySqlCommand("Update branchaccounts set Amount=Amount-@PaidAmount where BranchId=@BranchId");
                                 cmd.Parameters.AddWithValue("@PaidAmount", PaidAmount);
@@ -21166,7 +21166,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                             }
                         }
                     }
-                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay")
+                    if (paymenttype == "Cash" || paymenttype == "Bank Transfer" || paymenttype == "PhonePay" || paymenttype == "Journal Voucher")
                     {
                         DateTime pdate = Convert.ToDateTime(PaidDate);
 
