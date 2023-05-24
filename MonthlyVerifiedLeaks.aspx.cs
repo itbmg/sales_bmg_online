@@ -156,86 +156,90 @@ public partial class MonthlyVerifiedLeaks : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
             DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
-            
-                DataView view = new DataView(dtAgent);
-                //DataTable distinctproducts = view.ToTable(true, "ProductName");
-                Report = new DataTable();
-                Report.Columns.Add("SNo");
-                Report.Columns.Add("DC Date");
-                Report.Columns.Add("ReturnDC Date");
-                Report.Columns.Add("Submit Leaks", typeof(Double));
-                Report.Columns.Add("Verified Leaks", typeof(Double));
-                Report.Columns.Add("Difference Leaks", typeof(Double));
-                Report.Columns.Add("Submit Returns", typeof(Double));
-                Report.Columns.Add("Verified Returns", typeof(Double));
-                Report.Columns.Add("Difference Returns", typeof(Double));
-                DataTable distincttable = view.ToTable(true, "AssignDate", "ReturnDCTime");
-                int i = 1;
-                foreach (DataRow branch in distincttable.Rows)
+
+            DataView view = new DataView(dtAgent);
+            //DataTable distinctproducts = view.ToTable(true, "ProductName");
+            Report = new DataTable();
+            Report.Columns.Add("SNo");
+            Report.Columns.Add("DC Date");
+            Report.Columns.Add("ReturnDC Date");
+            Report.Columns.Add("Submit Leaks", typeof(Double));
+            Report.Columns.Add("Verified Leaks", typeof(Double));
+            Report.Columns.Add("Difference Leaks", typeof(Double));
+            Report.Columns.Add("Submit Returns", typeof(Double));
+            Report.Columns.Add("Verified Returns", typeof(Double));
+            Report.Columns.Add("Difference Returns", typeof(Double));
+            DataTable distincttable = view.ToTable(true, "AssignDate", "ReturnDCTime");
+            int i = 1;
+            foreach (DataRow branch in distincttable.Rows)
+            {
+                DataRow newrow = Report.NewRow();
+                newrow["SNo"] = i;
+                string dtdate1 = branch["AssignDate"].ToString();
+                string dtdate2 = branch["ReturnDCTime"].ToString();
+                if (dtdate2 != "")
                 {
-                    DataRow newrow = Report.NewRow();
-                    newrow["SNo"] = i;
-                    string dtdate1 = branch["AssignDate"].ToString();
-                    string dtdate2 = branch["ReturnDCTime"].ToString();
                     DateTime dtDOE1 = Convert.ToDateTime(dtdate1);
                     DateTime dtDOE2 = Convert.ToDateTime(dtdate2);
                     string ChangedTime1 = dtDOE1.ToString("dd/MMM/yyyy");
                     string ChangedTime2 = dtDOE2.ToString("dd/MMM/yyyy");
                     newrow["DC Date"] = ChangedTime1;
                     newrow["ReturnDC Date"] = ChangedTime2;
-
-                    double total = 0;
-                    double Amount = 0;
-                    foreach (DataRow dr in dtAgent.Rows)
-                    {
-                        if (branch["AssignDate"].ToString() == dr["AssignDate"].ToString())
-                        {
-                            double submitleaks = 0;
-                            double verifiedleaks = 0;
-                            double submitreturns = 0;
-                            double verifiedreturns = 0;
-                            double.TryParse(dr["totleaks"].ToString(), out submitleaks);
-                            double.TryParse(dr["vleaks"].ToString(), out verifiedleaks);
-                            double.TryParse(dr["returnqty"].ToString(), out submitreturns);
-                            double.TryParse(dr["vreturns"].ToString(), out verifiedreturns);
-                            newrow["Submit Leaks"] = Math.Round(submitleaks,2);
-                            newrow["Verified Leaks"] = Math.Round(verifiedleaks, 2);
-                            newrow["Difference Leaks"] = Math.Round(submitleaks - verifiedleaks, 2);
-                            newrow["Submit Returns"] = Math.Round(submitreturns, 2);
-                            newrow["Verified Returns"] = Math.Round(verifiedreturns, 2);
-                            newrow["Difference Returns"] = Math.Round(submitreturns - verifiedreturns, 2);
-
-                        }
-                    }
-                    Report.Rows.Add(newrow);
-                    i++;
-
                 }
-                DataRow newvartical = Report.NewRow();
-                newvartical["DC Date"] = "Total";
-                double val = 0.0;
-                foreach (DataColumn dc in Report.Columns)
+                
+
+                double total = 0;
+                double Amount = 0;
+                foreach (DataRow dr in dtAgent.Rows)
                 {
-                    if (dc.DataType == typeof(Double))
+                    if (branch["AssignDate"].ToString() == dr["AssignDate"].ToString())
                     {
-                        val = 0.0;
-                        double.TryParse(Report.Compute("sum([" + dc.ToString() + "])", "[" + dc.ToString() + "]<>'0'").ToString(), out val);
-                        newvartical[dc.ToString()] = val;
+                        double submitleaks = 0;
+                        double verifiedleaks = 0;
+                        double submitreturns = 0;
+                        double verifiedreturns = 0;
+                        double.TryParse(dr["totleaks"].ToString(), out submitleaks);
+                        double.TryParse(dr["vleaks"].ToString(), out verifiedleaks);
+                        double.TryParse(dr["returnqty"].ToString(), out submitreturns);
+                        double.TryParse(dr["vreturns"].ToString(), out verifiedreturns);
+                        newrow["Submit Leaks"] = Math.Round(submitleaks, 2);
+                        newrow["Verified Leaks"] = Math.Round(verifiedleaks, 2);
+                        newrow["Difference Leaks"] = Math.Round(submitleaks - verifiedleaks, 2);
+                        newrow["Submit Returns"] = Math.Round(submitreturns, 2);
+                        newrow["Verified Returns"] = Math.Round(verifiedreturns, 2);
+                        newrow["Difference Returns"] = Math.Round(submitreturns - verifiedreturns, 2);
+
                     }
                 }
-                Report.Rows.Add(newvartical);
-                foreach (DataColumn col in Report.Columns)
+                Report.Rows.Add(newrow);
+                i++;
+
+            }
+            DataRow newvartical = Report.NewRow();
+            newvartical["DC Date"] = "Total";
+            double val = 0.0;
+            foreach (DataColumn dc in Report.Columns)
+            {
+                if (dc.DataType == typeof(Double))
                 {
-                    string Pname = col.ToString();
-                    string ProductName = col.ToString();
-                    ProductName = GetSpace(ProductName);
-                    Report.Columns[Pname].ColumnName = ProductName;
+                    val = 0.0;
+                    double.TryParse(Report.Compute("sum([" + dc.ToString() + "])", "[" + dc.ToString() + "]<>'0'").ToString(), out val);
+                    newvartical[dc.ToString()] = val;
                 }
-                grdReports.DataSource = Report;
-                grdReports.DataBind();
-                Session["xportdata"] = Report;
+            }
+            Report.Rows.Add(newvartical);
+            foreach (DataColumn col in Report.Columns)
+            {
+                string Pname = col.ToString();
+                string ProductName = col.ToString();
+                ProductName = GetSpace(ProductName);
+                Report.Columns[Pname].ColumnName = ProductName;
+            }
+            grdReports.DataSource = Report;
+            grdReports.DataBind();
+            Session["xportdata"] = Report;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             lblmsg.Text = ex.Message;
 
