@@ -421,7 +421,7 @@ public partial class DueManage : System.Web.UI.Page
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
                 DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
 
-                cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate, CheckStatus,PaymentType FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2) AND (CheckStatus IS NULL)  GROUP BY PDate ORDER BY PDate");
+                cmd = new MySqlCommand("SELECT SUM(AmountPaid) AS AmountPaid, DATE_FORMAT(PaidDate, '%d/%b/%y') AS PDate, CheckStatus,PaymentType FROM collections WHERE (Branchid = @BranchID) AND (PaidDate BETWEEN @d1 AND @d2)  AND ((PaymentType = 'Cash') OR (PaymentType = 'PhonePay') OR (PaymentType = 'Bank Transfer'))  GROUP BY PDate ORDER BY PDate");
                 cmd.Parameters.AddWithValue("@BranchID", AgentCode);
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
