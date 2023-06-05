@@ -172,34 +172,22 @@ public partial class TallyReceipts : System.Web.UI.Page
             }
             Session["filename"] = ddlSalesOffice.SelectedItem.Text + " Tally Receipts" + fromdate.ToString("dd/MM/yyyy");
             DataTable dtAgent = vdm.SelectQuery(cmd).Tables[0];
-            if (ddlSalesOffice.SelectedValue == "306" || ddlSalesOffice.SelectedValue == "2909")
-            {
-                DateTime dtfromdate = GetLowDate(fromdate).AddDays(-2);
 
-                //// cmd = new MySqlCommand("SELECT branchdata.tBranchName,collections.Sno as ReceiptNo,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.AmountPaid > 0)");
-                // 04/18/2017
-                // cmd = new MySqlCommand("SELECT  branchdata.tbranchname,collections.receiptno as rec, collections.Sno AS ReceiptNo, DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE, collections.AmountPaid, collections.PaymentType, tripdata.Sno FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno INNER JOIN tripdata ON collections.tripId = tripdata.Sno WHERE (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) AND (tripdata.I_Date BETWEEN @d1 AND @d2) OR (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) AND (branchdata_1.SalesOfficeID = @SOID) AND (tripdata.I_Date BETWEEN @d1 AND @d2)");
-                cmd = new MySqlCommand("SELECT branchdata.tbranchname,cashreceipts.Remarks, cashreceipts.Receipt, DATE_FORMAT(tripdata.I_Date, '%d %b %y') AS DOE, cashreceipts.AmountPaid, cashreceipts.PaymentStatus, tripdata.Sno FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN cashreceipts ON branchdata.sno = cashreceipts.AgentID INNER JOIN tripdata ON cashreceipts.Tripid = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (cashreceipts.PaymentStatus = 'Cash') AND (cashreceipts.AmountPaid > 0)");
-                cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
-                cmd.Parameters.AddWithValue("@SOID", ddlSalesOffice.SelectedValue);
-                cmd.Parameters.AddWithValue("@d1", GetLowDate(dtfromdate));
-                cmd.Parameters.AddWithValue("@d2", GetHighDate(dtfromdate));
-                cmd.Parameters.AddWithValue("@Type", "Agent");
-                //dtAgent = vdm.SelectQuery(cmd).Tables[0];
-                cmd = new MySqlCommand("SELECT branchdata.tBranchName,collections.receiptno as rec,collections.Remarks, collections.Sno as ReceiptNo,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) AND (collections.tripid is NULL) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.tripid is NULL) AND (collections.AmountPaid > 0)");
+            if (ddlSalesOffice.SelectedValue == "1")
+            {
+                cmd = new MySqlCommand("SELECT branchdata.SalesType, branchdata.tbranchname,cashreceipts.Remarks, cashreceipts.AmountPaid ,cashreceipts.Receipt,DATE_FORMAT(cashreceipts.DOE, '%d %b %y') AS DOE FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno INNER JOIN cashreceipts ON branchdata.sno = cashreceipts.AgentID WHERE (branchmappingtable.SuperBranch = @BranchID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')   OR (branchdata_1.SalesOfficeID = @SOID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')  ");
                 cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
                 cmd.Parameters.AddWithValue("@SOID", ddlSalesOffice.SelectedValue);
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
                 cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
                 cmd.Parameters.AddWithValue("@Type", "Agent");
-                DataTable dtsalescollection = vdm.SelectQuery(cmd).Tables[0];
-                foreach (DataRow dr in dtsalescollection.Rows)
+                DataTable Agent = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in Agent.Rows)
                 {
                     DataRow newrow = Report.NewRow();
+                    string salestype = dr["salestype"].ToString();
                     newrow["DOE"] = dr["DOE"].ToString();
-
-                    newrow["Receipt"] = dr["rec"].ToString();
-
+                    newrow["Receipt"] = dr["Receipt"].ToString();
                     newrow["Name"] = dr["tBranchName"].ToString();
                     double AmountPaid = 0;
                     double.TryParse(dr["AmountPaid"].ToString(), out AmountPaid);
@@ -207,51 +195,31 @@ public partial class TallyReceipts : System.Web.UI.Page
                     newrow["Remarks"] = dr["Remarks"].ToString();
                     Report.Rows.Add(newrow);
                 }
-                //foreach (DataRow dr in dtAgent.Rows)
-                //{
-                //    DataRow newrow = Report.NewRow();
-                //    newrow["DOE"] = dr["DOE"].ToString();
-
-                //    newrow["Receipt"] = dr["Receipt"].ToString();
-
-                //    newrow["Name"] = dr["tBranchName"].ToString();
-                //    double AmountPaid = 0;
-                //    double.TryParse(dr["AmountPaid"].ToString(), out AmountPaid);
-                //    newrow["Amount"] = AmountPaid;
-                //    newrow["Remarks"] = dr["Remarks"].ToString();
-                //    Report.Rows.Add(newrow);
-                //}
             }
             else
             {
-                //if (ddlSalesOffice.SelectedValue == "1")
-                //{
-                //}
-                //else
-                //{
-                    cmd = new MySqlCommand("SELECT branchdata.salestype,branchdata.tBranchName,collections.ReceiptNo,collections.Sno,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType,collections.Remarks FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.AmountPaid > 0)");
-                    // 01/09/2017
-                    //cmd = new MySqlCommand("SELECT branchdata.SalesType, branchdata.tbranchname,cashreceipts.Remarks, cashreceipts.AmountPaid ,cashreceipts.Receipt,DATE_FORMAT(cashreceipts.DOE, '%d %b %y') AS DOE FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno INNER JOIN cashreceipts ON branchdata.sno = cashreceipts.AgentID WHERE (branchmappingtable.SuperBranch = @BranchID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')   OR (branchdata_1.SalesOfficeID = @SOID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')  ");
-                    cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
-                    cmd.Parameters.AddWithValue("@SOID", ddlSalesOffice.SelectedValue);
-                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
-                    cmd.Parameters.AddWithValue("@Type", "Agent");
-                    DataTable Agent = vdm.SelectQuery(cmd).Tables[0];
-                    foreach (DataRow dr in Agent.Rows)
-                    {
-                        DataRow newrow = Report.NewRow();
-                        string salestype = dr["salestype"].ToString();
-                        newrow["DOE"] = dr["DOE"].ToString();
-                        newrow["Receipt"] = dr["ReceiptNo"].ToString();
-                        newrow["Name"] = dr["tBranchName"].ToString();
-                        double AmountPaid = 0;
-                        double.TryParse(dr["AmountPaid"].ToString(), out AmountPaid);
-                        newrow["Amount"] = AmountPaid;
-                        newrow["Remarks"] = dr["Remarks"].ToString();
-                        Report.Rows.Add(newrow);
-                    }
-                //}
+                cmd = new MySqlCommand("SELECT branchdata.salestype,branchdata.tBranchName,collections.ReceiptNo,collections.Sno,DATE_FORMAT(collections.PaidDate, '%d %b %y') AS DOE , collections.AmountPaid, collections.PaymentType,collections.Remarks FROM collections INNER JOIN branchdata ON collections.Branchid = branchdata.sno INNER JOIN branchmappingtable ON branchdata.sno = branchmappingtable.SubBranch INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno WHERE (collections.PaidDate BETWEEN @d1 AND @d2) AND (branchmappingtable.SuperBranch = @BranchID) AND (collections.PaymentType = 'Cash') AND (collections.AmountPaid > 0) OR (collections.PaidDate BETWEEN @d1 AND @d2) AND (collections.PaymentType = 'Cash') AND (branchdata_1.SalesOfficeID = @SOID) AND (collections.AmountPaid > 0)");
+                // 01/09/2017
+                //cmd = new MySqlCommand("SELECT branchdata.SalesType, branchdata.tbranchname,cashreceipts.Remarks, cashreceipts.AmountPaid ,cashreceipts.Receipt,DATE_FORMAT(cashreceipts.DOE, '%d %b %y') AS DOE FROM branchmappingtable INNER JOIN branchdata ON branchmappingtable.SubBranch = branchdata.sno INNER JOIN branchdata branchdata_1 ON branchmappingtable.SuperBranch = branchdata_1.sno INNER JOIN cashreceipts ON branchdata.sno = cashreceipts.AgentID WHERE (branchmappingtable.SuperBranch = @BranchID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')   OR (branchdata_1.SalesOfficeID = @SOID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.AmountPaid > 0) AND (cashreceipts.PaymentStatus = 'Cash')  ");
+                cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
+                cmd.Parameters.AddWithValue("@SOID", ddlSalesOffice.SelectedValue);
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate));
+                cmd.Parameters.AddWithValue("@Type", "Agent");
+                DataTable Agent = vdm.SelectQuery(cmd).Tables[0];
+                foreach (DataRow dr in Agent.Rows)
+                {
+                    DataRow newrow = Report.NewRow();
+                    string salestype = dr["salestype"].ToString();
+                    newrow["DOE"] = dr["DOE"].ToString();
+                    newrow["Receipt"] = dr["ReceiptNo"].ToString();
+                    newrow["Name"] = dr["tBranchName"].ToString();
+                    double AmountPaid = 0;
+                    double.TryParse(dr["AmountPaid"].ToString(), out AmountPaid);
+                    newrow["Amount"] = AmountPaid;
+                    newrow["Remarks"] = dr["Remarks"].ToString();
+                    Report.Rows.Add(newrow);
+                }
             }
             cmd = new MySqlCommand("SELECT Sno,DATE_FORMAT(DOE, '%d %b %y') AS DOE,Receiptno,PaymentType as Type, Name, Amount,Remarks  FROM cashcollections WHERE (Branchid = @BranchID) AND (DOE BETWEEN @d1 AND @d2) AND   (CollectionType = 'Cash') ORDER BY DOE");
             //cmd = new MySqlCommand("SELECT DATE_FORMAT(cashreceipts.DOE, '%d %b %y') AS DOE, cashreceipts.Sno, cashreceipts.Receipt, cashreceipts.AmountPaid, cashcoll.Name, cashcoll.Amount FROM cashreceipts INNER JOIN (SELECT Branchid, Name, Amount, Remarks, DOE, Receiptno, Agentid, PaymentType, CollectionType, CollectionFrom, CheckStatus, ChequeNo, VarifyDate, ChequeDate, BankName, Sno, VEmpID FROM cashcollections WHERE (DOE BETWEEN @d1 AND @d2)) cashcoll ON cashreceipts.Receipt = cashcoll.Receiptno WHERE (cashreceipts.BranchId = @BranchID) AND (cashreceipts.DOE BETWEEN @d1 AND @d2) AND (cashreceipts.ReceivedFrom = @Type) ORDER BY DOE");

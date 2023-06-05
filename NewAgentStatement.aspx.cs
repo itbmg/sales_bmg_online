@@ -257,7 +257,7 @@ public partial class NewAgentStatement : System.Web.UI.Page
                
                 double totsale = 0;
                 double totamt = 0;
-                int j = 0;
+                //int j = 0;
                
                 double ftotaloppbal = 0;
                 double ftotalClosingbal = 0;
@@ -275,16 +275,22 @@ public partial class NewAgentStatement : System.Web.UI.Page
                 double grand_totalPhonepay = 0;
                 DataView view1 = new DataView(dtAgent);
                 DataTable distinct_Date= view1.ToTable(true, "IndentDate");
-                foreach (DataRow dr in distinct_Date.Rows)
+                for (int j = 0; j < NoOfdays; j++)
                 {
+                    //foreach (DataRow dr in distinct_Date.Rows)
+                    //{
                     double ftotalbankTransfer = 0;
 
                     DataRow newrow = Report.NewRow();
-                    DateTime d1 = Convert.ToDateTime(dr["IndentDate"].ToString()).AddDays(1);
-                    string dtcount = d1.ToString();
+
+                    string dtcount = fromdate.AddDays(j).ToString();
                     DateTime dtDOE = Convert.ToDateTime(dtcount);
+
+                    //DateTime d1 = Convert.ToDateTime(dr["IndentDate"].ToString()).AddDays(1);
+                    //string dtcount = d1.ToString();
+                    //DateTime dtDOE = Convert.ToDateTime(dtcount);
                     string dtdate1 = dtDOE.AddDays(-1).ToString();
-                    DateTime dtDOE1 = Convert.ToDateTime(dr["IndentDate"].ToString()).AddDays(1);
+                    DateTime dtDOE1 = Convert.ToDateTime(dtdate1).AddDays(1);
                     string ChangedTime1 = dtDOE1.ToString("dd/MMM/yy");
                     string ChangedTime2 = dtDOE.AddDays(-1).ToString("dd MMM yy");
                     newrow["DeliverDate"] = ChangedTime1;
@@ -306,6 +312,12 @@ public partial class NewAgentStatement : System.Web.UI.Page
                     }
                     newrow["Total"] = total_qty;
                     newrow["Sale Value"] = Amount;
+                    double banktransfervalue = 0;
+                    double Phonepayvalue = 0;
+                    double jvvalue = 0;
+                    double salesvalue = 0;
+                    double paidamount = 0;
+
                     foreach (DataRow drcollections in dtcollections.Select("PDate='" + ChangedTime1 + "'"))
                     {
                         string PaymentType = drcollections["PaymentType"].ToString();
@@ -320,7 +332,7 @@ public partial class NewAgentStatement : System.Web.UI.Page
                         //}
                         if (PaymentType == "Bank Transfer" || PaymentType == "Cheque" || PaymentType == "PhonePay" || PaymentType == "Journal Voucher" || PaymentType == "Incentive")
                         {
-                            double banktransfervalue = 0;
+                            //double banktransfervalue = 0;
                             double.TryParse(drcollections["AmountPaid"].ToString(), out banktransfervalue);
                             //newrow["Bank Transfer"] = banktransfervalue;
                             ftotalbankTransfer += banktransfervalue;
@@ -328,7 +340,7 @@ public partial class NewAgentStatement : System.Web.UI.Page
                         }
                         if (PaymentType == "PhonePay")
                         {
-                            double Phonepayvalue = 0;
+                            //double Phonepayvalue = 0;
                             double.TryParse(drcollections["AmountPaid"].ToString(), out Phonepayvalue);
                             newrow["Phone/Google Pay"] = Phonepayvalue;
                             ftotalPhonePay += Phonepayvalue;
@@ -336,7 +348,7 @@ public partial class NewAgentStatement : System.Web.UI.Page
                         }
                         if (PaymentType == "Journal Voucher" || PaymentType == "Incentive")
                         {
-                            double jvvalue = 0;
+                            //double jvvalue = 0;
                             double.TryParse(drcollections["AmountPaid"].ToString(), out jvvalue);
                             newrow["Incentive/JV"] = jvvalue;
                             ftotaljv += jvvalue;
@@ -345,12 +357,12 @@ public partial class NewAgentStatement : System.Web.UI.Page
                     }
                     foreach (DataRow drtrans in dtagenttrans.Select("PDate='" + ChangedTime2 + "'"))
                     {
-                        double salesvalue = 0;
+                        //double salesvalue = 0;
                         double.TryParse(drtrans["salesvalue"].ToString(), out salesvalue);
-                        //newrow["Sale Value"] = Math.Round(salesvalue);
+                       
                         ftotalsalesvalue += salesvalue;
                         grand_totalsalesvalue += salesvalue;
-                        double paidamount = 0;  
+                        //double paidamount = 0;  
                         double.TryParse(drtrans["paidamount"].ToString(), out paidamount);
                         paidamount = paidamount - ftotalbankTransfer;
                         newrow["Paid Amount"] = Math.Round(paidamount); ;
@@ -371,7 +383,10 @@ public partial class NewAgentStatement : System.Web.UI.Page
                         ftotalClosingbal += closvalue;
                         grand_totalClosingbal += closvalue;
                     }
-                    Report.Rows.Add(newrow);    
+                    if (paidamount+salesvalue + banktransfervalue + Phonepayvalue + jvvalue != 0)
+                    {
+                        Report.Rows.Add(newrow);
+                    }
 
                 }
                 DataRow newvartical = Report.NewRow();
