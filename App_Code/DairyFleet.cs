@@ -91,6 +91,13 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             switch (request)
             {
                 #region "SALES TYPE MANAGEMENT"
+                case "get_Agent_Bal_Trans":
+                    get_Agent_Bal_Trans(context);
+                    break;
+                case "Edit_Agent_Bal_Trans":
+                    Edit_Agent_Bal_Trans(context);
+                    break;
+                    
                 case "Get_Voucher_Print_Details":
                     Get_Voucher_Print_Details(context);
                     break;
@@ -1078,6 +1085,91 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             //context.Response.Write(ex.Message);
         }
     }
+
+    class Agent_Bal_Trans
+    {
+        public string AgentId { set; get; }
+        public string AgentName { set; get; }
+        public string opp_balance { set; get; }
+        public string inddate { set; get; }
+        public string salesvalue { set; get; }
+        public string paidamount { set; get; }
+        public string clo_balance { set; get; }
+        public string sno { set; get; }
+    }
+    private void get_Agent_Bal_Trans(HttpContext context)
+    {
+        try
+        {
+            vdbmngr = new VehicleDBMgr();
+            string AgentId = context.Request["AgentId"];
+            string fromDate = context.Request["fromdate"];
+            string todate = context.Request["todate"];
+            DateTime dt_fromdate = Convert.ToDateTime(fromDate);
+            DateTime dt_todate = Convert.ToDateTime(todate);
+            cmd = new MySqlCommand("SELECT agent_bal_trans.sno,agent_bal_trans.agentid,branchdata.branchname as AgentName, agent_bal_trans.opp_balance, agent_bal_trans.inddate, agent_bal_trans.salesvalue,agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM agent_bal_trans INNER JOIN branchdata ON agent_bal_trans.agentid=branchdata.sno  WHERE (agent_bal_trans.agentid = @agentid) AND (agent_bal_trans.inddate BETWEEN @d1 AND @d2)");
+            cmd.Parameters.AddWithValue("@agentid", AgentId);
+            cmd.Parameters.AddWithValue("@d1", GetLowDate(dt_fromdate).AddDays(-1));
+            cmd.Parameters.AddWithValue("@d2", GetHighDate(dt_todate).AddDays(-1));
+            DataTable dtAgent = vdbmngr.SelectQuery(cmd).Tables[0];
+            List<Agent_Bal_Trans> AgentBalList = new List<Agent_Bal_Trans>();
+            if (dtAgent.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtAgent.Rows)
+                {
+                    Agent_Bal_Trans getBalance = new Agent_Bal_Trans();
+                    getBalance.sno = dr["sno"].ToString();
+                    getBalance.AgentId = dr["agentid"].ToString();
+                    getBalance.AgentName = dr["AgentName"].ToString();
+                    getBalance.opp_balance = dr["opp_balance"].ToString();
+                    getBalance.inddate = dr["inddate"].ToString();
+                    getBalance.salesvalue = dr["salesvalue"].ToString();
+                    getBalance.paidamount = dr["paidamount"].ToString();
+                    getBalance.clo_balance = dr["clo_balance"].ToString();
+                    AgentBalList.Add(getBalance);
+                }
+                string response = GetJson(AgentBalList);
+                context.Response.Write(response);
+            }
+
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+    private void Edit_Agent_Bal_Trans(HttpContext context)
+    {
+        try
+        {
+            vdbmngr = new VehicleDBMgr();
+            string Date = context.Request["Date"];
+            string AgentId = context.Request["AgentId"];
+            string sno = context.Request["sno"];
+            string Op_Bal = context.Request["Op_Bal"];
+            string SaleValue = context.Request["SaleValue"];
+            string PaidAmount = context.Request["PaidAmount"];
+            string Clo_Bal = context.Request["Clo_Bal"];
+            DateTime dtIndent = Convert.ToDateTime(Date);
+            cmd = new MySqlCommand("UPDATE agent_bal_trans set opp_balance=@opp_balance,salesvalue=@salesvalue,paidamount=paidamount, clo_balance=clo_balance  where agentid=@agentid AND inddate between @d1 and @d2");
+            cmd.Parameters.AddWithValue("@d1", GetLowDate(dtIndent));
+            cmd.Parameters.AddWithValue("@d2", GetHighDate(dtIndent));
+            cmd.Parameters.AddWithValue("@salesvalue", SaleValue);
+            cmd.Parameters.AddWithValue("@opp_balance", Op_Bal);
+            cmd.Parameters.AddWithValue("@paidamount", PaidAmount);
+            cmd.Parameters.AddWithValue("@clo_balance", Clo_Bal);
+            cmd.Parameters.AddWithValue("@agentid", AgentId);
+            //vdbmngr.Update(cmd);
+            string msg = "Agent Balance Successfully Updated";
+            string Response = GetJson(msg);
+            context.Response.Write(Response);
+        }
+        catch (Exception ex)
+        {
+            string Response = GetJson(ex.Message);
+            context.Response.Write(Response);
+        }
+    }
+
     class invcollectionsave
     {
         public string op { set; get; }

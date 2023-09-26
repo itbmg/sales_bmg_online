@@ -546,8 +546,8 @@ public partial class DueManage : System.Web.UI.Page
                         cmd.Parameters.AddWithValue("@entryby", Session["UserSno"].ToString());
                         if (vdm.Update(cmd) == 0)
                         {
-                            if (k == 1)
-                            {
+                            //if (k == 1)
+                            //{
                                 cmd = new MySqlCommand("insert into agent_bal_trans (agentid,opp_balance,inddate,salesvalue,paidamount,clo_balance,createdate,entryby) values (@agentid,@opp_balance,@inddate,@salesvalue,@paidamount,@clo_balance,@createdate,@entryby)");
                                 cmd.Parameters.AddWithValue("@opp_balance", opbal);
                                 cmd.Parameters.AddWithValue("@salesvalue", tot_SaleValue);
@@ -558,7 +558,7 @@ public partial class DueManage : System.Web.UI.Page
                                 cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
                                 cmd.Parameters.AddWithValue("@entryby", Session["UserSno"].ToString());
                                 vdm.insert(cmd);
-                            }
+                            //}
                         }
                         tot_SaleValue = 0;
                         totpaidamt = 0;
