@@ -1,15 +1,10 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/MasterPage.master" AutoEventWireup="true" CodeFile="EditBalance.aspx.cs" Inherits="EditBalance" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
-    <script src="js/jquery-1.4.4.js" type="text/javascript"></script>
-    <script src="Js/JTemplate.js?v=3000" type="text/javascript"></script>
-    <script src="Js/jquery.blockUI.js?v=3005" type="text/javascript"></script>
-    <link rel="stylesheet" type="text/css" href="Css/VyshnaviStyles.css" />
-    <script src="js/jquery.json-2.4.js" type="text/javascript"></script>
-    <script src="src/jquery-ui-1.8.13.custom.min.js" type="text/javascript"></script>
-    <link href="js/DateStyles.css?v=3003" rel="stylesheet" type="text/css" />
-    <script src="js/1.8.6.jquery.ui.min.js" type="text/javascript"></script>
-    <link href="Css/VyshnaviStyles.css" rel="stylesheet" type="text/css" />
+   <script src="js/jquery.js"></script>
+    <script src="JSF/jquery.min.js"></script>
+    <script src="JSF/jquery-ui.js" type="text/javascript"></script>
+    <script src="JSF/jquery.blockUI.js" type="text/javascript"></script>
     <script type="text/javascript">
 
 
@@ -169,7 +164,7 @@
             var s = function (msg) {
                 if (msg) {
                     if (msg.length > 0) {
-                        filldetails(msg);
+                        fill_details(msg);
                     }
                 }
                 else {
@@ -180,22 +175,24 @@
             $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
             callHandler(data, s, e);
         }
-        function filldetails(msg) {
+        function fill_details(msg) {
             var results = '<div  style="overflow:auto;"><table id="myTable" class="table table-bordered table-hover dataTable no-footer">';
-            results += '<thead><tr><th scope="col"></th><th scope="col" >Sno</th><th scope="col" >Agentid</th><th scope="col">Date</th><th scope="col">AgentName</th><th scope="col">Op_Balance</th><th scope="col">SaleValue</th><th scope="col">PaidAmount</th><th scope="col">ClosingValue</th><th scope="col"></th></tr></thead></tbody>';
+            results += '<thead><tr><th scope="col" >Sno</th><th scope="col" >Agentid</th><th scope="col">Date</th><th scope="col">AgentName</th><th scope="col">Op_Balance</th><th scope="col">SaleValue</th><th scope="col">PaidAmount</th><th scope="col">ClosingValue</th><th></th></tr></thead></tbody>';
             var k = 1;
             for (var i = 0; i < msg.length; i++) {
-                results += '<tr><td><input id="btn_poplate" type="button"  name="submit" class="btn btn-primary" value="Update" /></td>';
+                results += '<tr>';
                 //k++;
                 results += '<td scope="row"  style="text-align:center;">' + k + '</td>';
-                results += '<th scope="row" class="1" style="text-align:center;">' + msg[i].AgentId + '</th>';
-                results += '<td class="2">' + msg[i].inddate + '</td>';
-                results += '<td class="3">' + msg[i].AgentName + '</td>';
-                results += '<td class="4">' + msg[i].opp_balance + '</td>';
+                results += '<th scope="row" id="spnAgentId" class="clsAgentid" style="text-align:center;">' + msg[i].AgentId + '</th>';
+                results += '<td id="spnDate" class="clsDate">' + msg[i].inddate + '</td>';
+                results += '<td id="spnAgentName" class="clsAgentName">' + msg[i].AgentName + '</td>';
+                results += '<td class="4"><span id="spn_OpBal" class="clsOp">' + msg[i].opp_balance + '</span></td>';
+                results += '<td id="spn_PrevOpBal" class="clsPrevOp" style="width:65px;display:none;">' + msg[i].opp_balance + '</td>';
                 //results += '<td><input id="txt_OpBal" data-title="Code" style="width:65px;" onkeyup="CLChange(this);" class="4"  value="' + msg[i].opp_balance + '"/></td>';
-                results += '<td><input  id="txt_SaleValue" class="5" style="width:65px;" value="' + msg[i].salesvalue + '"/></td>';
-                results += '<td><input id="txt_PaidAmount" class="6" style="width:65px;" value="' + msg[i].paidamount + '"/></td>';
-                results += '<td><input  id="txt_CloBal" class="7" style="width:65px;" value="' + msg[i].clo_balance + '"/></td>';
+                results += '<td><input  id="txt_SaleValue" class="clsSaleValue" style="width:65px;" value="' + msg[i].salesvalue + '"/></td>';
+                results += '<td><input id="txt_PaidAmount" class="clsPaidAmount" style="width:65px;" value="' + msg[i].paidamount + '"/></td>';
+                results += '<td id="txt_PrevCloBal" class="clsPrevCloBal" style="width:65px;display:none;">' + msg[i].clo_balance + '</td>';
+                results += '<td><input  id="txt_CloBal" class="clsCloBal" style="width:65px;" value="' + msg[i].clo_balance + '"/></td>';
                 results += '<td><input  id="txt_Sno" class="8" style="width:65px;display:none;"  value="' + msg[i].sno + '"/></td></tr >';
                 k++;
             }
@@ -203,48 +200,141 @@
             $("#div_BrandData").html(results);
         }
 
-        $('#btn_poplate').click(function () {
-            var Clo_Bal = $(this).closest("tr").find('.7').val();
+        var salevalue = 0; var paidamount = 0; var closingamt = 0;
+        let increment = 0; 
+        function calTotal_gst() {
+            let decreement = 1;
+            var $row = $(this).closest('tr'),
+                salevalue = parseFloat($row.find('.clsSaleValue').val(),) || 0
+            op = parseFloat($row.find('.clsOp').text(),) || 0
+            //closingamt = $row.find('.clsPaidAmount').val(),
+            paidamount = parseFloat($row.find('.clsPaidAmount').val(),) || 0
+
+            closingamt = op + salevalue - paidamount;
+            $row.find('.clsCloBal').val(parseFloat(closingamt).toFixed(2));
+            if (increment == 0) {
+                insertrow();
+                increment++;
+            }
+           
+        }
+
+        var salevalue = 0; var paidamount = 0; var closingamt = 0;
+        $(document).click(function () {
+            $('#myTable').on('change', '.clsSaleValue', calTotal_gst)
+                .on('change', '.clsPaidAmount', calTotal_gst)
+                .on('change', '.clsCloBal', calTotal_gst);
         });
 
-        //function getme(thisid) {
-        //    //var Date = $(thisid).parent().parent().children('.2').html();
-        //    //var Op_Bal = $(thisid).parent().parent().children('.4').html();
-        //    //var SaleValue = $(thisid).parent().parent().children('.5').val();
-        //    //var PaidAmount = $(thisid).parent().parent().children('.6').html();
-        //    //var Clo_Bal = $(thisid).parent().parent().children('.7').html();
-        //    //var sno = $(thisid).parent().parent().children('.8').html();
-        //    var Clo_Bal =$(this).closest("tr").find('.7').val();
-        //    var Date = $(thisid).parent().parent().children('.2').html();
-        //    var Op_Bal = $(thisid).parent().parent().children('.4').html();
-        //    var SaleValue = $(thisid).parent().parent().children('.5').val();
-        //    var PaidAmount = $(thisid).parent().parent().children('.6').html();
-        //    var Clo_Bal = $(thisid).parent().parent().children('.7').html();
-        //    var sno = $(thisid).parent().parent().children('.8').html();
-
-        //            var data1 = $(thisid).find("td:eq(0) input[type='text']").val();
-        //            var data2 = $(thisid).find("td:eq(1) input[type='text']").val();
 
 
-        //    var Op_Bal = document.getElementById('txt_PaidAmount');
-        //    var data = { 'operation': 'Edit_Agent_Bal_Trans', 'Op_Bal': Op_Bal, 'SaleValue': SaleValue, 'PaidAmount': PaidAmount, 'Clo_Bal': Clo_Bal, 'sno': sno, 'Date': Date };
-        //    var s = function (msg) {
-        //        if (msg) {
-        //            if (msg.length > 0) {
-        //                alert(msg);
-        //                btn_Get_AgentBal_Details();
-        //            }
-        //        }
-        //        else {
-        //        }
-        //    };
-        //    var e = function (x, h, e) {
-        //    };
-        //    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
-        //    callHandler(data, s, e);
-        //}
 
-       
+        var DataTable;
+       var presentClosing = 0;
+        function insertrow() {
+            DataTable = [];
+            var DataTable1 = [];
+            var AgentName = 0;
+            var AgentId = 0;
+            var Op_Bal = 0;
+            var PrevOp_Bal = 0;
+            var SaleValue = 0;
+            var PaidAmount = 0;
+            var Clo_Bal = 0;
+            var PrevClo_Bal = 0;
+            var sno = 0;
+            var IndDate = 0;
+            var rows = $("#myTable tr:gt(0)");
+            var rowsno = 1;
+            var count = 0;
+            $(rows).each(function (i, obj) {
+                AgentId = $(this).find('#spnAgentId').text();
+                AgentName = $(this).find('#spnAgentName').text();
+                IndDate = $(this).find('#spnDate').text();
+                
+                PrevOp_Bal = parseFloat($(this).find('#spn_PrevOpBal').text());
+                SaleValue = parseFloat($(this).find('#txt_SaleValue').val());
+                PaidAmount = parseFloat($(this).find('#txt_PaidAmount').val());
+                if (count == 0) {
+                    Clo_Bal = parseFloat($(this).find('#txt_CloBal').val());
+                    Op_Bal = parseFloat($(this).find('#spn_OpBal').text());
+                }
+                else {
+                    Clo_Bal = presentClosing;
+                    Op_Bal = PresentOpening;
+                }
+                PrevClo_Bal = parseFloat($(this).find('#txt_PrevCloBal').text());
+                sno = parseFloat($(this).find('#txt_Sno').val());
+                if (PrevClo_Bal != Clo_Bal) {
+                    if (count == 0) {
+                        Op_Bal = PrevOp_Bal;
+                        Clo_Bal = PrevOp_Bal + SaleValue - PaidAmount;
+
+                    }
+                    else {
+                        Clo_Bal = Op_Bal + SaleValue - PaidAmount;
+                    }
+
+                    presentClosing = Clo_Bal;
+                    PresentOpening = Clo_Bal;
+                    count++;
+                }
+                else {
+                    Clo_Bal = Op_Bal + SaleValue - PaidAmount;
+                    //Op_Bal = Clo_Bal;
+                }
+                sno = $(this).find('#txt_Sno').val();
+                DataTable1.push({ 'Op_Bal': Op_Bal, 'AgentName': AgentName, 'AgentId': AgentId, 'SaleValue': SaleValue, 'PaidAmount': PaidAmount, 'Clo_Bal': Clo_Bal, 'sno': sno, 'IndDate': IndDate });//, freigtamt: freigtamt
+                rowsno++;
+            });
+            var results = '<div  style="overflow:auto;"><table id="myTable" class="table table-bordered table-hover dataTable no-footer">';
+            results += '<thead><tr><th scope="col" >Sno</th><th scope="col" >Agentid</th><th scope="col">Date</th><th scope="col">AgentName</th><th scope="col">Op_Balance</th><th scope="col">SaleValue</th><th scope="col">PaidAmount</th><th scope="col">ClosingValue</th><th scope="col"></th></tr></thead></tbody>';
+            for (var i = 0; i < DataTable1.length; i++) {
+                results += '<tr><td scope="row" class="1" st    yle="text-align:center;" id="txtsno">' + i + '</td>';
+                results += '<th scope="row" id="spnAgentName" class="clsAgentid" style="text-align:center;">' + DataTable1[i].AgentId + '</th>';
+                results += '<td id="spnDate" class="clsDate">' + DataTable1[i].IndDate + '</td>';
+                results += '<td id="spnAgentName" class="clsAgentName">' + DataTable1[i].AgentName + '</td>';
+                results += '<td class="4"><span id="spn_OpBal" class="clsOp">' + parseFloat(DataTable1[i].Op_Bal).toFixed(2) + '</span></td>';
+                results += '<td><input  id="txt_SaleValue" class="clsSaleValue" style="width:65px;" value="' + DataTable1[i].SaleValue + '"/></td>';
+                results += '<td><input id="txt_PaidAmount" class="clsPaidAmount" style="width:65px;" value="' + DataTable1[i].PaidAmount + '"/></td>';
+                results += '<td><input  id="txt_CloBal" class="clsCloBal" style="width:65px;" value="' + parseFloat(DataTable1[i].Clo_Bal).toFixed(2) + '"/></td>';
+                results += '<td><input  id="txt_Sno" class="8" style="width:65px;display:none;"  value="' + DataTable1[i].sno + '"/></td>';
+                results += '<td style="display:none" class="4">' + i + '</td></tr>';
+            }
+            results += '</table></div>';
+            $("#div_BrandData").html(results);
+        }
+
+        var filldetails = [];
+        function btnUpdate_Click() {
+            $('#myTable> tbody > tr').each(function () {
+                var Op_Bal = $(this).find('#spn_OpBal').text();
+                var SaleValue = $(this).find('#txt_SaleValue').val();
+                var PaidAmount = $(this).find('#txt_PaidAmount').val();
+                var Clo_Bal = $(this).find('#txt_CloBal').val();
+                var sno = $(this).find('#txt_Sno').val();
+                var Date = $(this).find('#hdnproductsno').text();
+                filldetails.push({ 'Op_Bal': Op_Bal, 'SaleValue': SaleValue, 'PaidAmount': PaidAmount, 'Clo_Bal': Clo_Bal, 'sno': sno, 'Date': Date });//, 'freigtamt': freigtamt
+            });
+
+            var data = { 'operation': 'Edit_Agent_Bal_Trans', 'filldetails': filldetails };
+            var s = function (msg) {
+                if (msg) {
+                    if (msg.length > 0) {
+                        alert(msg);
+                        btn_Get_AgentBal_Details();
+                    }
+                }
+                else {
+                }
+            };
+            var e = function (x, h, e) {
+            };
+            $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+            callHandler(data, s, e);
+        }
+
+
     </script>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
@@ -283,7 +373,7 @@
                         <td style="width: 5px;"></td>
                         <td>
                             <input type="date" id="txtFrom_date" class="form-control" />
-                             </td>
+                        </td>
                         <td style="width: 5px;"></td>
                         <td>
                             <input type="date" id="txtTo_date" class="form-control" />
@@ -296,11 +386,18 @@
                         </td>
                     </tr>
                 </table>
+
                 <br />
+
                 <br />
                 <br />
                 <div id="div_BrandData">
                 </div>
+                <div style="text-align:center">
+                <button type="button" class="btn btn-primary" style="margin-right: 5px;" onclick="btnUpdate_Click()">
+                    <i class="fa fa-refresh"></i>Save
+                </button>
+                    </div>
             </div>
         </div>
     </section>
