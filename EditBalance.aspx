@@ -291,7 +291,7 @@
             results += '<thead><tr><th scope="col" >Sno</th><th scope="col" >Agentid</th><th scope="col">Date</th><th scope="col">AgentName</th><th scope="col">Op_Balance</th><th scope="col">SaleValue</th><th scope="col">PaidAmount</th><th scope="col">ClosingValue</th><th scope="col"></th></tr></thead></tbody>';
             for (var i = 0; i < DataTable1.length; i++) {
                 results += '<tr><td scope="row" class="1" st    yle="text-align:center;" id="txtsno">' + i + '</td>';
-                results += '<th scope="row" id="spnAgentName" class="clsAgentid" style="text-align:center;">' + DataTable1[i].AgentId + '</th>';
+                results += '<th scope="row" id="spnAgentId" class="clsAgentid" style="text-align:center;">' + DataTable1[i].AgentId + '</th>';
                 results += '<td id="spnDate" class="clsDate">' + DataTable1[i].IndDate + '</td>';
                 results += '<td id="spnAgentName" class="clsAgentName">' + DataTable1[i].AgentName + '</td>';
                 results += '<td class="4"><span id="spn_OpBal" class="clsOp">' + parseFloat(DataTable1[i].Op_Bal).toFixed(2) + '</span></td>';
@@ -313,16 +313,17 @@
                 var PaidAmount = $(this).find('#txt_PaidAmount').val();
                 var Clo_Bal = $(this).find('#txt_CloBal').val();
                 var sno = $(this).find('#txt_Sno').val();
-                var Date = $(this).find('#hdnproductsno').text();
-                filldetails.push({ 'Op_Bal': Op_Bal, 'SaleValue': SaleValue, 'PaidAmount': PaidAmount, 'Clo_Bal': Clo_Bal, 'sno': sno, 'Date': Date });//, 'freigtamt': freigtamt
+                var Date = $(this).find('#spnDate').text();
+                var Agentid = $(this).find('#spnAgentId').text();
+                filldetails.push({ 'opp_balance': Op_Bal, 'salesvalue': SaleValue, 'PaidAmount': PaidAmount, 'clo_balance': Clo_Bal, 'sno': sno, 'inddate': Date,'AgentId': Agentid });//, 'freigtamt': freigtamt
             });
-
-            var data = { 'operation': 'Edit_Agent_Bal_Trans', 'filldetails': filldetails };
+            var data = { 'operation': 'Edit_Agent_Bal_Trans', 'filldetails': filldetails  };
             var s = function (msg) {
                 if (msg) {
-                    if (msg.length > 0) {
-                        alert(msg);
-                        btn_Get_AgentBal_Details();
+                    alert(msg);
+                    btn_Get_AgentBal_Details();
+                    if (msg == "Session Expired") {
+                        window.location = "Login.aspx";
                     }
                 }
                 else {
@@ -331,9 +332,21 @@
             var e = function (x, h, e) {
             };
             $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
-            callHandler(data, s, e);
+            CallHandlerUsingJson(data, s, e);
         }
-
+        function CallHandlerUsingJson(d, s, e) {
+            $.ajax({
+                type: "GET",
+                url: "DairyFleet.axd?json=",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(d),
+                async: true,
+                cache: true,
+                success: s,
+                error: e
+            });
+        }
 
     </script>
 </asp:Content>

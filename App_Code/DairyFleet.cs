@@ -94,9 +94,6 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 case "get_Agent_Bal_Trans":
                     get_Agent_Bal_Trans(context);
                     break;
-                case "Edit_Agent_Bal_Trans":
-                    Edit_Agent_Bal_Trans(context);
-                    break;
                     
                 case "Get_Voucher_Print_Details":
                     Get_Voucher_Print_Details(context);
@@ -933,6 +930,12 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         var js = new JavaScriptSerializer();
                         var title1 = context.Request.Params[1];
                         Orders obj = js.Deserialize<Orders>(title1);
+
+                        if(obj.operation== "Edit_Agent_Bal_Trans")
+                        {
+                            Edit_Agent_Bal_Trans(context);
+                        }
+
                         //added by akbar 20-May-2022
                         if (obj.operation == "CollectioninventrySaveClick")
                         {
@@ -1097,6 +1100,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         public string clo_balance { set; get; }
         public string sno { set; get; }
     }
+    class Agent_Bal_Trans_Model
+    {
+        public List<Agent_Bal_Trans> filldetails { set; get; }
+    }
     private void get_Agent_Bal_Trans(HttpContext context)
     {
         try
@@ -1122,7 +1129,8 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                     getBalance.AgentId = dr["agentid"].ToString();
                     getBalance.AgentName = dr["AgentName"].ToString();
                     getBalance.opp_balance = dr["opp_balance"].ToString();
-                    getBalance.inddate = dr["inddate"].ToString();
+                    DateTime dtDOE = Convert.ToDateTime(dr["inddate"].ToString()).AddDays(1);
+                    getBalance.inddate = dtDOE.ToString("dd/MMM/yyyy");
                     getBalance.salesvalue = dr["salesvalue"].ToString();
                     getBalance.paidamount = dr["paidamount"].ToString();
                     getBalance.clo_balance = dr["clo_balance"].ToString();
@@ -1142,23 +1150,24 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
         try
         {
             vdbmngr = new VehicleDBMgr();
-            string Date = context.Request["Date"];
-            string AgentId = context.Request["AgentId"];
-            string sno = context.Request["sno"];
-            string Op_Bal = context.Request["Op_Bal"];
-            string SaleValue = context.Request["SaleValue"];
-            string PaidAmount = context.Request["PaidAmount"];
-            string Clo_Bal = context.Request["Clo_Bal"];
-            DateTime dtIndent = Convert.ToDateTime(Date);
-            cmd = new MySqlCommand("UPDATE agent_bal_trans set opp_balance=@opp_balance,salesvalue=@salesvalue,paidamount=paidamount, clo_balance=clo_balance  where agentid=@agentid AND inddate between @d1 and @d2");
-            cmd.Parameters.AddWithValue("@d1", GetLowDate(dtIndent));
-            cmd.Parameters.AddWithValue("@d2", GetHighDate(dtIndent));
-            cmd.Parameters.AddWithValue("@salesvalue", SaleValue);
-            cmd.Parameters.AddWithValue("@opp_balance", Op_Bal);
-            cmd.Parameters.AddWithValue("@paidamount", PaidAmount);
-            cmd.Parameters.AddWithValue("@clo_balance", Clo_Bal);
-            cmd.Parameters.AddWithValue("@agentid", AgentId);
-            //vdbmngr.Update(cmd);
+            var js = new JavaScriptSerializer();
+
+            var title1 = context.Request.Params[1];
+            Agent_Bal_Trans_Model obj = js.Deserialize<Agent_Bal_Trans_Model>(title1);
+            foreach (Agent_Bal_Trans o in obj.filldetails)
+            {
+                DateTime dtIndent = Convert.ToDateTime(o.inddate);
+                cmd = new MySqlCommand("UPDATE agent_bal_trans set opp_balance=@opp_balance,salesvalue=@salesvalue,paidamount=@paidamount, clo_balance=@clo_balance  where sno=@sno and agentid=@agentid AND inddate between @d1 and @d2");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(dtIndent).AddDays(-1));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(dtIndent).AddDays(-1));
+                cmd.Parameters.AddWithValue("@salesvalue", o.salesvalue);
+                cmd.Parameters.AddWithValue("@opp_balance", o.opp_balance);
+                cmd.Parameters.AddWithValue("@paidamount", o.paidamount);
+                cmd.Parameters.AddWithValue("@clo_balance", o.clo_balance);
+                cmd.Parameters.AddWithValue("@agentid", o.AgentId);
+                cmd.Parameters.AddWithValue("@sno", o.sno);
+                //vdbmngr.Update(cmd);
+            }
             string msg = "Agent Balance Successfully Updated";
             string Response = GetJson(msg);
             context.Response.Write(Response);
