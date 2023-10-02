@@ -200,30 +200,15 @@
             $("#div_BrandData").html(results);
         }
 
-        var salevalue = 0; var paidamount = 0; var closingamt = 0;
-        let increment = 0; 
-        function calTotal_gst() {
-            let decreement = 1;
-            var $row = $(this).closest('tr'),
-                salevalue = parseFloat($row.find('.clsSaleValue').val(),) || 0
-            op = parseFloat($row.find('.clsOp').text(),) || 0
-            //closingamt = $row.find('.clsPaidAmount').val(),
-            paidamount = parseFloat($row.find('.clsPaidAmount').val(),) || 0
-
-            closingamt = op + salevalue - paidamount;
-            $row.find('.clsCloBal').val(parseFloat(closingamt).toFixed(2));
-            if (increment == 0) {
-                insertrow();
-                increment++;
-            }
-           
-        }
+        
 
         var salevalue = 0; var paidamount = 0; var closingamt = 0;
         $(document).click(function () {
+            increment = 0;
             $('#myTable').on('change', '.clsSaleValue', calTotal_gst)
-                .on('change', '.clsPaidAmount', calTotal_gst)
-                .on('change', '.clsCloBal', calTotal_gst);
+                .on('change', '.clsPaidAmount', calTotal_gst);
+                //.on('change', '.clsCloBal', calTotal_gst);
+
         });
 
 
@@ -251,7 +236,7 @@
                 AgentId = $(this).find('#spnAgentId').text();
                 AgentName = $(this).find('#spnAgentName').text();
                 IndDate = $(this).find('#spnDate').text();
-                
+
                 PrevOp_Bal = parseFloat($(this).find('#spn_PrevOpBal').text());
                 SaleValue = parseFloat($(this).find('#txt_SaleValue').val());
                 PaidAmount = parseFloat($(this).find('#txt_PaidAmount').val());
@@ -295,14 +280,31 @@
                 results += '<td id="spnDate" class="clsDate">' + DataTable1[i].IndDate + '</td>';
                 results += '<td id="spnAgentName" class="clsAgentName">' + DataTable1[i].AgentName + '</td>';
                 results += '<td class="4"><span id="spn_OpBal" class="clsOp">' + parseFloat(DataTable1[i].Op_Bal).toFixed(2) + '</span></td>';
+                results += '<td id="spn_PrevOpBal" class="clsPrevOp" style="width:65px;display:none;">' + parseFloat(DataTable1[i].Op_Bal).toFixed(2) + '</td>';
                 results += '<td><input  id="txt_SaleValue" class="clsSaleValue" style="width:65px;" value="' + DataTable1[i].SaleValue + '"/></td>';
                 results += '<td><input id="txt_PaidAmount" class="clsPaidAmount" style="width:65px;" value="' + DataTable1[i].PaidAmount + '"/></td>';
                 results += '<td><input  id="txt_CloBal" class="clsCloBal" style="width:65px;" value="' + parseFloat(DataTable1[i].Clo_Bal).toFixed(2) + '"/></td>';
+                results += '<td id="txt_PrevCloBal" class="clsPrevCloBal" style="width:65px;display:none;">' + parseFloat(DataTable1[i].Clo_Bal).toFixed(2) + '</td>';
                 results += '<td><input  id="txt_Sno" class="8" style="width:65px;display:none;"  value="' + DataTable1[i].sno + '"/></td>';
                 results += '<td style="display:none" class="4">' + i + '</td></tr>';
             }
             results += '</table></div>';
             $("#div_BrandData").html(results);
+        }
+
+        var salevalue = 0; var paidamount = 0; var closingamt = 0;
+        let increment = 0;
+        function calTotal_gst() {
+
+            var $row = $(this).closest('tr'),
+                salevalue = parseFloat($row.find('.clsSaleValue').val(),) || 0
+            op = parseFloat($row.find('.clsOp').text(),) || 0
+            //closingamt = $row.find('.clsPaidAmount').val(),
+            paidamount = parseFloat($row.find('.clsPaidAmount').val(),) || 0
+
+            closingamt = op + salevalue - paidamount;
+            $row.find('.clsCloBal').val(parseFloat(closingamt).toFixed(2));
+                insertrow();
         }
 
         var filldetails = [];
