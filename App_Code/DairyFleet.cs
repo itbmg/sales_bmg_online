@@ -39582,10 +39582,18 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 cmd.Parameters.AddWithValue("@starttime", GetLowDate(fromdate.AddDays(-1)));
                 cmd.Parameters.AddWithValue("@endtime", GetHighDate(ServerDateCurrentdate));
                 DataTable dtminmax = vdm.SelectQuery(cmd).Tables[0];
-                string mindate = dtminmax.Rows[0]["midate"].ToString();
-                string maxdate = dtminmax.Rows[0]["madate"].ToString();
-                DateTime midate = DateTime.Parse(mindate);
-                DateTime madate = DateTime.Parse(maxdate);
+                DateTime midate = GetLowDate(ServerDateCurrentdate);
+                DateTime madate = GetHighDate(ServerDateCurrentdate);
+                if (dtminmax.Rows.Count > 0)
+                {
+                    string mindate = dtminmax.Rows[0]["midate"].ToString();
+                    string maxdate = dtminmax.Rows[0]["madate"].ToString();
+                    if (mindate != "")
+                    {
+                        midate = DateTime.Parse(mindate);
+                        madate = DateTime.Parse(maxdate);
+                    }
+                }
                 cmd = new MySqlCommand("SELECT branchdata.BranchName, indents_subtable.DTripId, SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS totalamount, indents_subtable.D_date, indent.Branch_id, modifiedroutes.Sno FROM dispatch INNER JOIN modifiedroutes ON dispatch.Route_id = modifiedroutes.Sno INNER JOIN modifiedroutesubtable ON modifiedroutesubtable.RefNo = modifiedroutes.Sno INNER JOIN branchdata ON modifiedroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, I_date, Branch_id FROM indents WHERE (I_date BETWEEN @starttime AND @endtime)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo WHERE (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) AND (dispatch.sno = @dispatchSno) AND (indents_subtable.DeliveryQty >  0) OR (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) AND (dispatch.sno = @dispatchSno) AND (indents_subtable.DeliveryQty > 0) GROUP BY branchdata.BranchName, modifiedroutes.Sno");
                 
                 cmd.Parameters.AddWithValue("@dispatchSno", ddlRouteName);
