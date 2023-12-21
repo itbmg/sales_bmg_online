@@ -1114,7 +1114,7 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             string todate = context.Request["todate"];
             DateTime dt_fromdate = Convert.ToDateTime(fromDate);
             DateTime dt_todate = Convert.ToDateTime(todate);
-            cmd = new MySqlCommand("SELECT agent_bal_trans.sno,agent_bal_trans.agentid,branchdata.branchname as AgentName, agent_bal_trans.opp_balance, agent_bal_trans.inddate, agent_bal_trans.salesvalue,agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM agent_bal_trans INNER JOIN branchdata ON agent_bal_trans.agentid=branchdata.sno  WHERE (agent_bal_trans.agentid = @agentid) AND (agent_bal_trans.inddate BETWEEN @d1 AND @d2)");
+            cmd = new MySqlCommand("SELECT agent_bal_trans.sno,agent_bal_trans.agentid,branchdata.branchname as AgentName, agent_bal_trans.opp_balance, agent_bal_trans.inddate, agent_bal_trans.salesvalue,agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM agent_bal_trans INNER JOIN branchdata ON agent_bal_trans.agentid=branchdata.sno  WHERE (agent_bal_trans.agentid = @agentid) AND (agent_bal_trans.inddate BETWEEN @d1 AND @d2) ORDER BY agent_bal_trans.inddate");
             cmd.Parameters.AddWithValue("@agentid", AgentId);
             cmd.Parameters.AddWithValue("@d1", GetLowDate(dt_fromdate).AddDays(-1));
             cmd.Parameters.AddWithValue("@d2", GetHighDate(dt_todate).AddDays(-1));

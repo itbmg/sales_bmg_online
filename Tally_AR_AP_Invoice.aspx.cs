@@ -200,7 +200,7 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
             string tostate = Session["stateid"].ToString();
             if (ddlsalestype.SelectedValue == "NonTax")
             {
-                cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.igst, productsdata.cgst,products_category.tcategory,products_category.sno as catsno, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
+                cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.qty as uomqty,productsdata.Units,productsdata.igst, productsdata.cgst,products_category.tcategory,products_category.sno as catsno, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
                 cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
                 cmd.Parameters.AddWithValue("@PlantID", Session["branch"]);
                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
@@ -333,6 +333,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                             double qty = 0;
                             double taxval = 0;
                             double.TryParse(branch["qty"].ToString(), out qty);
+							double ltr_rate = 0;
+                            double ltrqty = 0;
+                            if (branch["Units"].ToString() != "Nos")
+                            {
+                                EInvoice obj = new EInvoice();
+                                ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                ////newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                rate = ltr_rate;
+                                //ltrqty = qty;
+                            }
                             if (fromstateid == tostate)
                             {
                                 double sgstamount = 0;
@@ -721,6 +732,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                                         double qty = 0;
                                         double taxval = 0;
                                         double.TryParse(branch["qty"].ToString(), out qty);
+										 double ltr_rate = 0;
+                                        double ltrqty = 0;
+                                        if (branch["Units"].ToString() != "Nos")
+                                        {
+                                            EInvoice obj = new EInvoice();
+                                            ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                            rate = ltr_rate;
+                                            //ltrqty = qty;
+                                        }
                                         if (fromstateid == tostate)
                                         {
                                             double sgstamount = 0;
@@ -991,7 +1013,7 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
             {
                 if (ddlSalesOffice.SelectedValue == "172")
                 {
-                    cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.igst, productsdata.cgst, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname,products_category.tcategory FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
+                    cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.igst, productsdata.cgst,productsdata.qty as uomqty,productsdata.Units, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname,products_category.tcategory FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
                     cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
                     cmd.Parameters.AddWithValue("@PlantID", Session["branch"]);
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
@@ -1000,7 +1022,7 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                 }
                 else
                 {
-                    cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.igst, productsdata.cgst, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname,products_category.tcategory,products_category.sno as categoryid FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
+                    cmd = new MySqlCommand("SELECT productsdata.hsncode, productsdata.igst, productsdata.cgst,productsdata.qty as uomqty,productsdata.Units, productsdata.sgst, productsdata.tproduct, ROUND(SUM(tripsubdata.Qty), 2) AS qty,tripdata.dcno,tripdata.taxdcno, tripdata.Sno, tripdata.I_Date, empmanage.UserName, branchproducts.unitprice, products_category.Categoryname,products_category.tcategory,products_category.sno as categoryid FROM tripdata INNER JOIN tripsubdata ON tripdata.Sno = tripsubdata.Tripdata_sno INNER JOIN productsdata ON tripsubdata.ProductId = productsdata.sno INNER JOIN empmanage ON tripdata.EmpId = empmanage.Sno INNER JOIN branchproducts ON empmanage.Branch = branchproducts.branch_sno AND productsdata.sno = branchproducts.product_sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE  (tripdata.I_Date BETWEEN @d1 AND @d2) AND (empmanage.Branch = @BranchID) AND (tripdata.BranchID = @PlantID) GROUP BY productsdata.tproduct, branchproducts.unitprice");
                     cmd.Parameters.AddWithValue("@BranchID", ddlSalesOffice.SelectedValue);
                     cmd.Parameters.AddWithValue("@PlantID", Session["branch"]);
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
@@ -1131,6 +1153,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                                     double qty = 0;
                                     double taxval = 0;
                                     double.TryParse(branch["qty"].ToString(), out qty);
+									 double ltr_rate = 0;
+                                        double ltrqty = 0;
+                                        if (branch["Units"].ToString() != "Nos")
+                                        {
+                                            EInvoice obj = new EInvoice();
+                                            ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                            rate = ltr_rate;
+                                            //ltrqty = qty;
+                                        }
                                     if (fromstateid == tostate)
                                     {
                                         double sgstamount = 0;
@@ -1307,6 +1340,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                                 double qty = 0;
                                 double taxval = 0;
                                 double.TryParse(branch["qty"].ToString(), out qty);
+								 double ltr_rate = 0;
+                                        double ltrqty = 0;
+                                        if (branch["Units"].ToString() != "Nos")
+                                        {
+                                            EInvoice obj = new EInvoice();
+                                            ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                            rate = ltr_rate;
+                                            //ltrqty = qty;
+                                        }
                                 if (fromstateid == tostate)
                                 {
                                     double sgstamount = 0;
@@ -1507,6 +1551,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                                                 double qty = 0;
                                                 double taxval = 0;
                                                 double.TryParse(branch["qty"].ToString(), out qty);
+												 double ltr_rate = 0;
+                                        double ltrqty = 0;
+                                        if (branch["Units"].ToString() != "Nos")
+                                        {
+                                            EInvoice obj = new EInvoice();
+                                            ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                            rate = ltr_rate;
+                                            //ltrqty = qty;
+                                        }
                                                 if (fromstateid == tostate)
                                                 {
                                                     double sgstamount = 0;
@@ -1669,6 +1724,17 @@ public partial class Tally_AR_AP_Invoice : System.Web.UI.Page
                                             double qty = 0;
                                             double taxval = 0;
                                             double.TryParse(branch["qty"].ToString(), out qty);
+											 double ltr_rate = 0;
+                                        double ltrqty = 0;
+                                        if (branch["Units"].ToString() != "Nos")
+                                        {
+                                            EInvoice obj = new EInvoice();
+                                            ltr_rate = obj.Converting_Ltr_rate(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //ltrqty = obj.ConvertingLtrs(qty.ToString(), branch["Uomqty"].ToString(), rate.ToString());
+                                            //newrow["Qty"] = Math.Round(ltrqty, 2).ToString();
+                                            rate = ltr_rate;
+                                            //ltrqty = qty;
+                                        }
                                             if (fromstateid == tostate)
                                             {
                                                 double sgstamount = 0;
