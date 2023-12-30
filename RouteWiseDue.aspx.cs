@@ -170,10 +170,10 @@ public partial class RouteWiseDue : System.Web.UI.Page
             //        fromdate = new DateTime(int.Parse(dates[2]), int.Parse(dates[1]), int.Parse(dates[0]), int.Parse(times[0]), int.Parse(times[1]), 0);
             //    }
             //}
-            lblDate.Text = ServerDateCurrentdate.ToString("dd/MMM/yyyy");
+            //lblDate.Text = ServerDateCurrentdate.ToString("dd/MMM/yyyy");
             Session["filename"] = ddlRouteName.SelectedItem.Text + "-> DUE REPORT";
             // cmd.Parameters.AddWithValue("SELECT branchdata.sno, branchdata.BranchName, branchaccounts.Amount FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN branchaccounts ON branchdata.sno = branchaccounts.BranchId WHERE (dispatch.sno = 5)");
-            cmd = new MySqlCommand("SELECT branchdata.sno, branchdata.BranchName,branchdata.flag, branchaccounts.Amount FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN branchaccounts ON branchdata.sno = branchaccounts.BranchId WHERE (dispatch.sno = @dispatchsno)");
+            cmd = new MySqlCommand("SELECT branchdata.sno, branchdata.BranchName,branchdata.flag FROM dispatch INNER JOIN branchroutes ON dispatch.Route_id = branchroutes.Sno INNER JOIN branchroutesubtable ON branchroutes.Sno = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno  WHERE (dispatch.sno = @dispatchsno)");
             cmd.Parameters.AddWithValue("@dispatchsno", ddlRouteName.SelectedValue);
             DataTable dtroutedue = vdm.SelectQuery(cmd).Tables[0];
             //cmd = new MySqlCommand("SELECT branchroutesubtable.BranchID, branchdata.BranchName, branchdata.flag, indents_subtable.DeliveryQty, indents_subtable.UnitCost,SUM(indents_subtable.DeliveryQty * indents_subtable.UnitCost) AS salevalue FROM dispatch INNER JOIN branchroutesubtable ON dispatch.Route_id = branchroutesubtable.RefNo INNER JOIN branchdata ON branchroutesubtable.BranchID = branchdata.sno INNER JOIN (SELECT IndentNo, Branch_id, I_date FROM indents WHERE (I_date BETWEEN @d1 AND @d2)) indent ON branchdata.sno = indent.Branch_id INNER JOIN indents_subtable ON indent.IndentNo = indents_subtable.IndentNo WHERE (dispatch.sno = @dispatchsno) GROUP BY indent.Branch_id");
@@ -190,7 +190,7 @@ public partial class RouteWiseDue : System.Web.UI.Page
             Report.Columns.Add("Can40 Bal");
             Report.Columns.Add("Can20 Bal");
             Report.Columns.Add("Can10 Bal");
-            float dueamount = 0;
+            double dueamount = 0;
             float cratesbal = 0;
             float can40 = 0;
             float can20 = 0;
@@ -201,6 +201,58 @@ public partial class RouteWiseDue : System.Web.UI.Page
                 DataRow newrow = Report.NewRow();
                 newrow["Agent Code"] = branch["sno"].ToString();
                 newrow["Agent Name"] = branch["BranchName"].ToString();
+
+                cmd = new MySqlCommand("SELECT opp_balance,salesvalue,paidamount,clo_balance,DATE_FORMAT(inddate, '%d %b %y') AS PDate,agentid FROM agent_bal_trans WHERE agentid=@agentid and inddate between @d1 and @d2 GROUP BY PDate order by inddate");
+                cmd.Parameters.AddWithValue("@agentid", branch["sno"].ToString());
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(ServerDateCurrentdate.AddDays(-1)));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(ServerDateCurrentdate.AddDays(-1)));
+                DataTable dtagenttrans = vdm.SelectQuery(cmd).Tables[0];
+                if (dtagenttrans.Rows.Count == 0)
+                {
+                    cmd = new MySqlCommand("SELECT MAX(sno) as sno FROM agent_bal_trans WHERE agentid=@Branchid AND (inddate < @d1)");
+                    cmd.Parameters.AddWithValue("@Branchid", branch["sno"].ToString());
+                    cmd.Parameters.AddWithValue("@d1", ServerDateCurrentdate.AddDays(-1));
+                    DataTable dtPrev_trans = vdm.SelectQuery(cmd).Tables[0];
+                    if (dtPrev_trans.Rows.Count > 0)
+                    {
+                        string sno = dtPrev_trans.Rows[0]["sno"].ToString();
+                        if (sno == "")
+                        {
+                            double closingbalance = 0;
+                            newrow["Due Amount"] = closingbalance;
+                        }
+                        else
+                        {
+                            cmd = new MySqlCommand("SELECT agentid, opp_balance, inddate, salesvalue, clo_balance FROM agent_bal_trans WHERE sno=@sno");
+                            cmd.Parameters.AddWithValue("@sno", dtPrev_trans.Rows[0]["sno"].ToString());
+                            DataTable dtagent_value = vdm.SelectQuery(cmd).Tables[0];
+                            if (dtagent_value.Rows.Count > 0)
+                            {
+                                double closingbalance = 0;
+                                double.TryParse(dtagent_value.Rows[0]["clo_balance"].ToString(), out closingbalance);
+                                string inddate = dtagent_value.Rows[0]["inddate"].ToString();
+                                DateTime dtinddate = Convert.ToDateTime(inddate);
+                                if (dtinddate < fromdate)
+                                {
+                                    closingbalance = Math.Round(closingbalance, 2);
+                                    newrow["Due Amount"] = closingbalance;
+                                    dueamount += closingbalance;
+                                }
+                                else
+                                {
+                                    newrow["Due Amount"] = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    newrow["Due Amount"] = dtagenttrans.Rows[0]["clo_balance"].ToString();
+                    double damt = 0;
+                    double.TryParse(dtagenttrans.Rows[0]["clo_balance"].ToString(), out damt);
+                    dueamount += damt;
+                }
                 if (branch["flag"].ToString() == "0")
                 {
                     newrow["Status"] = "InActive";
@@ -240,10 +292,7 @@ public partial class RouteWiseDue : System.Web.UI.Page
                         can40 += can;
                     }
                 }
-                newrow["Due Amount"] = branch["Amount"].ToString();
-                float damt = 0;
-                float.TryParse(branch["Amount"].ToString(), out damt);
-                dueamount += damt;
+
                 Report.Rows.Add(newrow);
             }
             DataRow total = Report.NewRow();

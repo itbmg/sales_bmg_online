@@ -75,7 +75,15 @@
                                     <asp:DropDownList ID="ddlRouteName" runat="server" CssClass="form-control">
                                     </asp:DropDownList>
                                 </td>
-                                 <td style="width: 5px;">
+                               <%--  <td style="width: 5px;">
+                                </td>
+                                <td>
+                                    <asp:TextBox ID="txtdate" runat="server" Width="205px" CssClass="form-control"></asp:TextBox>
+                                    <asp:CalendarExtender ID="enddate_CalendarExtender" runat="server" Enabled="True"
+                                        TargetControlID="txtdate" Format="dd-MM-yyyy HH:mm">
+                                    </asp:CalendarExtender>
+                                </td>--%>
+                                <td style="width: 5px;">
                                 </td>
                                 <td>
                                     <asp:Button ID="btnGenerate" Text="Generate" runat="server" OnClientClick="OrderValidate();"
