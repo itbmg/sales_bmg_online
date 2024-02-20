@@ -94,7 +94,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                 case "get_Agent_Bal_Trans":
                     get_Agent_Bal_Trans(context);
                     break;
-                    
+                case "get_Agent_Inv_Bal_Trans":
+                    get_Agent_Inv_Bal_Trans(context);
+                    break;
+
                 case "Get_Voucher_Print_Details":
                     Get_Voucher_Print_Details(context);
                     break;
@@ -935,6 +938,10 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
                         {
                             Edit_Agent_Bal_Trans(context);
                         }
+                        if (obj.operation == "Edit_Agent_Inv_Bal_Trans")
+                        {
+                            Edit_Agent_Bal_Trans(context);
+                        }
 
                         //added by akbar 20-May-2022
                         if (obj.operation == "CollectioninventrySaveClick")
@@ -1181,6 +1188,100 @@ public class DairyFleet : IHttpHandler, IRequiresSessionState
             context.Response.Write(Response);
         }
     }
+
+    class Agent_Inv_Bal_Trans
+    {
+        public string AgentId { set; get; }
+        public string AgentName { set; get; }
+        public string opp_balance { set; get; }
+        public string inddate { set; get; }
+        public string salesvalue { set; get; }
+        public string paidamount { set; get; }
+        public string clo_balance { set; get; }
+        public string sno { set; get; }
+    }
+    class Agent_Inv_Bal_Trans_Model
+    {
+        public List<Agent_Inv_Bal_Trans> filldetails { set; get; }
+    }
+    private void get_Agent_Inv_Bal_Trans(HttpContext context)
+    {
+        try
+        {
+            vdbmngr = new VehicleDBMgr();
+            string AgentId = context.Request["AgentId"];
+            string fromDate = context.Request["fromdate"];
+            string todate = context.Request["todate"];
+            DateTime dt_fromdate = Convert.ToDateTime(fromDate);
+            DateTime dt_todate = Convert.ToDateTime(todate);
+            cmd = new MySqlCommand("SELECT agent_bal_trans.sno,agent_bal_trans.agentid,branchdata.branchname as AgentName, agent_bal_trans.opp_balance, agent_bal_trans.inddate, agent_bal_trans.salesvalue,agent_bal_trans.paidamount, agent_bal_trans.clo_balance FROM agent_bal_trans INNER JOIN branchdata ON agent_bal_trans.agentid=branchdata.sno  WHERE (agent_bal_trans.agentid = @agentid) AND (agent_bal_trans.inddate BETWEEN @d1 AND @d2) ORDER BY agent_bal_trans.inddate");
+            cmd.Parameters.AddWithValue("@agentid", AgentId);
+            cmd.Parameters.AddWithValue("@d1", GetLowDate(dt_fromdate).AddDays(-1));
+            cmd.Parameters.AddWithValue("@d2", GetHighDate(dt_todate).AddDays(-1));
+            DataTable dtAgent = vdbmngr.SelectQuery(cmd).Tables[0];
+            List<Agent_Inv_Bal_Trans> AgentBalList = new List<Agent_Inv_Bal_Trans>();
+            if (dtAgent.Rows.Count > 0)
+            {
+                foreach (DataRow dr in dtAgent.Rows)
+                {
+                    Agent_Inv_Bal_Trans getBalance = new Agent_Inv_Bal_Trans();
+                    getBalance.sno = dr["sno"].ToString();
+                    getBalance.AgentId = dr["agentid"].ToString();
+                    getBalance.AgentName = dr["AgentName"].ToString();
+                    getBalance.opp_balance = dr["opp_balance"].ToString();
+                    DateTime dtDOE = Convert.ToDateTime(dr["inddate"].ToString()).AddDays(1);
+                    getBalance.inddate = dtDOE.ToString("dd/MMM/yyyy");
+                    getBalance.salesvalue = dr["salesvalue"].ToString();
+                    getBalance.paidamount = dr["paidamount"].ToString();
+                    getBalance.clo_balance = dr["clo_balance"].ToString();
+                    AgentBalList.Add(getBalance);
+                }
+                string response = GetJson(AgentBalList);
+                context.Response.Write(response);
+            }
+
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+    private void Edit_Agent_Inv_Bal_Trans(HttpContext context)
+    {
+        try
+        {
+            vdbmngr = new VehicleDBMgr();
+            var js = new JavaScriptSerializer();
+            string empid = context.Session["empid"].ToString();
+            DateTime ServerDateCurrentdate = VehicleDBMgr.GetTime(vdbmngr.conn);
+            var title1 = context.Request.Params[1];
+            Agent_Bal_Trans_Model obj = js.Deserialize<Agent_Bal_Trans_Model>(title1);
+            foreach (Agent_Bal_Trans o in obj.filldetails)
+            {
+                DateTime dtIndent = Convert.ToDateTime(o.inddate);
+                cmd = new MySqlCommand("UPDATE agent_bal_trans set opp_balance=@opp_balance,salesvalue=@salesvalue,paidamount=@paidamount, clo_balance=@clo_balance,entryby=@entryby,createdate=@createdate  where sno=@sno and agentid=@agentid AND inddate between @d1 and @d2");
+                cmd.Parameters.AddWithValue("@d1", GetLowDate(dtIndent).AddDays(-1));
+                cmd.Parameters.AddWithValue("@d2", GetHighDate(dtIndent).AddDays(-1));
+                cmd.Parameters.AddWithValue("@salesvalue", o.salesvalue);
+                cmd.Parameters.AddWithValue("@opp_balance", o.opp_balance);
+                cmd.Parameters.AddWithValue("@paidamount", o.paidamount);
+                cmd.Parameters.AddWithValue("@clo_balance", o.clo_balance);
+                cmd.Parameters.AddWithValue("@agentid", o.AgentId);
+                cmd.Parameters.AddWithValue("@sno", o.sno);
+                cmd.Parameters.AddWithValue("@createdate", ServerDateCurrentdate);
+                cmd.Parameters.AddWithValue("@entryby", empid);
+                vdbmngr.Update(cmd);
+            }
+            string msg = "Agent Balance Successfully Updated";
+            string Response = GetJson(msg);
+            context.Response.Write(Response);
+        }
+        catch (Exception ex)
+        {
+            string Response = GetJson(ex.Message);
+            context.Response.Write(Response);
+        }
+    }
+
 
 
     class invcollectionsave

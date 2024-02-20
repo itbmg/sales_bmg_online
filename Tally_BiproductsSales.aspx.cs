@@ -268,14 +268,14 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             {
                                 //if (NoOfdays < 2)
                                 //{
-                                if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
-                                {
-                                    ddlSalesOffice.SelectedValue = "7";
-                                }
-                                else if (ddlSalesOffice.SelectedValue == "4626")
-                                {
-                                    ddlSalesOffice.SelectedValue = "159";
-                                }
+                                //if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
+                                //{
+                                //    ddlSalesOffice.SelectedValue = "7";
+                                //}
+                                //else if (ddlSalesOffice.SelectedValue == "4626")
+                                //{
+                                //    ddlSalesOffice.SelectedValue = "159";
+                                //}
                                 cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agentdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));

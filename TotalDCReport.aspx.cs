@@ -1040,7 +1040,7 @@ public partial class TotalDCReport : System.Web.UI.Page
                                     double.TryParse(dr["Qty"].ToString(), out assqty);
                                     total += assqty;
                                 }
-                                if (dr["Categoryname"].ToString() == "CURD" || dr["Categoryname"].ToString() == "OTHERS" || dr["Categoryname"].ToString() == "Curd Cups" || dr["Categoryname"].ToString() == "Curd Buckets")
+                                if (dr["Categoryname"].ToString() == "CURD" || dr["Categoryname"].ToString() == "OTHERS" || dr["Categoryname"].ToString() == "Curd Cups" || dr["Categoryname"].ToString() == "Curd Bkt")
                                 {
                                     double.TryParse(dr["Qty"].ToString(), out curdBm);
                                     totalcurdandBM += curdBm;
