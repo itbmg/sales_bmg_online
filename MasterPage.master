@@ -760,6 +760,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="libranchdueconsolidatedetails"><a href="Periodic_Due_Report.aspx">AgentWise Periodic Due</a></li>
                                             <li id="libranchdueSummary"><a href="Branchwise_due_summary.aspx">Branch Wise Due Summary</a></li>
                                             <li id="li70"><a href="BranchWiseIndent.aspx">AgentWise Indent Comparison</a></li>
+                                            <li id="libranchInvduedetails"><a href="Agent_Inv_Due_Details.aspx">AgentWise Inv Due Report</a></li>
                                         </ul>
                                     </div>
                                 </li>

@@ -109,7 +109,7 @@ public partial class Agent_Inv_Due_Details : System.Web.UI.Page
             vdm = new VehicleDBMgr();
 
             PBranch.Visible = true;
-            cmd = new MySqlCommand("Select sno,InvName from InvMaster");
+            cmd = new MySqlCommand("Select sno,InvName from InvMaster where flag <>'0' order by sno");
             DataTable dtinv = vdm.SelectQuery(cmd).Tables[0];
             ddlInvtory.DataSource = dtinv;
             ddlInvtory.DataTextField = "InvName";
