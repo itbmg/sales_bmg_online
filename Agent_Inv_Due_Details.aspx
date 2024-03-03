@@ -43,19 +43,19 @@
     </div>
     <section class="content-header">
         <h1>
-            AgentWise Due Transaction<small>Preview</small>
+            AgentWise Inventory Due Transaction<small>Preview</small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i>Operations</a></li>
             <li><a href="#"><i></i>Due Details</a></li>
-            <li><a href="#">AgentWise Due Transaction</a></li>
+            <li><a href="#">AgentWise Inventory Due Transaction</a></li>
         </ol>
     </section>
     <section class="content">
         <div class="box box-info">
             <div class="box-header with-border">
                 <h3 class="box-title">
-                    <i style="padding-right: 5px;" class="fa fa-cog"></i>AgentWise Due Transaction Details
+                    <i style="padding-right: 5px;" class="fa fa-cog"></i>AgentWise Inventory Due Transaction
                 </h3>
             </div>
             <div class="box-body">

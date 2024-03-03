@@ -785,7 +785,8 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                             <li id="LiCahsbookEdit"><a href="EditCashBook.aspx">CashBook Edit</a></li>
                                             <li id="liInventoryEdit"><a href="InventoryEdit.aspx">Inventory Edit</a></li>
                                             <li id="listockclear"><a href="StockEdit.aspx">Stock Clear</a></li>
-                                            <li id="li28"><a href="editduetransactions.aspx">Edit Due Transactions</a></li>
+                                            <li id="li28"><a href="EditBalance.aspx">Edit Due Details</a></li>
+                                            <li id="li28"><a href="EditInvBalance.aspx">Edit Due Inventory Details</a></li>
                                             <li id="li21"><a href="InventoryUpdate.aspx">Inventory Update</a></li>
                                         </ul>
                                     </div>
@@ -862,6 +863,7 @@ j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; 
                                                 <li id="lisalesofficecollection"><a href="SalesOfficeCollection.aspx">SalesOffice Collections</a></li>
                                                 <li id="liroutewisecollections"><a href="RouteWiseCollections.aspx">Route Wise Collections</a></li>
                                                 <li id="liAgentTransaction"><a href="NewAgentStatement.aspx">Agent Statement</a></li>
+                                                <li id="liAgentTransaction"><a href="Agent_Inv_Statement.aspx">Agent Inventory Statement</a></li>
                                               <%--  <li id="li47"><a href="TotalReport.aspx">Sangam Report</a></li>--%>
                                                 <li id="liRouteWiseActivity"><a href="RouteWiseActivity.aspx">Route Wise Activity</a></li>
                                                 <li id="liSalesOfficewiseActivity"><a href="SalesOfficeWiseActivity.aspx">SalesOffice
