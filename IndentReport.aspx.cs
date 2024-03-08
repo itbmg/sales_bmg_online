@@ -44,7 +44,7 @@ public partial class Report : System.Web.UI.Page
                 cmd = new MySqlCommand("SELECT DispName, sno FROM dispatch WHERE (Branch_Id = @BranchD) and (DispMode Is NULL) and (flag=@flag)");
                 cmd.Parameters.AddWithValue("@BranchD", Session["branch"].ToString());
                 cmd.Parameters.AddWithValue("@flag", "1");
-                
+
                 DataTable dtRoutedata = vdm.SelectQuery(cmd).Tables[0];
                 ddlRouteName.DataSource = dtRoutedata;
                 ddlRouteName.DataTextField = "DispName";
@@ -77,7 +77,7 @@ public partial class Report : System.Web.UI.Page
     protected void btnGenerate_Click(object sender, EventArgs e)
     {
         GetReport();
-        
+
     }
     protected void btnSMS_Click(object sender, EventArgs e)
     {
@@ -239,7 +239,7 @@ public partial class Report : System.Web.UI.Page
             cmd.Parameters.AddWithValue("@endtime", GetHighDate(fromdate));
             cmd.Parameters.AddWithValue("@itype", routeitype);
             DataTable dtble = vdm.SelectQuery(cmd).Tables[0];
-           
+
             cmd = new MySqlCommand("SELECT modifiedroutes.RouteName, ROUND(SUM(offer_indents_sub.offer_indent_qty), 2) AS unitQty, productsdata.ProductName, productsdata.Units, products_category.Categoryname, brnchprdt.Rank, invmaster.Qty,productsdata.sno AS productid FROM dispatch INNER JOIN dispatch_sub ON dispatch.sno = dispatch_sub.dispatch_sno INNER JOIN modifiedroutes ON dispatch_sub.Route_id = modifiedroutes.Sno INNER JOIN modifiedroutesubtable ON modifiedroutes.Sno = modifiedroutesubtable.RefNo INNER JOIN (SELECT idoffer_indents, idoffers_assignment, salesoffice_id, route_id, agent_id, indent_date, indents_id, IndentType, I_modified_by FROM offer_indents WHERE (indent_date BETWEEN @starttime AND @endtime) AND (IndentType = @itype)) offerindents ON modifiedroutesubtable.BranchID = offerindents.agent_id INNER JOIN offer_indents_sub ON offerindents.idoffer_indents = offer_indents_sub.idoffer_indents INNER JOIN productsdata ON offer_indents_sub.product_id = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno INNER JOIN (SELECT branch_sno, product_sno, Rank FROM branchproducts WHERE (branch_sno = @BranchID)) brnchprdt ON productsdata.sno = brnchprdt.product_sno INNER JOIN invmaster ON productsdata.Inventorysno = invmaster.sno WHERE (dispatch.sno = @dispatchSno) AND (modifiedroutesubtable.EDate IS NULL) AND (modifiedroutesubtable.CDate <= @starttime) OR (dispatch.sno = @dispatchSno) AND (modifiedroutesubtable.EDate > @starttime) AND (modifiedroutesubtable.CDate <= @starttime) GROUP BY modifiedroutes.RouteName, productsdata.sno ORDER BY brnchprdt.Rank");
             if (Session["salestype"].ToString() == "Plant")
             {
@@ -261,7 +261,7 @@ public partial class Report : System.Web.UI.Page
             {
                 DataView view = new DataView(dtble);
                 DataView viewOffers = new DataView(dt_offertble);
-                DataTable produtstbl = view.ToTable(true, "productid", "ProductName", "Categoryname", "Units", "Qty", "Rank");
+                DataTable produtstbl = view.ToTable(true, "productid", "ProductName", "Categoryname", "Units", "Qty", "Rank", "uomqty");
                 DataTable Offersprodutstbl = viewOffers.ToTable(true, "productid", "ProductName", "Categoryname", "Units", "Qty", "Rank");
                 foreach (DataRow drprdt in Offersprodutstbl.Rows)
                 {
@@ -455,52 +455,78 @@ public partial class Report : System.Web.UI.Page
                     int.TryParse(lastRow.ToString(), out First);
                     double test = 0;
                     double.TryParse(lastRow.ToString(), out test);
-                    int Qty = 0;
-                    int.TryParse(dr["Qty"].ToString(), out Qty);
+                    double Qty = 0;
+                    double.TryParse(dr["Qty"].ToString(), out Qty);
                     double InvQty = 0;
                     string prd = dr["ProductName"].ToString();
-                    if (dr["ProductName"].ToString() == "CURD175" || dr["ProductName"].ToString() == "CURD175(P)")
+                    if (dr["uomqty"].ToString() == "130")
                     {
-                        double qt = 10.5;
-                        Qty = (int)qt;
+                        double qt = 9.36;
+                        Qty = (double)qt;
                         InvQty = First / Qty;
 
                         if (First == 0)
                         {
-                            double test1 = 0;
-                            test1 = test / 10.5;
-                            InvQty = (int)test1;
+                            InvQty = test / 9.36;
                         }
                     }
-                    if (dr["ProductName"].ToString() == "CURD-450ml")
+                    if (dr["uomqty"].ToString() == "180")
                     {
-                        double qt = 10.8;
-                        Qty = (int)qt;
+                        double qt = 9;
+                        Qty = (double)qt;
                         InvQty = First / Qty;
 
                         if (First == 0)
                         {
-                            double test1 = 0;
-                            test1 = test / 10.8;
-                            InvQty = (int)test1;
+                            InvQty = test / 9;
                         }
                     }
-                    if (dr["ProductName"].ToString() == "CURD 10 MRP")
+                    if (dr["uomqty"].ToString() == "475" || dr["uomqty"].ToString() == "950")
                     {
-
-                        double qt = 10.8;
-                        InvQty = First / qt;
-                        InvQty = Math.Round(InvQty);
+                        double qt = 11.4;
+                        Qty = (double)qt;
+                        InvQty = First / 11.4;
 
                         if (First == 0)
                         {
-                            double test1 = 0;
-                            test1 = test / 10.8;
-                            test1 = Math.Round(test1);
-                            InvQty = (int)test1;
+                            InvQty = test / 11.4;
                         }
                     }
-                    if (dr["ProductName"].ToString() != "CURD175" || dr["ProductName"].ToString() != "CURD 10 MRP" || dr["ProductName"].ToString() != "CURD175(P)" || dr["ProductName"].ToString() != "CURD-450ml")
+                    if (dr["uomqty"].ToString() == "140")
+                    {
+                        double qt = 10.08;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                        if (First == 0)
+                        {
+                            InvQty = test / 10.08;
+                        }
+                    }
+                    if (dr["uomqty"].ToString() == "230")
+                    {
+                        double qt = 11.04;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                        if (First == 0)
+                        {
+                            InvQty = test / 11.04;
+                        }
+                    }
+                    if (dr["uomqty"].ToString() == "450" || dr["uomqty"].ToString() == "150") // 950 ,140 ,230 ,130 ,450
+                    {
+                        double qt = 10.8;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                        if (First == 0)
+                        {
+                            InvQty = test / 10.8;
+                        }
+                    }
+
+                    if (dr["uomqty"].ToString() != "950" && dr["uomqty"].ToString() != "140" && dr["uomqty"].ToString() != "150" && dr["uomqty"].ToString() != "130" && dr["uomqty"].ToString() != "180" && dr["uomqty"].ToString() != "475" && dr["uomqty"].ToString() != "450")
                     {
                         InvQty = First / Qty;
                     }
@@ -508,9 +534,14 @@ public partial class Report : System.Web.UI.Page
                     double quotient = 0;
                     if (First != 0)
                     {
-                        if (dr["ProductName"].ToString() != "CURD175" || dr["ProductName"].ToString() != "CURD 10 MRP" || dr["ProductName"].ToString() != "CURD175(P)" || dr["ProductName"].ToString() != "CURD-450ml")
+                        if (dr["uomqty"].ToString() != "950" && dr["uomqty"].ToString() != "140" && dr["uomqty"].ToString() != "150" && dr["uomqty"].ToString() != "130" && dr["uomqty"].ToString() != "180" && dr["uomqty"].ToString() != "475" && dr["uomqty"].ToString() != "450")
+                        // if (dr["ProductName"].ToString() != "CURD175" || dr["ProductName"].ToString() != "CURD 10 MRP" || dr["ProductName"].ToString() != "CURD175(P)" || dr["ProductName"].ToString() != "CURD-450ml")
                         {
-                            quotient = Math.DivRem(First, Qty, out result);
+                           // quotient = Math.DivRem(First, Qty, out result);
+                           // double First = 10.5;
+                           // double Qty = 3.2;
+                             quotient = First / Qty;
+                            // remainder = First % Qty;
                         }
                         else
                         {
@@ -520,29 +551,13 @@ public partial class Report : System.Web.UI.Page
                             }
                             else
                             {
-                                quotient = Math.DivRem(First, Qty, out result);
-                                quotient = quotient - 1;
+                               // quotient = Math.DivRem(First, Qty, out result);
+                                quotient = First / Qty;
+                                // quotient = quotient - 1;
                             }
                         }
                     }
-                    if (First == 0)
-                    {
-                        if (dr["ProductName"].ToString() == "CURD 10 MRP" || dr["ProductName"].ToString() == "CURD-450ml")
-                        {
-                            double qt = 10.8;
-                            InvQty = test / qt;
-                            InvQty = Math.Round(InvQty);
-                            quotient = Math.Round(InvQty);
-                        }
-                        else
-                        {
-                            quotient = Math.DivRem((int)test, Qty, out result);
-                            if (quotient > 19)
-                            {
-                                quotient = quotient - 1;
-                            }
-                        }
-                    }
+                    
                     if (dr["Categoryname"].ToString() == "MILK")
                     {
                         if (dr["Qty"].ToString() != "12")
@@ -550,14 +565,14 @@ public partial class Report : System.Web.UI.Page
                         }
                         else
                         {
-                            TotCreatsQty += quotient;
-                            newInventory[dr["ProductName"].ToString()] = quotient;
+                            TotCreatsQty += InvQty;
+                            newInventory[dr["ProductName"].ToString()] =Math.Round(InvQty);
                             foreach (DataRow drdttotal in TotReport.Select("ProductName='" + dr["ProductName"].ToString() + "'"))
                             {
                                 double totind = 0;
                                 double finaltotind = 0;
                                 double.TryParse(drdttotal["TotCrates"].ToString(), out totind);
-                                finaltotind = totind + quotient;
+                                finaltotind = totind + Math.Round(InvQty); 
                                 drdttotal["TotCrates"] = finaltotind.ToString();
                             }
                             newInventory["TOTAL INDENT"] = TotCreatsQty;
@@ -575,13 +590,13 @@ public partial class Report : System.Web.UI.Page
                             }
                             else
                             {
-                                newInventory[dr["ProductName"].ToString()] = quotient;
+                                newInventory[dr["ProductName"].ToString()] = Math.Round(InvQty);
                                 foreach (DataRow drdttotal in TotReport.Select("ProductName='" + dr["ProductName"].ToString() + "'"))
                                 {
                                     double totind = 0;
                                     double finaltotind = 0;
                                     double.TryParse(drdttotal["TotCrates"].ToString(), out totind);
-                                    finaltotind = totind + quotient;
+                                    finaltotind = totind + Math.Round(InvQty);
                                     drdttotal["TotCrates"] = finaltotind.ToString();
                                 }
                             }
@@ -606,7 +621,7 @@ public partial class Report : System.Web.UI.Page
                     InvQty = First / Qty;
                     int result = 0;
                     float quotient = 0;
-                    if (dr["ProductName"].ToString() != "CURD175")
+                    if (dr["uomqty"].ToString() != "180")
                     {
                         quotient = Math.DivRem(First, Qty, out result);
                     }
@@ -1073,7 +1088,7 @@ public partial class Report : System.Web.UI.Page
         }
     }
 
-  
+
 
     private string GetSpace(string p)
     {
