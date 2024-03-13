@@ -615,15 +615,61 @@ public partial class Report : System.Web.UI.Page
                     var lastRow = Report.Rows[Report.Rows.Count - 3][dr["ProductName"].ToString()];
                     int First = 0;
                     int.TryParse(lastRow.ToString(), out First);
-                    int Qty = 0;
-                    int.TryParse(dr["Qty"].ToString(), out Qty);
-                    int InvQty = 0;
-                    InvQty = First / Qty;
+                    double Qty = 0;
+                    double.TryParse(dr["Qty"].ToString(), out Qty);
+
+                    double InvQty = 0;
+                    if (dr["uomqty"].ToString() == "130")
+                    {
+                        double qt = 9.36;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                    }
+                    if (dr["uomqty"].ToString() == "180")
+                    {
+                        double qt = 9;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                    }
+                    if (dr["uomqty"].ToString() == "475" || dr["uomqty"].ToString() == "950")
+                    {
+                        double qt = 11.4;
+                        Qty = (double)qt;
+                        InvQty = First / 11.4;
+
+                    }
+                    if (dr["uomqty"].ToString() == "140")
+                    {
+                        double qt = 10.08;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                    }
+                    if (dr["uomqty"].ToString() == "230")
+                    {
+                        double qt = 11.04;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+
+                    }
+                    if (dr["uomqty"].ToString() == "450" || dr["uomqty"].ToString() == "150") // 950 ,140 ,230 ,130 ,450
+                    {
+                        double qt = 10.8;
+                        Qty = (double)qt;
+                        InvQty = First / Qty;
+                    }
+
+                    if (dr["uomqty"].ToString() != "950" && dr["uomqty"].ToString() != "140" && dr["uomqty"].ToString() != "150" && dr["uomqty"].ToString() != "130" && dr["uomqty"].ToString() != "180" && dr["uomqty"].ToString() != "475" && dr["uomqty"].ToString() != "450")
+                    {
+                        InvQty = First / Qty;
+                    }
                     int result = 0;
-                    float quotient = 0;
+                    double quotient = 0;
                     if (dr["uomqty"].ToString() != "180")
                     {
-                        quotient = Math.DivRem(First, Qty, out result);
+                        quotient = First / Qty;
                     }
                     if (dr["Categoryname"].ToString() == "MILK")
                     {
