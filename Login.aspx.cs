@@ -267,7 +267,7 @@ public partial class Login : System.Web.UI.Page
                         string Branch = dtemp.Rows[0]["Branch"].ToString();
                         if (dtBranch.Rows.Count > 0)
                         {
-                            PlantID = dtBranch.Rows[0]["SuperBranch"].ToString();
+                            Session["PlantID"]  = "1";
                             Session["SuperBranch"] = dtBranch.Rows[0]["SuperBranch"].ToString();
 
                             Session["TitleName"] = "SRI VYSHNAVI DAIRY SPECIALITIES (P) LTD";
@@ -286,7 +286,7 @@ public partial class Login : System.Web.UI.Page
                         Session["EmpName"] = dtemp.Rows[0]["EmpName"].ToString();
                         if ("232" == dtemp.Rows[0]["Sno"].ToString())
                         {
-                            Session["branch"] = "172";
+                            Session["branch"] = "1";
                             Session["salestype"] = "Plant";
                         }
                         else

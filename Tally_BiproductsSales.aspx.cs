@@ -206,6 +206,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                     Report.Columns.Add("Ledger Type");
                     Report.Columns.Add("Customer Name");
                     Report.Columns.Add("Invoce No.");
+                    Report.Columns.Add("Plant_Invoce No.");
                     Report.Columns.Add("Invoice Date");
                     Report.Columns.Add("HSN CODE");
                     Report.Columns.Add("Item Name");
@@ -264,45 +265,88 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                 dcnumber = dtDcnumber.Rows[0]["agentdcno"].ToString();
                                 DCNO = dcnumber.ToString();
                             }
-                            else
+
+                            string plant_invoice = "";
+                            string PlantDCNo = "";
+                            cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agentdc WHERE  (BranchId = @BranchId) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
+                            cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
+                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                            cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                            DataTable dtPlantInvoice = vdm.SelectQuery(cmd).Tables[0];
+                            if (dtPlantInvoice.Rows.Count > 0)
                             {
-                                //if (NoOfdays < 2)
-                                //{
-                                //if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
-                                //{
-                                //    ddlSalesOffice.SelectedValue = "7";
-                                //}
-                                //else if (ddlSalesOffice.SelectedValue == "4626")
-                                //{
-                                //    ddlSalesOffice.SelectedValue = "159";
-                                //}
-                                cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agentdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
+                                plant_invoice = dtPlantInvoice.Rows[0]["plant_invoiceno"].ToString();
+                                PlantDCNo = plant_invoice.ToString();
+                            }
+                            if (PlantDCNo == "" || PlantDCNo == "0")
+                            {
+                                string agentdcNo = "";
+                                if (DCNO == "" || DCNO == "0")
+                                {
+                                    cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agentdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
+                                    cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
+                                    cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
+                                    cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
+                                    DataTable dtadcno = vdm.SelectQuery(cmd).Tables[0];
+                                    DCNO = dtadcno.Rows[0]["Sno"].ToString();
+                                }
+
+
+                                cmd = new MySqlCommand("SELECT IFNULL(MAX(plant_invoiceno), 0) + 1 AS P_invoiceno FROM agentdc WHERE  (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
-                                DataTable dtadcno = vdm.SelectQuery(cmd).Tables[0];
-                                string agentdcNo = dtadcno.Rows[0]["Sno"].ToString();
-                                cmd = new MySqlCommand("Insert Into Agentdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype)");
+                                DataTable dtplantinvoice = vdm.SelectQuery(cmd).Tables[0];
+                                string plant_invoiceno = dtplantinvoice.Rows[0]["P_invoiceno"].ToString();
+
+                                cmd = new MySqlCommand("Update Agentdc set plant_invoiceno=@plant_invoiceno,plantid=@plantid  WHERE (BranchId = @BranchId)  AND (soid=@soid)  AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                cmd.Parameters.AddWithValue("@IndDate", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d2", GetLowDate(fromdate.AddDays(-1)));
                                 cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                cmd.Parameters.AddWithValue("@agentdcno", agentdcNo);
-                                cmd.Parameters.AddWithValue("@stateid", gststatecode);
-                                cmd.Parameters.AddWithValue("@companycode", companycode);
                                 cmd.Parameters.AddWithValue("@doe", ReportDate);
-                                cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
-                                cmd.Parameters.AddWithValue("@invoicetype", "TSales");
-                                DcNo = vdm.insertScalar(cmd);
+                                cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                if (vdm.Update(cmd) == 0)
+                                {
+                                    cmd = new MySqlCommand("Insert Into Agentdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype,plant_invoiceno,plantid) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype,@plant_invoiceno,@plantid)");
+                                    cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
+                                    cmd.Parameters.AddWithValue("@IndDate", GetLowDate(fromdate.AddDays(-1)));
+                                    cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
+                                    cmd.Parameters.AddWithValue("@agentdcno", DCNO);
+                                    cmd.Parameters.AddWithValue("@stateid", gststatecode);
+                                    cmd.Parameters.AddWithValue("@companycode", companycode);
+                                    cmd.Parameters.AddWithValue("@doe", ReportDate);
+                                    cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
+                                    cmd.Parameters.AddWithValue("@invoicetype", "TSales");
+                                    cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
+                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                    vdm.insert(cmd);
+                                }
                                 cmd = new MySqlCommand("SELECT agentdcno FROM  agentdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
                                 cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                                 DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
+                                cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agentdc WHERE (BranchID = @BranchID) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
+                                cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                                DataTable dtgetP_invoice = vdm.SelectQuery(cmd).Tables[0];
                                 if (dtsubDc.Rows.Count > 0)
                                 {
                                     DCNO = dtsubDc.Rows[0]["agentdcno"].ToString();
                                 }
+                                if (dtgetP_invoice.Rows.Count > 0)
+                                {
+                                    PlantDCNo = dtgetP_invoice.Rows[0]["plant_invoiceno"].ToString();
+                                }
+
+                                PlantDCNo = PlantDCNo.ToString();
                                 DCNO = DCNO.ToString();
                                 //}
                             }
@@ -328,52 +372,68 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             {
                                 DCNO = "" + countdc;
                             }
-                            if (ddlSalesOffice.SelectedValue == "306")
+
+                            if (fromdate.Month > 3)
                             {
-                                if (fromdate.AddDays(1).Month > 3)
-                                {
-                                    DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                }
-                                else
-                                {
-                                    if (fromdate.AddDays(1).Month <= 3)
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                    }
-                                    else
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + DCNO;
-                                    }
-                                }
+                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
                             }
                             else
                             {
-                                if (fromdate.Month > 3)
+                                if (fromdate.Month <= 3)
                                 {
                                     DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
                                 }
                                 else
                                 {
-                                    if (fromdate.Month <= 3)
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                    }
-                                    else
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + DCNO;
-                                    }
+                                    DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + DCNO;
                                 }
                             }
+
+
+
+                            int pcountdc = 0;
+                            int.TryParse(PlantDCNo, out pcountdc);
+                            if (pcountdc <= 10)
+                            {
+                                PlantDCNo = "0000" + pcountdc;
+                            }
+                            if (pcountdc >= 10 && pcountdc <= 99)
+                            {
+                                PlantDCNo = "000" + pcountdc;
+                            }
+                            if (pcountdc >= 99 && pcountdc <= 999)
+                            {
+                                PlantDCNo = "00" + pcountdc;
+                            }
+                            if (pcountdc > 999 && pcountdc <= 9999)
+                            {
+                                PlantDCNo = "0" + pcountdc;
+                            }
+                            if (pcountdc > 9999)
+                            {
+                                PlantDCNo = "" + pcountdc;
+                            }
+
+                            if (fromdate.Month > 3)
+                            {
+                                PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
+                            }
+                            else
+                            {
+                                if (fromdate.Month <= 3)
+                                {
+                                    PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
+                                }
+                                else
+                                {
+                                    PlantDCNo = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + PlantDCNo;
+                                }
+                            }
+
                             newrow["Customer Name"] = branch["tBranchName"].ToString();
                             newrow["Invoce No."] = DCNO;
-                            if (ddlSalesOffice.SelectedValue == "306")
-                            {
-                                newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
-                            }
-                            else
-                            {
-                                newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
-                            }
+                            newrow["Plant_Invoce No."] = PlantDCNo;
+                            newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
                             newrow["HSN CODE"] = branch["hsncode"].ToString();
                             newrow["Item Name"] = branch["tProduct"].ToString();
                             double igst = 0;
@@ -480,247 +540,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             i++;
                             //}
                         }
-                        else
-                        {
-                            DateTime dtjuly = new DateTime();
-                            string jul = "7/18/2022";
-                            dtjuly = DateTime.Parse(jul);
-                            if (dtjuly > fromdate)
-                            {
-                                string[] catarr = { "2", "12", "39", "47", "48" };
-                                if (catarr.Contains(branch["categoryid"].ToString()))
-                                {
-                                    DataRow newrow = Report.NewRow();
-                                    string DCNO = "0";
-                                    long DcNo = 0;
-                                    cmd = new MySqlCommand("SELECT agentdcno FROM  agentdc WHERE (BranchId = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
-                                    cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                    DataTable dtDcnumber = vdm.SelectQuery(cmd).Tables[0];
-                                    string dcnumber = "";
-                                    if (dtDcnumber.Rows.Count > 0)
-                                    {
-                                        dcnumber = dtDcnumber.Rows[0]["agentdcno"].ToString();
-                                        DCNO = dcnumber.ToString();
-                                    }
-                                    else
-                                    {
-                                        //if (NoOfdays < 2)
-                                        //{
-                                        if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
-                                        {
-                                            ddlSalesOffice.SelectedValue = "7";
-                                        }
-                                        else if (ddlSalesOffice.SelectedValue == "4626")
-                                        {
-                                            ddlSalesOffice.SelectedValue = "159";
-                                        }
-                                        cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agentdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
-                                        cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
-                                        cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
-                                        DataTable dtadcno = vdm.SelectQuery(cmd).Tables[0];
-                                        string agentdcNo = dtadcno.Rows[0]["Sno"].ToString();
-                                        cmd = new MySqlCommand("Insert Into Agentdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype)");
-                                        cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                        cmd.Parameters.AddWithValue("@IndDate", GetLowDate(fromdate.AddDays(-1)));
-                                        cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@agentdcno", agentdcNo);
-                                        cmd.Parameters.AddWithValue("@stateid", gststatecode);
-                                        cmd.Parameters.AddWithValue("@companycode", companycode);
-                                        cmd.Parameters.AddWithValue("@doe", ReportDate);
-                                        cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
-                                        cmd.Parameters.AddWithValue("@invoicetype", "TSales");
-                                        DcNo = vdm.insertScalar(cmd);
-                                        cmd = new MySqlCommand("SELECT agentdcno FROM  agentdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
-                                        cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
-                                        cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                        cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                        DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
-                                        if (dtsubDc.Rows.Count > 0)
-                                        {
-                                            DCNO = dtsubDc.Rows[0]["agentdcno"].ToString();
-                                        }
-                                        DCNO = DCNO.ToString();
-                                        //}
-                                    }
-                                    int countdc = 0;
-                                    int.TryParse(DCNO, out countdc);
-                                    if (countdc <= 10)
-                                    {
-                                        DCNO = "0000" + countdc;
-                                    }
-                                    if (countdc >= 10 && countdc <= 99)
-                                    {
-                                        DCNO = "000" + countdc;
-                                    }
-                                    if (countdc >= 99 && countdc <= 999)
-                                    {
-                                        DCNO = "00" + countdc;
-                                    }
-                                    if (countdc > 999 && countdc <= 9999)
-                                    {
-                                        DCNO = "0" + countdc;
-                                    }
-                                    if (countdc > 9999)
-                                    {
-                                        DCNO = "" + countdc;
-                                    }
-                                    if (ddlSalesOffice.SelectedValue == "306")
-                                    {
-                                        if (fromdate.AddDays(1).Month > 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                        }
-                                        else
-                                        {
-                                            if (fromdate.AddDays(1).Month <= 3)
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                            }
-                                            else
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + DCNO;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (fromdate.Month > 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                        }
-                                        else
-                                        {
-                                            if (fromdate.Month <= 3)
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + DCNO;
-                                            }
-                                            else
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + DCNO;
-                                            }
-                                        }
-                                    }
-                                    newrow["Customer Name"] = branch["tBranchName"].ToString();
-                                    newrow["Invoce No."] = DCNO;
-                                    if (ddlSalesOffice.SelectedValue == "306")
-                                    {
-                                        newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
-                                    }
-                                    else
-                                    {
-                                        newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
-                                    }
-                                    newrow["HSN CODE"] = branch["hsncode"].ToString();
-                                    newrow["Item Name"] = branch["tProduct"].ToString();
-                                    double igst = 0;
-                                    double.TryParse(branch["igst"].ToString(), out igst);
-                                    double delqty = 0;
-                                    double.TryParse(branch["DeliveryQty"].ToString(), out delqty);
-                                    string tcategory = "";
-                                    newrow["Qty"] = branch["DeliveryQty"].ToString();
-                                    double UnitCost = 0;
-                                    double Unitprice = 0;
-                                    double.TryParse(branch["UnitCost"].ToString(), out UnitCost);
-                                    Unitprice = UnitCost;
-                                    double.TryParse(branch["igst"].ToString(), out igst);
-                                    float rate = 0;
-                                    double invval = 0;
-                                    double qty = 0;
-                                    double.TryParse(branch["DeliveryQty"].ToString(), out qty);
-                                    double taxval = 0;
-                                    float.TryParse(branch["UnitCost"].ToString(), out rate);
-                                    double tot_vatamount = 0;
-                                    double PAmount = 0;
-                                    string tostateid = branch["stateid"].ToString();
-                                    if (fromstateid == tostateid)
-                                    {
-                                        double sgstamount = 0;
-                                        double cgstamount = 0;
-                                        double Igst = 0;
-                                        double Igstamount = 0;
-                                        double totRate = 0;
-                                        double.TryParse(branch["Igst"].ToString(), out Igst);
-                                        double Igstcon = 100 + Igst;
-                                        Igstamount = (rate / Igstcon) * Igst;
-                                        Igstamount = Math.Round(Igstamount, 2);
-                                        totRate = Igstamount;
-                                        //if (igst == null || igst == 0.0)
-                                        //{
-                                        tcategory = branch["tcategory"].ToString();
-                                        //}
-                                        //else
-                                        //{
-                                        //    tcategory = branch["tcategory"].ToString() + "-CGST/SGST";
-                                        //}
-                                        newrow["Ledger Type"] = tcategory.ToString();
-                                        double Vatrate = rate - totRate;
-                                        Vatrate = Math.Round(Vatrate, 2);
-                                        newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
-                                        newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                        tot_vatamount = (PAmount * Igst) / 100;
-                                        sgstamount = (tot_vatamount / 2);
-                                        sgstamount = Math.Round(sgstamount, 2);
-                                        newrow["sgst%"] = "'" + 0;
-                                        newrow["sgst amount"] = 0;
-                                        cgstamount = (tot_vatamount / 2);
-                                        cgstamount = Math.Round(cgstamount, 2);
-                                        newrow["cgst%"] = "'" + 0;
-                                        newrow["cgst amount"] = 0;
-                                        newrow["Igst%"] = "'" + 0;
-                                        newrow["Igst amount"] = 0;
-                                    }
-                                    else
-                                    {
-                                        double Igst = 0;
-                                        double Igstamount = 0;
-                                        double totRate = 0;
-                                        double.TryParse(branch["Igst"].ToString(), out Igst);
-                                        double Igstcon = 100 + Igst;
-                                        Igstamount = (rate / Igstcon) * Igst;
-                                        Igstamount = Math.Round(Igstamount, 2);
-                                        totRate = Igstamount;
-                                        //if (igst == null || igst == 0.0)
-                                        //{
-                                            tcategory = branch["tcategory"].ToString();
-                                        //}
-                                        //else
-                                        //{
-                                        //    tcategory = branch["tcategory"].ToString() + "-IGST";
-                                        //}
-                                        newrow["Ledger Type"] = tcategory.ToString();
-                                        double Vatrate = rate - totRate;
-                                        Vatrate = Math.Round(Vatrate, 2);
-                                        newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
-                                        newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                        tot_vatamount = (PAmount * Igst) / 100;
-                                        newrow["sgst%"] = "'" + 0;
-                                        newrow["sgst amount"] = 0;
-                                        newrow["cgst%"] = "'" + 0;
-                                        newrow["cgst amount"] = 0;
-                                        newrow["Igst%"] = "'" + 0;
-                                        tot_vatamount = Math.Round(tot_vatamount, 2);
-                                        newrow["Igst amount"] = 0;
-                                    }
-                                    invval = Math.Round(invval, 2);
-                                    double netvalue = 0;
-                                    netvalue = invval + taxval;
-                                    netvalue = Math.Round(netvalue, 2);
 
-                                    double tot_amount = PAmount;
-                                    tot_amount = Math.Round(tot_amount, 2);
-                                    newrow["Net Value"] = tot_amount;
-                                    newrow["Narration"] = "Being the sale of milk to  " + branch["tBranchName"].ToString() + " vide DC No " + DCNO + ",DC Date " + fromdate.ToString("dd/MM/yyyy") + ",Emp Name " + Session["EmpName"].ToString();
-                                    Report.Rows.Add(newrow);
-                                    i++;
-                                }
-                            }
-                        }
                     }
                     grdReports.DataSource = Report;
                     grdReports.DataBind();
@@ -741,8 +561,9 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                     DataView view = new DataView(dtble);
                     Report = new DataTable();
                     Report.Columns.Add("Ledger Type");
-                    Report.Columns.Add("Customer Name");
+                    Report.Columns.Add("Customer Name"); 
                     Report.Columns.Add("Invoce No.");
+                    Report.Columns.Add("Plant_Invoce No.");
                     Report.Columns.Add("Invoice Date");
                     Report.Columns.Add("HSN CODE");
                     Report.Columns.Add("Item Name");
@@ -785,530 +606,227 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                     }
                     foreach (DataRow branch in dtble.Rows)
                     {
-                        DateTime dtjuly = new DateTime();
-                        string jul = "7/18/2022";
-                        dtjuly = DateTime.Parse(jul);
-                        if (dtjuly > fromdate)
+
+                        if (branch["igst"].ToString() != "0")
                         {
-                            string[] catarr = { "2", "12", "39", "47", "48" };
-                            if (catarr.Contains(branch["categoryid"].ToString()))
+                            DataRow newrow = Report.NewRow();
+                            string DCNO = "0";
+                            long DcNo = 0;
+
+                            cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchId = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
+                            cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                            cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                            DataTable dtDcnumber = vdm.SelectQuery(cmd).Tables[0];
+                            string dcnumber = "";
+                            if (dtDcnumber.Rows.Count > 0)
                             {
-                                
+                                dcnumber = dtDcnumber.Rows[0]["agentdcno"].ToString();
+                                DCNO = dcnumber.ToString();
                             }
-                            else
+                            string plant_invoice = "";
+                            string PlantDCNo = "";
+                            cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agenttaxdc WHERE  (BranchId = @BranchId) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
+                            cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
+                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                            cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                            cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                            DataTable dtPlantInvoice = vdm.SelectQuery(cmd).Tables[0];
+                            if (dtPlantInvoice.Rows.Count > 0)
                             {
-                                if (branch["igst"].ToString() != "0")
-                                {
-                                    DataRow newrow = Report.NewRow();
-                                    string DCNO = "0";
-                                    long DcNo = 0;
-                                    cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchId = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
-                                    cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                    DataTable dtDcnumber = vdm.SelectQuery(cmd).Tables[0];
-                                    string dcnumber = "";
-                                    if (dtDcnumber.Rows.Count > 0)
-                                    {
-                                        dcnumber = dtDcnumber.Rows[0]["agentdcno"].ToString();
-                                        DCNO = dcnumber.ToString();
-                                    }
-                                    else
-                                    {
-                                        if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
-                                        {
-                                            ddlSalesOffice.SelectedValue = "7";
-                                        }
-                                        else if (ddlSalesOffice.SelectedValue == "4626")
-                                        {
-                                            ddlSalesOffice.SelectedValue = "159";
-                                        }
-                                        //if (NoOfdays < 2)
-                                        //{
-                                        cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agenttaxdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
-                                        cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
-                                        cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
-                                        DataTable dtadcno = vdm.SelectQuery(cmd).Tables[0];
-                                        string agentdcNo = dtadcno.Rows[0]["Sno"].ToString();
-                                        cmd = new MySqlCommand("Insert Into agenttaxdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype)");
-                                        cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                        cmd.Parameters.AddWithValue("@IndDate", GetLowDate(fromdate.AddDays(-1)));
-                                        cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@agentdcno", agentdcNo);
-                                        cmd.Parameters.AddWithValue("@stateid", gststatecode);
-                                        cmd.Parameters.AddWithValue("@companycode", companycode);
-                                        cmd.Parameters.AddWithValue("@doe", ReportDate);
-                                        cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
-                                        cmd.Parameters.AddWithValue("@invoicetype", "TSales");
-                                        DcNo = vdm.insertScalar(cmd);
-                                        cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
-                                        cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
-                                        cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                        cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                        cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                        DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
-                                        if (dtsubDc.Rows.Count > 0)
-                                        {
-                                            DCNO = dtsubDc.Rows[0]["agentdcno"].ToString();
-                                        }
-                                        DCNO = DCNO.ToString();
-                                        //}
-                                    }
-                                    int countdc = 0;
-                                    int.TryParse(DCNO, out countdc);
-                                    if (countdc <= 10)
-                                    {
-                                        DCNO = "0000" + countdc;
-                                    }
-                                    if (countdc >= 10 && countdc <= 99)
-                                    {
-                                        DCNO = "000" + countdc;
-                                    }
-                                    if (countdc >= 99 && countdc <= 999)
-                                    {
-                                        DCNO = "00" + countdc;
-                                    }
-                                    if (countdc > 999 && countdc <= 9999)
-                                    {
-                                        DCNO = "0" + countdc;
-                                    }
-                                    if (countdc > 9999)
-                                    {
-                                        DCNO = "" + countdc;
-                                    }
-                                    if (ddlSalesOffice.SelectedValue == "306")
-                                    {
-                                        if (fromdate.AddDays(1).Month > 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-
-                                        }
-                                        else
-                                        {
-                                            if (fromdate.AddDays(1).Month <= 3)
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                            }
-                                            else
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + DCNO;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (fromdate.Month > 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                        }
-                                        else
-                                        {
-                                            if (fromdate.Month <= 3)
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                            }
-                                            else
-                                            {
-                                                DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + DCNO;
-                                            }
-                                        }
-                                    }
-                                    // DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                    newrow["Customer Name"] = branch["tBranchName"].ToString();
-                                    newrow["Invoce No."] = DCNO;
-                                    if (ddlSalesOffice.SelectedValue == "306")
-                                    {
-                                        newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
-                                    }
-                                    else
-                                    {
-                                        newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
-                                    }
-                                    newrow["HSN CODE"] = branch["hsncode"].ToString();
-                                    newrow["Item Name"] = branch["tProduct"].ToString();
-                                    double igst = 0;
-                                    double.TryParse(branch["igst"].ToString(), out igst);
-                                    double delqty = 0;
-                                    double.TryParse(branch["DeliveryQty"].ToString(), out delqty);
-                                    string tcategory = "";
-                                    newrow["Qty"] = branch["DeliveryQty"].ToString();
-                                    double UnitCost = 0;
-                                    double Unitprice = 0;
-                                    double.TryParse(branch["UnitCost"].ToString(), out UnitCost);
-                                    Unitprice = UnitCost;
-                                    double.TryParse(branch["igst"].ToString(), out igst);
-                                    float rate = 0;
-                                    double invval = 0;
-                                    double qty = 0;
-                                    double.TryParse(branch["DeliveryQty"].ToString(), out qty);
-                                    double taxval = 0;
-                                    float.TryParse(branch["UnitCost"].ToString(), out rate);
-                                    double tot_vatamount = 0;
-                                    double PAmount = 0;
-                                    string tostateid = branch["stateid"].ToString();
-                                    string regtype = branch["regtype"].ToString();
-                                    if (fromstateid == tostateid)
-                                    {
-                                        if (regtype == "Special Economic Zone")
-                                        {
-                                            double Igst = 0;
-                                            double Igstamount = 0;
-                                            double totRate = 0;
-                                            double.TryParse(branch["Igst"].ToString(), out Igst);
-                                            double Igstcon = 100 + Igst;
-                                            Igstamount = (rate / Igstcon) * Igst;
-                                            Igstamount = Math.Round(Igstamount, 2);
-                                            totRate = Igstamount;
-                                            if (igst == null || igst == 0.0)
-                                            {
-                                                tcategory = branch["tcategory"].ToString();
-                                            }
-                                            else
-                                            {
-                                                tcategory = branch["tcategory"].ToString() + "-IGST";
-                                            }
-                                            newrow["Ledger Type"] = tcategory.ToString();
-                                            double Vatrate = rate - totRate;
-                                            Vatrate = Math.Round(Vatrate, 2);
-                                            newrow["Rate"] = Vatrate.ToString();
-                                            PAmount = qty * Vatrate;
-                                            newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                            tot_vatamount = (PAmount * Igst) / 100;
-                                            newrow["sgst%"] = "'" + 0;
-                                            newrow["sgst amount"] = 0;
-                                            newrow["cgst%"] = "'" + 0;
-                                            newrow["cgst amount"] = 0;
-                                            newrow["Igst%"] = "'" + branch["Igst"].ToString();
-                                            tot_vatamount = Math.Round(tot_vatamount, 2);
-                                            newrow["Igst amount"] = tot_vatamount.ToString();
-                                        }
-                                        else
-                                        {
-                                            double sgstamount = 0;
-                                            double cgstamount = 0;
-                                            double Igst = 0;
-                                            double Igstamount = 0;
-                                            double totRate = 0;
-                                            double.TryParse(branch["Igst"].ToString(), out Igst);
-                                            double Igstcon = 100 + Igst;
-                                            Igstamount = (rate / Igstcon) * Igst;
-                                            Igstamount = Math.Round(Igstamount, 2);
-                                            totRate = Igstamount;
-                                            if (igst == null || igst == 0.0)
-                                            {
-                                                tcategory = branch["tcategory"].ToString();
-                                            }
-                                            else
-                                            {
-                                                tcategory = branch["tcategory"].ToString() + "-CGST/SGST";
-                                                if (tcategory == "Sale Of FM-CGST/SGST")
-                                                {
-                                                    tcategory = "Sale Of FM-CGST/SGST 12%";
-                                                }
-                                            }
-                                            newrow["Ledger Type"] = tcategory.ToString();
-                                            double Vatrate = rate - totRate;
-                                            Vatrate = Math.Round(Vatrate, 2);
-                                            newrow["Rate"] = Vatrate.ToString();
-                                            PAmount = qty * Vatrate;
-                                            newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                            tot_vatamount = (PAmount * Igst) / 100;
-                                            sgstamount = (tot_vatamount / 2);
-                                            sgstamount = Math.Round(sgstamount, 2);
-                                            newrow["sgst%"] = "'" + branch["sgst"].ToString();
-                                            newrow["sgst amount"] = sgstamount.ToString();
-                                            cgstamount = (tot_vatamount / 2);
-                                            cgstamount = Math.Round(cgstamount, 2);
-                                            newrow["cgst%"] = "'" + branch["cgst"].ToString();
-                                            newrow["cgst amount"] = cgstamount.ToString();
-                                            newrow["Igst%"] = "'" + 0;
-                                            newrow["Igst amount"] = 0;
-                                        }
-                                    }
-                                    else
-                                    {
-
-                                        double Igst = 0;
-                                        double Igstamount = 0;
-                                        double totRate = 0;
-                                        double.TryParse(branch["Igst"].ToString(), out Igst);
-                                        double Igstcon = 100 + Igst;
-                                        Igstamount = (rate / Igstcon) * Igst;
-                                        Igstamount = Math.Round(Igstamount, 2);
-                                        totRate = Igstamount;
-                                        if (igst == null || igst == 0.0)
-                                        {
-                                            tcategory = branch["tcategory"].ToString();
-                                        }
-                                        else
-                                        {
-                                            tcategory = branch["tcategory"].ToString() + "-IGST";
-                                        }
-                                        newrow["Ledger Type"] = tcategory.ToString();
-                                        double Vatrate = rate - totRate;
-                                        Vatrate = Math.Round(Vatrate, 2);
-                                        newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
-                                        newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                        tot_vatamount = (PAmount * Igst) / 100;
-                                        newrow["sgst%"] = "'" + 0;
-                                        newrow["sgst amount"] = 0;
-                                        newrow["cgst%"] = "'" + 0;
-                                        newrow["cgst amount"] = 0;
-                                        newrow["Igst%"] = "'" + branch["Igst"].ToString();
-                                        tot_vatamount = Math.Round(tot_vatamount, 2);
-                                        newrow["Igst amount"] = tot_vatamount.ToString();
-                                    }
-                                    invval = Math.Round(invval, 2);
-                                    double netvalue = 0;
-                                    netvalue = invval + taxval;
-                                    netvalue = Math.Round(netvalue, 2);
-                                    double tot_amount = PAmount + tot_vatamount;
-                                    tot_amount = Math.Round(tot_amount, 2);
-                                    newrow["Net Value"] = tot_amount;
-                                    newrow["Narration"] = "Being the sale of milk to  " + branch["tBranchName"].ToString() + " vide DC No " + DCNO + ",DC Date " + fromdate.ToString("dd/MM/yyyy") + ",Emp Name " + Session["EmpName"].ToString();
-                                    Report.Rows.Add(newrow);
-                                    i++;
-                                    //}
-                                }
+                                plant_invoice = dtPlantInvoice.Rows[0]["plant_invoiceno"].ToString();
+                                PlantDCNo = plant_invoice.ToString();
                             }
-                        }
-                        else
-                        {
-                            if (branch["igst"].ToString() != "0")
+                            if (PlantDCNo == "" || PlantDCNo == "0")
                             {
-                                DataRow newrow = Report.NewRow();
-                                string DCNO = "0";
-                                long DcNo = 0;
-
-                                cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchId = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
-                                cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                DataTable dtDcnumber = vdm.SelectQuery(cmd).Tables[0];
-                                string dcnumber = "";
-                                if (dtDcnumber.Rows.Count > 0)
+                                string agentdcNo = "";
+                                if (DCNO == "" || DCNO == "0")
                                 {
-                                    dcnumber = dtDcnumber.Rows[0]["agentdcno"].ToString();
-                                    DCNO = dcnumber.ToString();
-                                }
-                                else
-                                {
-                                    //if (ddlSalesOffice.SelectedValue == "572" || ddlSalesOffice.SelectedValue == "3")
-                                    //{
-                                    //    ddlSalesOffice.SelectedValue = "7";
-                                    //}
-                                    //else if (ddlSalesOffice.SelectedValue == "4626")
-                                    //{
-                                    //    ddlSalesOffice.SelectedValue = "159";
-                                    //}
-                                    //if (NoOfdays < 2)
-                                    //{
                                     cmd = new MySqlCommand("SELECT IFNULL(MAX(agentdcno), 0) + 1 AS Sno FROM agenttaxdc WHERE (soid = @BranchId) AND (IndDate BETWEEN @d1 AND @d2)");
                                     cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
                                     cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
                                     cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
                                     DataTable dtadcno = vdm.SelectQuery(cmd).Tables[0];
-                                    string agentdcNo = dtadcno.Rows[0]["Sno"].ToString();
-                                    cmd = new MySqlCommand("Insert Into agenttaxdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype)");
+                                    DCNO = dtadcno.Rows[0]["Sno"].ToString();
+                                }
+                                cmd = new MySqlCommand("SELECT IFNULL(MAX(plant_invoiceno), 0) + 1 AS P_invoiceno FROM agenttaxdc WHERE  (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
+                                cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
+                                cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
+                                DataTable dtplantinvoice = vdm.SelectQuery(cmd).Tables[0];
+                                string plant_invoiceno = dtplantinvoice.Rows[0]["P_invoiceno"].ToString();
+
+                                cmd = new MySqlCommand("Update agenttaxdc set plant_invoiceno=@plant_invoiceno,plantid=@plantid  WHERE (BranchId = @BranchId)  AND (soid=@soid)  AND (IndDate BETWEEN @d1 AND @d2)");
+                                cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d2", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
+                                cmd.Parameters.AddWithValue("@doe", ReportDate);
+                                cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                if (vdm.Update(cmd) == 0)
+                                {
+                                    cmd = new MySqlCommand("Insert Into agenttaxdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype,plant_invoiceno,plantid) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype,@plant_invoiceno,@plantid)");
                                     cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
                                     cmd.Parameters.AddWithValue("@IndDate", GetLowDate(fromdate.AddDays(-1)));
                                     cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                    cmd.Parameters.AddWithValue("@agentdcno", agentdcNo);
+                                    cmd.Parameters.AddWithValue("@agentdcno", DCNO);
                                     cmd.Parameters.AddWithValue("@stateid", gststatecode);
                                     cmd.Parameters.AddWithValue("@companycode", companycode);
                                     cmd.Parameters.AddWithValue("@doe", ReportDate);
                                     cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
                                     cmd.Parameters.AddWithValue("@invoicetype", "TSales");
+                                    cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
+                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
                                     DcNo = vdm.insertScalar(cmd);
-                                    cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
-                                    cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
-                                    cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
-                                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
-                                    DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
-                                    if (dtsubDc.Rows.Count > 0)
-                                    {
-                                        DCNO = dtsubDc.Rows[0]["agentdcno"].ToString();
-                                    }
-                                    DCNO = DCNO.ToString();
-                                    //}
                                 }
-                                int countdc = 0;
-                                int.TryParse(DCNO, out countdc);
-                                if (countdc <= 10)
-                                {
-                                    DCNO = "0000" + countdc;
-                                }
-                                if (countdc >= 10 && countdc <= 99)
-                                {
-                                    DCNO = "000" + countdc;
-                                }
-                                if (countdc >= 99 && countdc <= 999)
-                                {
-                                    DCNO = "00" + countdc;
-                                }
-                                if (countdc > 999 && countdc <= 9999)
-                                {
-                                    DCNO = "0" + countdc;
-                                }
-                                if (countdc > 9999)
-                                {
-                                    DCNO = "" + countdc;
-                                }
-                                if (ddlSalesOffice.SelectedValue == "306")
-                                {
-                                    if (fromdate.AddDays(1).Month > 3)
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
+                                cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
+                                cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
+                                cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                                DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
 
-                                    }
-                                    else
-                                    {
-                                        if (fromdate.AddDays(1).Month <= 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                        }
-                                        else
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + DCNO;
-                                        }
-                                    }
-                                }
-                                else
+                                cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
+                                cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                                cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                                DataTable dtgetP_invoice = vdm.SelectQuery(cmd).Tables[0];
+                                if (dtsubDc.Rows.Count > 0)
                                 {
-                                    if (fromdate.Month > 3)
-                                    {
-                                        DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                    }
-                                    else
-                                    {
-                                        if (fromdate.Month <= 3)
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                        }
-                                        else
-                                        {
-                                            DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + DCNO;
-                                        }
-                                    }
+                                    DCNO = dtsubDc.Rows[0]["agentdcno"].ToString();
                                 }
-                                // DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
-                                newrow["Customer Name"] = branch["tBranchName"].ToString();
-                                newrow["Invoce No."] = DCNO;
-                                if (ddlSalesOffice.SelectedValue == "306")
+                                if (dtgetP_invoice.Rows.Count > 0)
                                 {
-                                    newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
+                                    PlantDCNo = dtgetP_invoice.Rows[0]["plant_invoiceno"].ToString();
                                 }
-                                else
-                                {
-                                    newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
-                                }
-                                newrow["HSN CODE"] = branch["hsncode"].ToString();
-                                newrow["Item Name"] = branch["tProduct"].ToString();
-                                double igst = 0;
-                                double.TryParse(branch["igst"].ToString(), out igst);
-                                double delqty = 0;
-                                double.TryParse(branch["DeliveryQty"].ToString(), out delqty);
-                                string tcategory = "";
-                                newrow["Qty"] = branch["DeliveryQty"].ToString();
-                                double UnitCost = 0;
-                                double Unitprice = 0;
-                                double.TryParse(branch["UnitCost"].ToString(), out UnitCost);
-                                Unitprice = UnitCost;
-                                double.TryParse(branch["igst"].ToString(), out igst);
-                                float rate = 0;
-                                double invval = 0;
-                                double qty = 0;
-                                double.TryParse(branch["DeliveryQty"].ToString(), out qty);
-                                double taxval = 0;
-                                float.TryParse(branch["UnitCost"].ToString(), out rate);
-                                double tot_vatamount = 0;
-                                double PAmount = 0;
-                                string tostateid = branch["stateid"].ToString();
-                                string regtype = branch["regtype"].ToString();
-                                if (fromstateid == tostateid)
-                                {
-                                    if (regtype == "Special Economic Zone")
-                                    {
-                                        double Igst = 0;
-                                        double Igstamount = 0;
-                                        double totRate = 0;
-                                        double.TryParse(branch["Igst"].ToString(), out Igst);
-                                        double Igstcon = 100 + Igst;
-                                        Igstamount = (rate / Igstcon) * Igst;
-                                        Igstamount = Math.Round(Igstamount, 2);
-                                        totRate = Igstamount;
-                                        if (igst == null || igst == 0.0)
-                                        {
-                                            tcategory = branch["tcategory"].ToString();
-                                        }
-                                        else
-                                        {
-                                            tcategory = branch["tcategory"].ToString() + "-IGST";
-                                        }
-                                        newrow["Ledger Type"] = tcategory.ToString();
-                                        double Vatrate = rate - totRate;
-                                        Vatrate = Math.Round(Vatrate, 2);
-                                        newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
-                                        newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                        tot_vatamount = (PAmount * Igst) / 100;
-                                        newrow["sgst%"] = "'" + 0;
-                                        newrow["sgst amount"] = 0;
-                                        newrow["cgst%"] = "'" + 0;
-                                        newrow["cgst amount"] = 0;
-                                        newrow["Igst%"] = "'" + branch["Igst"].ToString();
-                                        tot_vatamount = Math.Round(tot_vatamount, 2);
-                                        newrow["Igst amount"] = tot_vatamount.ToString();
-                                    }
-                                    else
-                                    {
-                                        double sgstamount = 0;
-                                        double cgstamount = 0;
-                                        double Igst = 0;
-                                        double Igstamount = 0;
-                                        double totRate = 0;
-                                        double.TryParse(branch["Igst"].ToString(), out Igst);
-                                        double Igstcon = 100 + Igst;
-                                        Igstamount = (rate / Igstcon) * Igst;
-                                        Igstamount = Math.Round(Igstamount, 2);
-                                        totRate = Igstamount;
-                                        if (igst == null || igst == 0.0)
-                                        {
-                                            tcategory = branch["tcategory"].ToString();
-                                        }
-                                        else
-                                        {
-                                            tcategory = branch["tcategory"].ToString() + "-CGST/SGST";
-                                            if (tcategory == "Sale Of FM-CGST/SGST")
-                                            {
-                                                tcategory = "Sale Of FM-CGST/SGST 12%";
-                                            }
-                                        }
-                                        newrow["Ledger Type"] = tcategory.ToString();
-                                        double Vatrate = rate - totRate;
-                                        Vatrate = Math.Round(Vatrate, 2);
-                                        newrow["Rate"] = Vatrate.ToString();
-                                        PAmount = qty * Vatrate;
-                                        newrow["Taxable Value"] = Math.Round(PAmount, 2);
-                                        tot_vatamount = (PAmount * Igst) / 100;
-                                        sgstamount = (tot_vatamount / 2);
-                                        sgstamount = Math.Round(sgstamount, 2);
-                                        newrow["sgst%"] = "'" + branch["sgst"].ToString();
-                                        newrow["sgst amount"] = sgstamount.ToString();
-                                        cgstamount = (tot_vatamount / 2);
-                                        cgstamount = Math.Round(cgstamount, 2);
-                                        newrow["cgst%"] = "'" + branch["cgst"].ToString();
-                                        newrow["cgst amount"] = cgstamount.ToString();
-                                        newrow["Igst%"] = "'" + 0;
-                                        newrow["Igst amount"] = 0;
-                                    }
-                                }
-                                else
-                                {
 
+                                PlantDCNo = PlantDCNo.ToString();
+                                DCNO = DCNO.ToString();
+                                //}
+                            }
+                            int countdc = 0;
+                            int.TryParse(DCNO, out countdc);
+                            if (countdc <= 10)
+                            {
+                                DCNO = "0000" + countdc;
+                            }
+                            if (countdc >= 10 && countdc <= 99)
+                            {
+                                DCNO = "000" + countdc;
+                            }
+                            if (countdc >= 99 && countdc <= 999)
+                            {
+                                DCNO = "00" + countdc;
+                            }
+                            if (countdc > 999 && countdc <= 9999)
+                            {
+                                DCNO = "0" + countdc;
+                            }
+                            if (countdc > 9999)
+                            {
+                                DCNO = "" + countdc;
+                            }
+
+                            if (fromdate.Month > 3)
+                            {
+                                DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
+                            }
+                            else
+                            {
+                                if (fromdate.Month <= 3)
+                                {
+                                    DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
+                                }
+                                else
+                                {
+                                    DCNO = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + DCNO;
+                                }
+                            }
+                            
+
+
+                            int pcountdc = 0;
+                            int.TryParse(PlantDCNo, out pcountdc);
+                            if (countdc <= 10)
+                            {
+                                PlantDCNo = "0000" + pcountdc;
+                            }
+                            if (pcountdc >= 10 && pcountdc <= 99)
+                            {
+                                PlantDCNo = "000" + pcountdc;
+                            }
+                            if (pcountdc >= 99 && pcountdc <= 999)
+                            {
+                                PlantDCNo = "00" + pcountdc;
+                            }
+                            if (pcountdc > 999 && pcountdc <= 9999)
+                            {
+                                DCNO = "0" + pcountdc;
+                            }
+                            if (pcountdc > 9999)
+                            {
+                                PlantDCNo = "" + pcountdc;
+                            }
+
+
+                            if (fromdate.Month > 3)
+                            {
+                                PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
+                            }
+                            else
+                            {
+                                if (fromdate.Month <= 3)
+                                {
+                                    PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
+                                }
+                                else
+                                {
+                                    PlantDCNo = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + PlantDCNo;
+                                }
+                            }
+                            // DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
+                            newrow["Customer Name"] = branch["tBranchName"].ToString();
+                            newrow["Invoce No."] = DCNO;
+                            newrow["Plant_Invoce No."] = PlantDCNo;
+
+                            if (ddlSalesOffice.SelectedValue == "306")
+                            {
+                                newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
+                            }
+                            else
+                            {
+                                newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
+                            }
+                            newrow["HSN CODE"] = branch["hsncode"].ToString();
+                            newrow["Item Name"] = branch["tProduct"].ToString();
+                            double igst = 0;
+                            double.TryParse(branch["igst"].ToString(), out igst);
+                            double delqty = 0;
+                            double.TryParse(branch["DeliveryQty"].ToString(), out delqty);
+                            string tcategory = "";
+                            newrow["Qty"] = branch["DeliveryQty"].ToString();
+                            double UnitCost = 0;
+                            double Unitprice = 0;
+                            double.TryParse(branch["UnitCost"].ToString(), out UnitCost);
+                            Unitprice = UnitCost;
+                            double.TryParse(branch["igst"].ToString(), out igst);
+                            float rate = 0;
+                            double invval = 0;
+                            double qty = 0;
+                            double.TryParse(branch["DeliveryQty"].ToString(), out qty);
+                            double taxval = 0;
+                            float.TryParse(branch["UnitCost"].ToString(), out rate);
+                            double tot_vatamount = 0;
+                            double PAmount = 0;
+                            string tostateid = branch["stateid"].ToString();
+                            string regtype = branch["regtype"].ToString();
+                            if (fromstateid == tostateid)
+                            {
+                                if (regtype == "Special Economic Zone")
+                                {
                                     double Igst = 0;
                                     double Igstamount = 0;
                                     double totRate = 0;
@@ -1340,19 +858,96 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                     tot_vatamount = Math.Round(tot_vatamount, 2);
                                     newrow["Igst amount"] = tot_vatamount.ToString();
                                 }
-                                invval = Math.Round(invval, 2);
-                                double netvalue = 0;
-                                netvalue = invval + taxval;
-                                netvalue = Math.Round(netvalue, 2);
-                                double tot_amount = PAmount + tot_vatamount;
-                                tot_amount = Math.Round(tot_amount, 2);
-                                newrow["Net Value"] = tot_amount;
-                                newrow["Narration"] = "Being the sale of milk to  " + branch["tBranchName"].ToString() + " vide DC No " + DCNO + ",DC Date " + fromdate.ToString("dd/MM/yyyy") + ",Emp Name " + Session["EmpName"].ToString();
-                                Report.Rows.Add(newrow);
-                                i++;
-                                //}
+                                else
+                                {
+                                    double sgstamount = 0;
+                                    double cgstamount = 0;
+                                    double Igst = 0;
+                                    double Igstamount = 0;
+                                    double totRate = 0;
+                                    double.TryParse(branch["Igst"].ToString(), out Igst);
+                                    double Igstcon = 100 + Igst;
+                                    Igstamount = (rate / Igstcon) * Igst;
+                                    Igstamount = Math.Round(Igstamount, 2);
+                                    totRate = Igstamount;
+                                    if (igst == null || igst == 0.0)
+                                    {
+                                        tcategory = branch["tcategory"].ToString();
+                                    }
+                                    else
+                                    {
+                                        tcategory = branch["tcategory"].ToString() + "-CGST/SGST";
+                                        if (tcategory == "Sale Of FM-CGST/SGST")
+                                        {
+                                            tcategory = "Sale Of FM-CGST/SGST 12%";
+                                        }
+                                    }
+                                    newrow["Ledger Type"] = tcategory.ToString();
+                                    double Vatrate = rate - totRate;
+                                    Vatrate = Math.Round(Vatrate, 2);
+                                    newrow["Rate"] = Vatrate.ToString();
+                                    PAmount = qty * Vatrate;
+                                    newrow["Taxable Value"] = Math.Round(PAmount, 2);
+                                    tot_vatamount = (PAmount * Igst) / 100;
+                                    sgstamount = (tot_vatamount / 2);
+                                    sgstamount = Math.Round(sgstamount, 2);
+                                    newrow["sgst%"] = "'" + branch["sgst"].ToString();
+                                    newrow["sgst amount"] = sgstamount.ToString();
+                                    cgstamount = (tot_vatamount / 2);
+                                    cgstamount = Math.Round(cgstamount, 2);
+                                    newrow["cgst%"] = "'" + branch["cgst"].ToString();
+                                    newrow["cgst amount"] = cgstamount.ToString();
+                                    newrow["Igst%"] = "'" + 0;
+                                    newrow["Igst amount"] = 0;
+                                }
                             }
+                            else
+                            {
+
+                                double Igst = 0;
+                                double Igstamount = 0;
+                                double totRate = 0;
+                                double.TryParse(branch["Igst"].ToString(), out Igst);
+                                double Igstcon = 100 + Igst;
+                                Igstamount = (rate / Igstcon) * Igst;
+                                Igstamount = Math.Round(Igstamount, 2);
+                                totRate = Igstamount;
+                                if (igst == null || igst == 0.0)
+                                {
+                                    tcategory = branch["tcategory"].ToString();
+                                }
+                                else
+                                {
+                                    tcategory = branch["tcategory"].ToString() + "-IGST";
+                                }
+                                newrow["Ledger Type"] = tcategory.ToString();
+                                double Vatrate = rate - totRate;
+                                Vatrate = Math.Round(Vatrate, 2);
+                                newrow["Rate"] = Vatrate.ToString();
+                                PAmount = qty * Vatrate;
+                                newrow["Taxable Value"] = Math.Round(PAmount, 2);
+                                tot_vatamount = (PAmount * Igst) / 100;
+                                newrow["sgst%"] = "'" + 0;
+                                newrow["sgst amount"] = 0;
+                                newrow["cgst%"] = "'" + 0;
+                                newrow["cgst amount"] = 0;
+                                newrow["Igst%"] = "'" + branch["Igst"].ToString();
+                                tot_vatamount = Math.Round(tot_vatamount, 2);
+                                newrow["Igst amount"] = tot_vatamount.ToString();
+                            }
+                            invval = Math.Round(invval, 2);
+                            double netvalue = 0;
+                            netvalue = invval + taxval;
+                            netvalue = Math.Round(netvalue, 2);
+                            double tot_amount = PAmount + tot_vatamount;
+                            tot_amount = Math.Round(tot_amount, 2);
+                            newrow["Net Value"] = tot_amount;
+                            newrow["Narration"] = "Being the sale of milk to  " + branch["tBranchName"].ToString() + " vide DC No " + DCNO + ",DC Date " + fromdate.ToString("dd/MM/yyyy") + ",Emp Name " + Session["EmpName"].ToString();
+                            Report.Rows.Add(newrow);
+                            i++;
+                            //}
                         }
+                        //}
                     }
                     grdReports.DataSource = Report;
                     grdReports.DataBind();
