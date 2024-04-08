@@ -206,7 +206,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                     Report.Columns.Add("Ledger Type");
                     Report.Columns.Add("Customer Name");
                     Report.Columns.Add("Invoce No.");
-                    Report.Columns.Add("Plant_Invoce No.");
+                    //Report.Columns.Add("Plant_Invoce No.");
                     Report.Columns.Add("Invoice Date");
                     Report.Columns.Add("HSN CODE");
                     Report.Columns.Add("Item Name");
@@ -269,8 +269,8 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             string plant_invoice = "";
                             string PlantDCNo = "";
                             cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agentdc WHERE  (BranchId = @BranchId) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
-                            cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                            cmd.Parameters.AddWithValue("@BranchId", branch["BSno"]);
+                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                             DataTable dtPlantInvoice = vdm.SelectQuery(cmd).Tables[0];
@@ -295,7 +295,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
 
                                 cmd = new MySqlCommand("SELECT IFNULL(MAX(plant_invoiceno), 0) + 1 AS P_invoiceno FROM agentdc WHERE  (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
                                 DataTable dtplantinvoice = vdm.SelectQuery(cmd).Tables[0];
@@ -308,7 +308,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                 cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
                                 cmd.Parameters.AddWithValue("@doe", ReportDate);
                                 cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 if (vdm.Update(cmd) == 0)
                                 {
                                     cmd = new MySqlCommand("Insert Into Agentdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype,plant_invoiceno,plantid) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype,@plant_invoiceno,@plantid)");
@@ -322,7 +322,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                     cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
                                     cmd.Parameters.AddWithValue("@invoicetype", "TSales");
                                     cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
-                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                     vdm.insert(cmd);
                                 }
                                 cmd = new MySqlCommand("SELECT agentdcno FROM  agentdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
@@ -333,7 +333,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                 DataTable dtsubDc = vdm.SelectQuery(cmd).Tables[0];
                                 cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agentdc WHERE (BranchID = @BranchID) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                                 DataTable dtgetP_invoice = vdm.SelectQuery(cmd).Tables[0];
@@ -416,23 +416,23 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
 
                             if (fromdate.Month > 3)
                             {
-                                PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
+                                PlantDCNo = "PBK" + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
                             }
                             else
                             {
                                 if (fromdate.Month <= 3)
                                 {
-                                    PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
+                                    PlantDCNo = "PBK" + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "N/" + PlantDCNo;
                                 }
                                 else
                                 {
-                                    PlantDCNo = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + PlantDCNo;
+                                    PlantDCNo = "PBK" + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "N/" + PlantDCNo;
                                 }
                             }
 
                             newrow["Customer Name"] = branch["tBranchName"].ToString();
-                            newrow["Invoce No."] = DCNO;
-                            newrow["Plant_Invoce No."] = PlantDCNo;
+                            newrow["Invoce No."] = PlantDCNo;
+                            //newrow["Plant_Invoce No."] = PlantDCNo;
                             newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
                             newrow["HSN CODE"] = branch["hsncode"].ToString();
                             newrow["Item Name"] = branch["tProduct"].ToString();
@@ -563,7 +563,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                     Report.Columns.Add("Ledger Type");
                     Report.Columns.Add("Customer Name"); 
                     Report.Columns.Add("Invoce No.");
-                    Report.Columns.Add("Plant_Invoce No.");
+                    //Report.Columns.Add("Plant_Invoce No.");
                     Report.Columns.Add("Invoice Date");
                     Report.Columns.Add("HSN CODE");
                     Report.Columns.Add("Item Name");
@@ -628,7 +628,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             string PlantDCNo = "";
                             cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agenttaxdc WHERE  (BranchId = @BranchId) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                             cmd.Parameters.AddWithValue("@BranchId", branch["BSno"].ToString());
-                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                            cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                             cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                             cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                             DataTable dtPlantInvoice = vdm.SelectQuery(cmd).Tables[0];
@@ -651,7 +651,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                 }
                                 cmd = new MySqlCommand("SELECT IFNULL(MAX(plant_invoiceno), 0) + 1 AS P_invoiceno FROM agenttaxdc WHERE  (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchId", ddlSalesOffice.SelectedValue);
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(dtapril).AddDays(-1));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(dtmarch).AddDays(-1));
                                 DataTable dtplantinvoice = vdm.SelectQuery(cmd).Tables[0];
@@ -664,7 +664,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                 cmd.Parameters.AddWithValue("@soid", ddlSalesOffice.SelectedValue);
                                 cmd.Parameters.AddWithValue("@doe", ReportDate);
                                 cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 if (vdm.Update(cmd) == 0)
                                 {
                                     cmd = new MySqlCommand("Insert Into agenttaxdc (BranchId,IndDate,soid,agentdcno,stateid,companycode,moduleid,doe,invoicetype,plant_invoiceno,plantid) Values(@BranchId,@IndDate,@soid,@agentdcno,@stateid,@companycode,@moduleid,@doe,@invoicetype,@plant_invoiceno,@plantid)");
@@ -678,7 +678,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                                     cmd.Parameters.AddWithValue("@moduleid", Session["moduleid"].ToString());
                                     cmd.Parameters.AddWithValue("@invoicetype", "TSales");
                                     cmd.Parameters.AddWithValue("@plant_invoiceno", plant_invoiceno);
-                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                    cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                     DcNo = vdm.insertScalar(cmd);
                                 }
                                 cmd = new MySqlCommand("SELECT agentdcno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (IndDate BETWEEN @d1 AND @d2)");
@@ -690,7 +690,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
 
                                 cmd = new MySqlCommand("SELECT plant_invoiceno FROM  agenttaxdc WHERE (BranchID = @BranchID) AND (plantid = @plantid) AND (IndDate BETWEEN @d1 AND @d2)");
                                 cmd.Parameters.AddWithValue("@BranchID", branch["BSno"].ToString());
-                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"].ToString());
+                                cmd.Parameters.AddWithValue("@plantid", Session["PlantID"]);
                                 cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                                 cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
                                 DataTable dtgetP_invoice = vdm.SelectQuery(cmd).Tables[0];
@@ -750,7 +750,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
 
                             int pcountdc = 0;
                             int.TryParse(PlantDCNo, out pcountdc);
-                            if (countdc <= 10)
+                            if (pcountdc <= 10)
                             {
                                 PlantDCNo = "0000" + pcountdc;
                             }
@@ -764,7 +764,7 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
                             }
                             if (pcountdc > 999 && pcountdc <= 9999)
                             {
-                                DCNO = "0" + pcountdc;
+                                PlantDCNo = "0" + pcountdc;
                             }
                             if (pcountdc > 9999)
                             {
@@ -774,32 +774,27 @@ public partial class Tally_BiproductsSales : System.Web.UI.Page
 
                             if (fromdate.Month > 3)
                             {
-                                PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
+                                PlantDCNo = "PBK" + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
                             }
                             else
                             {
                                 if (fromdate.Month <= 3)
                                 {
-                                    PlantDCNo = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
+                                    PlantDCNo = "PBK" + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + PlantDCNo;
                                 }
                                 else
                                 {
-                                    PlantDCNo = Branchcode + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + PlantDCNo;
+                                    PlantDCNo = "PBK" + "/" + dtapril.AddYears(-1).ToString("yy") + "-" + dtmarch.AddYears(-1).ToString("yy") + "T/" + PlantDCNo;
                                 }
                             }
                             // DCNO = Branchcode + "/" + dtapril.ToString("yy") + "-" + dtmarch.ToString("yy") + "T/" + DCNO;
                             newrow["Customer Name"] = branch["tBranchName"].ToString();
-                            newrow["Invoce No."] = DCNO;
-                            newrow["Plant_Invoce No."] = PlantDCNo;
+                            //newrow["Invoce No."] = DCNO;
+                            newrow["Invoce No."] = PlantDCNo;
 
-                            if (ddlSalesOffice.SelectedValue == "306")
-                            {
-                                newrow["Invoice Date"] = fromdate.AddDays(1).ToString("dd-MMM-yyyy");
-                            }
-                            else
-                            {
-                                newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
-                            }
+
+                            newrow["Invoice Date"] = fromdate.ToString("dd-MMM-yyyy");
+                           
                             newrow["HSN CODE"] = branch["hsncode"].ToString();
                             newrow["Item Name"] = branch["tProduct"].ToString();
                             double igst = 0;
