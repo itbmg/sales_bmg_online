@@ -168,39 +168,56 @@ public partial class LeaksAndReturns : System.Web.UI.Page
             #region leaks
             if (ddlType.SelectedValue == "Leaks")
             {
+                DataTable dtLeaks = new DataTable();
                 lblLeak.Text = "Leaks For  " + ddlRouteName.SelectedItem.Text;
                 if (ddlreporttype.SelectedValue == "Dispatch Wise")
                 {
-                    //cmd = new MySqlCommand("SELECT tripdata.Sno, DATE_FORMAT(leakages.EntryDate, '%d %b %y') AS Date, leakages.TotalLeaks, dispatch.DispName, leakages.ProductID, leakages.LeakQty,leakages.TripID, leakages.VarifyStatus, branchproducts.unitprice, productsdata.ProductName FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN leakages ON tripdata.Sno = leakages.TripID INNER JOIN branchproducts ON leakages.ProductID = branchproducts.product_sno AND dispatch.Branch_Id = branchproducts.branch_sno INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (dispatch.sno = @dispatchsno) AND (leakages.EntryDate BETWEEN @d1 AND @d2) AND (leakages.VarifyStatus <> 'NULL')");
                     cmd = new MySqlCommand("SELECT tripdat.Sno, DATE_FORMAT(tripdat.I_Date, '%d %b %y') AS Date, leakages.TotalLeaks, dispatch.DispName, leakages.ProductID, leakages.LeakQty, leakages.TripID,leakages.VarifyStatus, branchproducts.unitprice, productsdata.ProductName FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN (SELECT Sno, AssignDate, I_Date FROM tripdata WHERE (I_Date BETWEEN @d1 AND @d2)) tripdat ON triproutes.Tripdata_sno = tripdat.Sno INNER JOIN leakages ON tripdat.Sno = leakages.TripID INNER JOIN branchproducts ON leakages.ProductID = branchproducts.product_sno AND dispatch.Branch_Id = branchproducts.branch_sno INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (dispatch.sno = @dispatchsno) AND (leakages.VarifyStatus <> 'NULL')");
+                    //cmd = new MySqlCommand("SELECT tripdat.Sno, DATE_FORMAT(tripdat.I_Date, '%d %b %y') AS Date, leakages.TotalLeaks, dispatch.DispName, leakages.ProductID, leakages.LeakQty, leakages.TripID,leakages.VarifyStatus, branchproducts.unitprice, productsdata.ProductName FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN (SELECT Sno, AssignDate, I_Date FROM tripdata WHERE (I_Date BETWEEN @d1 AND @d2)) tripdat ON triproutes.Tripdata_sno = tripdat.Sno INNER JOIN leakages ON tripdat.Sno = leakages.TripID INNER JOIN branchproducts ON leakages.ProductID = branchproducts.product_sno AND dispatch.Branch_Id = branchproducts.branch_sno INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (dispatch.sno = @dispatchsno)");
                     cmd.Parameters.AddWithValue("@dispatchsno", ddlRouteName.SelectedValue);
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
                     cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
                 }
                 else
                 {
-                    ////cmd = new MySqlCommand("SELECT tripdat.Sno, DATE_FORMAT(tripdat.I_Date, '%d %b %y') AS DATE, leakages.TotalLeaks, productsdata.UnitPrice, productsdata.ProductName, leakages.ProductID,leakages.LeakQty, leakages.TripID, leakages.VarifyStatus FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN (SELECT Sno, AssignDate, I_Date FROM tripdata WHERE (I_Date BETWEEN @d1 AND @d2)) tripdat ON triproutes.Tripdata_sno = tripdat.Sno INNER JOIN leakages ON tripdat.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (leakages.VarifyStatus <> 'NULL') AND (dispatch.BranchID = @sobranchid)"); 
-                    //Ravindra 30/01/2017
-                    cmd = new MySqlCommand("SELECT Leaks.TotalLeaks,leaks.productsno, Leaks.UnitPrice, Leaks.ProductName,DATE_FORMAT(ff.I_Date, '%d %b %y') AS DATE,  ff.DispName, Leaks.Sno AS Sno FROM (SELECT leakages.TotalLeaks,productsdata.UnitPrice, productsdata.ProductName,productsdata.sno AS productsno, tripdata_1.Sno FROM            tripdata tripdata_1 INNER JOIN leakages ON tripdata_1.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE        (leakages.VarifyStatus <> 'NULL') AND (tripdata_1.I_Date BETWEEN @d1 AND @d2)) Leaks INNER JOIN (SELECT  DispName, Sno, DespSno, I_Date FROM  (SELECT  dispatch.DispName, tripdata.Sno, dispatch.sno AS DespSno, tripdata.I_Date FROM branchdata INNER JOIN dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @BranchID)) TripInfo) ff ON ff.Sno = Leaks.Sno");
+                    cmd = new MySqlCommand("SELECT dispatch.DispName, dispatch.sno, dispatch.BranchID, tripdata.I_Date,tripdata.sno as TripSno FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (dispatch.BranchID = @BranchID) AND (tripdata.I_Date BETWEEN @d1 AND @d2)  and (dispatch.DispType='SO') and (tripdata.Status<>'C')  group by tripdata.Sno ORDER BY dispatch.sno");
                     cmd.Parameters.AddWithValue("@BranchID", ddlRouteName.SelectedValue);
                     cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
-                }
-                // cmd = new MySqlCommand("SELECT tripdata.Sno,DATE_FORMAT(leakages.EntryDate, '%d %b %y') as Date, leakages.TotalLeaks,productsdata.UnitPrice, productsdata.ProductName, dispatch.DispName, leakages.ProductID  FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN leakages ON tripdata.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE  (dispatch.sno = @dispatchsno) AND (leakages.EntryDate between @d1 and @d2) Group by leakages.EntryDate, productsdata.ProductName");
+                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                    DataTable dtDispnames = vdm.SelectQuery(cmd).Tables[0];
+                    foreach (DataRow dr in dtDispnames.Rows)
+                    {
+                        cmd = new MySqlCommand("SELECT Triproutes.Tripdata_sno, Triproutes.RouteID, ff.Sno,DATE_FORMAT(ff.I_Date, '%d %b %y') AS DATE, ROUND(SUM(ff.TotalLeaks), 2)as TotalLeaks, ff.VLeaks, ff.VReturns, ff.ReturnQty, ff.ProductName, ff.ProductID, ff.FreeMilk, ff.ShortQty FROM (SELECT Tripdata_sno, RouteID, Sno FROM triproutes triproutes_1 WHERE (RouteID = @dispatchSno)) Triproutes INNER JOIN (SELECT Sno, I_Date,TotalLeaks, VLeaks, VReturns, ReturnQty, ProductName, ProductID, FreeMilk, ShortQty FROM (SELECT tripdata.Sno,tripdata.I_Date, leakages.TotalLeaks, leakages.VLeaks, leakages.VReturns, leakages.ReturnQty, productsdata.ProductName, leakages.ProductID, leakages.FreeMilk,  leakages.ShortQty FROM  leakages INNER JOIN tripdata ON leakages.TripID = tripdata.Sno INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2)) tripinfo) ff ON ff.Sno = Triproutes.Tripdata_sno group by Date(ff.I_Date),ff.ProductID");
+                        cmd.Parameters.AddWithValue("@dispatchSno", dr["sno"].ToString());
+                        cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                        cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
+                        dtLeaks = vdm.SelectQuery(cmd).Tables[0];
+                    }
 
-                DataTable dtLeaks = vdm.SelectQuery(cmd).Tables[0];
+                    //cmd = new MySqlCommand("SELECT ROUND(SUM(Leaks.TotalLeaks), 2)as TotalLeaks,leaks.productsno, Leaks.UnitPrice, Leaks.ProductName,DATE_FORMAT(ff.I_Date, '%d %b %y') AS DATE,  ff.DispName, Leaks.Sno AS Sno FROM (SELECT leakages.TotalLeaks,productsdata.UnitPrice, productsdata.ProductName,productsdata.sno AS productsno, tripdata_1.Sno FROM            tripdata tripdata_1 INNER JOIN leakages ON tripdata_1.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE        (leakages.VarifyStatus <> 'NULL') AND (tripdata_1.I_Date BETWEEN @d1 AND @d2)) Leaks INNER JOIN (SELECT  DispName, Sno, DespSno, I_Date FROM  (SELECT  dispatch.DispName, tripdata.Sno, dispatch.sno AS DespSno, tripdata.I_Date FROM branchdata INNER JOIN dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN  triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @BranchID)) TripInfo) ff ON ff.Sno = Leaks.Sno group by ff.I_Date,leaks.productsno");
+                    //cmd.Parameters.AddWithValue("@BranchID", ddlRouteName.SelectedValue);
+                    //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                    //cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
+
+                    //cmd = new MySqlCommand("SELECT DATE_FORMAT(result.I_Date, '%d %b %y') AS Date, result.LeakQty as TotalLeaks, result.ProductName, result.DispName, result.Categoryname, result.Prodsno as productid  FROM (SELECT        ROUND(SUM(Leaks.TotalLeaks),2) AS LeakQty, Leaks.ProductName, Leaks.Categoryname, ff.DispName, Leaks.Prodsno,Leaks.I_Date FROM (SELECT leakages.TotalLeaks, productsdata.ProductName, tripdata_1.Sno,tripdata_1.I_Date, products_category.Categoryname, productsdata.sno AS Prodsno FROM tripdata tripdata_1 INNER JOIN leakages ON tripdata_1.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno INNER JOIN products_subcategory ON productsdata.SubCat_sno = products_subcategory.sno INNER JOIN products_category ON products_subcategory.category_sno = products_category.sno WHERE   (leakages.VarifyStatus = 'V') AND (tripdata_1.I_Date BETWEEN @d1 AND @d2)) Leaks INNER JOIN (SELECT        DispName, Sno, DespSno FROM            (SELECT        dispatch.DispName, tripdata.Sno, dispatch.sno AS DespSno FROM            branchdata INNER JOIN dispatch ON branchdata.sno = dispatch.Branch_Id INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE        (tripdata.I_Date BETWEEN @d1 AND @d2) AND (dispatch.BranchID = @BranchID)) TripInfo) ff ON ff.Sno = Leaks.Sno GROUP BY Leaks.ProductName,DATE(Leaks.I_Date)) result INNER JOIN (SELECT branch_sno, product_sno, Rank FROM            branchproducts WHERE        (branch_sno = @BranchID)) brnchproductsRank ON result.Prodsno = brnchproductsRank.product_sno order by Date");
+                    //cmd.Parameters.AddWithValue("@BranchID", ddlRouteName.SelectedValue);
+                    //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate).AddDays(-1));
+                    //cmd.Parameters.AddWithValue("@d2", GetHighDate(todate).AddDays(-1));
+
+                }
+
 
                 Report = new DataTable();
                 Report.Columns.Add("Date");
                 DataView view = new DataView(dtLeaks);
-                DataTable distinctProduct = view.ToTable(true, "ProductName", "productsno");
+                DataTable distinctProduct = view.ToTable(true, "ProductName");
                 foreach (DataRow dr in distinctProduct.Rows)
                 {
                     Report.Columns.Add(dr["ProductName"].ToString()).DataType = typeof(Double);
                 }
                 Report.Columns.Add("Total  Leaks").DataType = typeof(Double);
-                Report.Columns.Add("Despatch Qty").DataType = typeof(Double);
-                Report.Columns.Add("Leaks %");
+                //Report.Columns.Add("Despatch Qty").DataType = typeof(Double);
+                //Report.Columns.Add("Leaks %");
                 //Report.Columns.Add("Total  Amount").DataType = typeof(float);
                 DataTable distincttable = view.ToTable(true, "Date");
                 int i = 1;
@@ -242,7 +259,7 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                             double TotalLeaks = 0;
                             double.TryParse(dr["TotalLeaks"].ToString(), out TotalLeaks);
                             double UnitCost = 0;
-                            double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
+                            //double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
                             if (TotalLeaks == 0)
                             {
                             }
@@ -269,25 +286,23 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                         {
                             avg = (Totleaks / dispqty) * 100;
                         }
-                        newrow["Leaks %"] = Math.Round(avg, 2);
-                        newrow["Despatch Qty"] = Math.Round(dispqty, 2);
+                        //newrow["Leaks %"] = Math.Round(avg, 2);
+                        //newrow["Despatch Qty"] = Math.Round(dispqty, 2);
                         TotldespQty += dispqty;
 
                     }
                     else
                     {
-                        //avg = 0;
-                        newrow["Leaks %"] = avg;
-                        newrow["Despatch Qty"] = "";
+                       // newrow["Leaks %"] = avg;
+                        //newrow["Despatch Qty"] = "";
 
                     }
-                    //newrow["Total  Amount"] = Total;
                     Report.Rows.Add(newrow);
                 }
                 double Tot_per = 0;
                 Tot_per = Tot_leaks / TotldespQty;
                 Tot_per = Tot_per * 100;
-                lblMessage.Text = "Total Leak % = " + Tot_per.ToString("F2");
+                //lblMessage.Text = "Total Leak % = " + Tot_per.ToString("F2");
                 foreach (var column in Report.Columns.Cast<DataColumn>().ToArray())
                 {
                     if (Report.AsEnumerable().All(dr => dr.IsNull(column)))
@@ -306,7 +321,7 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                         double empty = 0;
                         double.TryParse(Report.Compute("sum([" + dc.ToString() + "])", "[" + dc.ToString() + "]<>'0'").ToString(), out val1);
                         newvartical[dc.ToString()] = val1;
-                        if (dc.ToString() == "Total  Leaks" || dc.ToString() == "Despatch Qty")
+                        if (dc.ToString() == "Total  Leaks")
                         {
                             newvarticalks[dc.ToString()] = empty;
                         }
@@ -322,46 +337,37 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                 DataRow newvartical1 = Report.NewRow();
                 newvartical1["Date"] = "Dispatchqty";
                
-                DataRow newvartical2 = Report.NewRow();
+                //DataRow newvartical2 = Report.NewRow();
                 
 
-                double val2 = 0;
-                string va = string.Empty;
-                double Gval = 0;
-                int inc = 1;
-                foreach (DataRow drr2 in dtproductdispatch.Rows)
-                {
-                    string col1 = drr2[2].ToString();
-                    va = drr2[1].ToString();
-                    try
-                    {
-                        newvartical1[col1] = va;                        
-                        Gval = Gval + Convert.ToDouble(va);
+                //double val2 = 0;
+                //string va = string.Empty;
+                //double Gval = 0;
+                //int inc = 1;
+                //foreach (DataRow drr2 in dtproductdispatch.Rows)
+                //{
+                //    string col1 = drr2[2].ToString();
+                //    va = drr2[1].ToString();
+                //    try
+                //    {
+                //        newvartical1[col1] = va;                        
+                //        Gval = Gval + Convert.ToDouble(va);
 
-                        //
-                        double d = Convert.ToDouble(newvarticalks[col1]);
-                        double LeakPercent = (d / Convert.ToDouble(va)) * 100;
-                        //if (col1 == "Total  Leaks" || col1 == "Despatch Qty")
-                        //{
-                        //    newvarticalks[col1] = " ";
-                        //}
-                        //else
-                        //{
-                            newvarticalks[col1] = LeakPercent.ToString("F2");
-                        //}
-                        //
+                //        //
+                //        double d = Convert.ToDouble(newvarticalks[col1]);
+                //        double LeakPercent = (d / Convert.ToDouble(va)) * 100;
+                //            newvarticalks[col1] = LeakPercent.ToString("F2");
+                //        inc++;
+                //    }
+                //    catch (Exception ex)
+                //    {
 
-                        inc++;
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                }
-                newvartical1["Despatch Qty"] = val1.ToString();               
-                Report.Rows.Add(newvartical1);
-                newvarticalks["Date"] = "Leak%";
-                Report.Rows.Add(newvarticalks);
+                //    }
+                //}
+                //newvartical1["Despatch Qty"] = val1.ToString();               
+                //Report.Rows.Add(newvartical1);
+                //newvarticalks["Date"] = "Leak%";
+                //Report.Rows.Add(newvarticalks);
                 foreach (DataColumn col in Report.Columns)
                 {
                     string Pname = col.ToString();
@@ -378,6 +384,7 @@ public partial class LeaksAndReturns : System.Web.UI.Page
             #region Returns
             if (ddlType.SelectedValue == "Returns")
             {
+                DataTable dtLeaks = new DataTable();
                 lblLeak.Text = "Returns For  " + ddlRouteName.SelectedItem.Text;
                 if (ddlreporttype.SelectedValue == "Dispatch Wise")
                 {
@@ -388,14 +395,30 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                 }
                 else
                 {
-                    cmd = new MySqlCommand("SELECT tripdata.Sno, DATE_FORMAT(leakages.EntryDate,'%d %b %y') as Date, leakages.ReturnQty, productsdata.UnitPrice, productsdata.ProductName, leakages.ProductID FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN leakages ON tripdata.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (leakages.EntryDate BETWEEN @d1 AND @d2) AND (leakages.VarifyStatus <> 'NULL') AND (dispatch.BranchID = @sobranchid) AND (leakages.ReturnQty <> 0)");
-                    cmd.Parameters.AddWithValue("@sobranchid", ddlRouteName.SelectedValue);
-                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
-                    cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
+                    cmd = new MySqlCommand("SELECT dispatch.DispName, dispatch.sno, dispatch.BranchID, tripdata.I_Date,tripdata.sno as TripSno FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno WHERE (dispatch.BranchID = @BranchID) AND (tripdata.I_Date BETWEEN @d1 AND @d2)  and (dispatch.DispType='SO') and (tripdata.Status<>'C')  group by tripdata.Sno ORDER BY dispatch.sno");
+                    cmd.Parameters.AddWithValue("@BranchID", ddlRouteName.SelectedValue);
+                    cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                    cmd.Parameters.AddWithValue("@d2", GetHighDate(fromdate.AddDays(-1)));
+                    DataTable dtDispnames = vdm.SelectQuery(cmd).Tables[0];
+                    foreach (DataRow dr in dtDispnames.Rows)
+                    {
+                        cmd = new MySqlCommand("SELECT Triproutes.Tripdata_sno, Triproutes.RouteID, ff.Sno,DATE_FORMAT(ff.I_Date, '%d %b %y') AS DATE, ROUND(SUM(ff.TotalLeaks), 2)as TotalLeaks, ff.VLeaks, ff.VReturns, ROUND(SUM(ff.ReturnQty), 2)as ReturnQty, ff.ProductName, ff.ProductID, ff.FreeMilk, ff.ShortQty FROM (SELECT Tripdata_sno, RouteID, Sno FROM triproutes triproutes_1 WHERE (RouteID = @dispatchSno)) Triproutes INNER JOIN (SELECT Sno, I_Date,TotalLeaks, VLeaks, VReturns, ReturnQty, ProductName, ProductID, FreeMilk, ShortQty FROM (SELECT tripdata.Sno,tripdata.I_Date, leakages.TotalLeaks, leakages.VLeaks, leakages.VReturns, leakages.ReturnQty, productsdata.ProductName, leakages.ProductID, leakages.FreeMilk,  leakages.ShortQty FROM  leakages INNER JOIN tripdata ON leakages.TripID = tripdata.Sno INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (tripdata.I_Date BETWEEN @d1 AND @d2)) tripinfo) ff ON ff.Sno = Triproutes.Tripdata_sno group by Date(ff.I_Date),ff.ProductID");
+                        cmd.Parameters.AddWithValue("@dispatchSno", dr["sno"].ToString());
+                        cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate.AddDays(-1)));
+                        cmd.Parameters.AddWithValue("@d2", GetHighDate(todate.AddDays(-1)));
+                        dtLeaks = vdm.SelectQuery(cmd).Tables[0];
+                    }
+
+                    //cmd = new MySqlCommand("SELECT tripdata.Sno, DATE_FORMAT(leakages.EntryDate,'%d %b %y') as Date, leakages.ReturnQty, productsdata.UnitPrice, productsdata.ProductName, leakages.ProductID FROM dispatch INNER JOIN triproutes ON dispatch.sno = triproutes.RouteID INNER JOIN tripdata ON triproutes.Tripdata_sno = tripdata.Sno INNER JOIN leakages ON tripdata.Sno = leakages.TripID INNER JOIN productsdata ON leakages.ProductID = productsdata.sno WHERE (leakages.EntryDate BETWEEN @d1 AND @d2) AND (leakages.VarifyStatus <> 'NULL') AND (dispatch.BranchID = @sobranchid) AND (leakages.ReturnQty <> 0)");
+                    //cmd.Parameters.AddWithValue("@sobranchid", ddlRouteName.SelectedValue);
+                    //cmd.Parameters.AddWithValue("@d1", GetLowDate(fromdate));
+                    //cmd.Parameters.AddWithValue("@d2", GetHighDate(todate));
+
+
 
                 }
 
-                DataTable dtLeaks = vdm.SelectQuery(cmd).Tables[0];
+                //DataTable dtLeaks = vdm.SelectQuery(cmd).Tables[0];
                 Report = new DataTable();
                 Report.Columns.Add("Date");
                 DataView view = new DataView(dtLeaks);
@@ -405,8 +428,8 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     Report.Columns.Add(dr["ProductName"].ToString()).DataType = typeof(Double);
                 }
                 Report.Columns.Add("Total  Returns").DataType = typeof(Double);
-                Report.Columns.Add("Total  Average Returns For Total Dispatch");
-                Report.Columns.Add("Total  Amount").DataType = typeof(float);
+                //Report.Columns.Add("Total  Average Returns For Total Dispatch");
+                //Report.Columns.Add("Total  Amount").DataType = typeof(float);
                 DataTable distincttable = view.ToTable(true, "Date", "Sno");
                 int i = 1;
                 foreach (DataRow branch in distincttable.Rows)
@@ -419,51 +442,55 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     DateTime dtIndentDate = Convert.ToDateTime(IndentDate);
                     string ChangedTime = dtIndentDate.ToString("dd/MMM/yyyy");
                     newrow["Date"] = ChangedTime;
-                    //newrow["Branch Name"] = branch["BranchName"].ToString();
                     double Totreturn = 0;
                     double Total = 0;
                     foreach (DataRow dr in dtLeaks.Rows)
                     {
                         if (branch["Date"].ToString() == dr["Date"].ToString())
                         {
-                            //if (dr["DeliveryQty"].ToString() != "")
-                            //{
+                           
                             double ReturnQty = 0;
                             double.TryParse(dr["ReturnQty"].ToString(), out ReturnQty);
                             double UnitCost = 0;
-                            double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
-                            newrow[dr["ProductName"].ToString()] = ReturnQty;
-                            Total += ReturnQty * UnitCost;
-                            Totreturn += ReturnQty;
-                            //}
+                            if (ReturnQty == 0)
+                            {
+                            }
+                            else
+                            {
+                                //double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
+                                newrow[dr["ProductName"].ToString()] = ReturnQty;
+                                Total += ReturnQty * UnitCost;
+                                Totreturn += ReturnQty;
+                            }
+                            
                         }
                     }
                     newrow["Total  Returns"] = Totreturn;
                     double avg = 0;
 
-                    if (dtdispatch.Rows.Count > 0)
-                    {
-                        double dispqty = 0;
-                        double.TryParse(dtdispatch.Rows[0]["disqty"].ToString(), out dispqty);
-                        avg = Totreturn / dispqty;
-                        newrow["Total  Average Returns For Total Dispatch"] = Math.Round(avg, 2);
+                    //if (dtdispatch.Rows.Count > 0)
+                    //{
+                    //    double dispqty = 0;
+                    //    double.TryParse(dtdispatch.Rows[0]["disqty"].ToString(), out dispqty);
+                    //    avg = Totreturn / dispqty;
+                    //    newrow["Total  Average Returns For Total Dispatch"] = Math.Round(avg, 2);
 
+                    //}
+                    //else
+                    //{
+                    //    //avg = 0;
+                    //    newrow["Total  Average Returns For Total Dispatch"] = avg;
 
-                    }
-                    else
-                    {
-                        //avg = 0;
-                        newrow["Total  Average Returns For Total Dispatch"] = avg;
-
-                    }
-                    newrow["Total  Amount"] = Total;
+                    //}
+                    //newrow["Total  Amount"] = Total;
                     Report.Rows.Add(newrow);
                 }
+                
                 DataRow newvartical = Report.NewRow();
                 newvartical["Date"] = "Total";
-                float val = 0;
-                float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
-                newvartical["Total  Amount"] = val;
+                //float val = 0;
+                //float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
+                //newvartical["Total  Amount"] = val;
                 double val1 = 0;
                 foreach (DataColumn dc in Report.Columns)
                 {
@@ -629,8 +656,7 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     Report.Columns.Add(dr["ProductName"].ToString()).DataType = typeof(Double);
                 }
                 Report.Columns.Add("Total  FreeMilk").DataType = typeof(Double);
-                //Report.Columns.Add("Total  Average Returns For Total Dispatch");
-                Report.Columns.Add("Total  Amount").DataType = typeof(float);
+                //Report.Columns.Add("Total  Amount").DataType = typeof(float);
                 DataTable distincttable = view.ToTable(true, "Date");
                 int i = 1;
                 foreach (DataRow branch in distincttable.Rows)
@@ -640,7 +666,6 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     DateTime dtIndentDate = Convert.ToDateTime(IndentDate).AddDays(1);
                     string ChangedTime = dtIndentDate.ToString("dd/MMM/yyyy");
                     newrow["Date"] = ChangedTime;
-                    //newrow["Branch Name"] = branch["BranchName"].ToString();
                     double Totreturn = 0;
                     double Total = 0;
                     foreach (DataRow dr in dtLeaks.Rows)
@@ -649,23 +674,29 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                         {
                             double FreeMilk = 0;
                             double.TryParse(dr["FreeMilk"].ToString(), out FreeMilk);
-                            double UnitCost = 0;
-                            double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
-                            newrow[dr["ProductName"].ToString()] = FreeMilk;
-                            Total += FreeMilk * UnitCost;
-                            Totreturn += FreeMilk;
+                            if (FreeMilk == 0)
+                            {
+                            }
+                            else
+                            {
+                                double UnitCost = 0;
+                                double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
+                                newrow[dr["ProductName"].ToString()] = FreeMilk;
+                                Total += FreeMilk * UnitCost;
+                                Totreturn += FreeMilk;
+                            }
                         }
                     }
                     newrow["Total  FreeMilk"] = Totreturn;
-                    double avg = 0;
-                    newrow["Total  Amount"] = Total;
+                    //double avg = 0;
+                    //newrow["Total  Amount"] = Total;
                     Report.Rows.Add(newrow);
                 }
                 DataRow newvartical = Report.NewRow();
                 newvartical["Date"] = "Total";
-                float val = 0;
-                float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
-                newvartical["Total  Amount"] = val;
+                //float val = 0;
+                //float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
+                //newvartical["Total  Amount"] = val;
                 double val1 = 0;
                 foreach (DataColumn dc in Report.Columns)
                 {
@@ -730,8 +761,7 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     Report.Columns.Add(dr["ProductName"].ToString()).DataType = typeof(Double);
                 }
                 Report.Columns.Add("Total  Shortqty").DataType = typeof(Double);
-               // Report.Columns.Add("Total  Average Returns For Total Dispatch");
-                Report.Columns.Add("Total  Amount").DataType = typeof(float);
+                //Report.Columns.Add("Total  Amount").DataType = typeof(float);
                 DataTable distincttable = view.ToTable(true, "Date");
                 DataView dv = distincttable.DefaultView;
                 dv.Sort = "Date ASC";
@@ -753,11 +783,17 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                         {
                             double Shortqty = 0;
                             double.TryParse(dr["ShortQty"].ToString(), out Shortqty);
-                            double UnitCost = 0;
-                            double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
-                            totqty += Shortqty;
-                            newrow[dr["ProductName"].ToString()] = totqty;
-                            Total += totqty * UnitCost;
+                            if (Shortqty == 0)
+                            {
+                            }
+                            else
+                            {
+                                double UnitCost = 0;
+                                double.TryParse(dr["UnitPrice"].ToString(), out UnitCost);
+                                totqty += Shortqty;
+                                newrow[dr["ProductName"].ToString()] = totqty;
+                                Total += totqty * UnitCost;
+                            }
                         }
                     }
                     newrow["Total  Shortqty"] = totqty;
@@ -775,14 +811,14 @@ public partial class LeaksAndReturns : System.Web.UI.Page
                     ////    newrow["Total  Average Returns For Total Dispatch"] = avg;
 
                     ////}
-                    newrow["Total  Amount"] = Total;
+                    //newrow["Total  Amount"] = Total;
                     Report.Rows.Add(newrow);
                 }
                 DataRow newvartical = Report.NewRow();
                 newvartical["Date"] = "Total";
-                float val = 0;
-                float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
-                newvartical["Total  Amount"] = val;
+                //float val = 0;
+                //float.TryParse(Report.Compute("sum([Total  Amount])", "[Total  Amount]<>'0'").ToString(), out val);
+                //newvartical["Total  Amount"] = val;
                 double val1 = 0;
                 foreach (DataColumn dc in Report.Columns)
                 {
