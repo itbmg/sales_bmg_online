@@ -689,7 +689,7 @@ public partial class DsicountRateManage : System.Web.UI.Page
                                 cmd.Parameters.AddWithValue("@editeddiscountprice", discountUnitCost);
                                 cmd.Parameters.AddWithValue("@EditedUserid", Session["UserSno"]);
                                 cmd.Parameters.AddWithValue("@DateOfEdit", ServerDateCurrentdate);
-                                vdm.insert(cmd);
+                                //vdm.insert(cmd);
                             }
                         }
                         j++;
